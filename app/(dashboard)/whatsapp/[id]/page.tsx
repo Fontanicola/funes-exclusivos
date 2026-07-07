@@ -27,6 +27,15 @@ type Conversation = {
   unread_count: number | null;
   resumen_ia: string | null;
   interes_compra: string | null;
+  ia_estado: string | null;
+  ia_resumen: string | null;
+  ia_interes_compra: string | null;
+  ia_score: number | null;
+  ia_intencion: string | null;
+  ia_proximo_paso: string | null;
+  ia_procesado_at: string | null;
+  ia_modelo: string | null;
+  ia_error: string | null;
   intencion_detectada: string | null;
   proxima_accion_sugerida: string | null;
   requiere_atencion: boolean | null;
@@ -122,7 +131,7 @@ export default async function WhatsappConversationPage({
       supabase
         .from("conversaciones")
         .select(
-          "id,whatsapp_instancia_id,lead_id,vendedor_id,vehiculo_interes_id,canal,estado,contacto_nombre,contacto_telefono,contacto_numero_normalizado,contacto_email,ultimo_mensaje_at,last_message_preview,mensajes_count,unread_count,resumen_ia,interes_compra,intencion_detectada,proxima_accion_sugerida,requiere_atencion,created_at,instancia:whatsapp_instancias!conversaciones_whatsapp_instancia_id_fkey(id,instance_name,estado,telefono_conectado),lead:leads!conversaciones_lead_id_fkey(id,nombre,telefono,email,estado,origen),vendedor:empleados!conversaciones_vendedor_id_fkey(id,nombre,email,rol),vehiculo:vehiculos!conversaciones_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio)"
+          "id,whatsapp_instancia_id,lead_id,vendedor_id,vehiculo_interes_id,canal,estado,contacto_nombre,contacto_telefono,contacto_numero_normalizado,contacto_email,ultimo_mensaje_at,last_message_preview,mensajes_count,unread_count,resumen_ia,interes_compra,ia_estado,ia_resumen,ia_interes_compra,ia_score,ia_intencion,ia_proximo_paso,ia_procesado_at,ia_modelo,ia_error,intencion_detectada,proxima_accion_sugerida,requiere_atencion,created_at,instancia:whatsapp_instancias!conversaciones_whatsapp_instancia_id_fkey(id,instance_name,estado,telefono_conectado),lead:leads!conversaciones_lead_id_fkey(id,nombre,telefono,email,estado,origen),vendedor:empleados!conversaciones_vendedor_id_fkey(id,nombre,email,rol),vehiculo:vehiculos!conversaciones_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio)"
         )
         .eq("id", params.id)
         .maybeSingle(),

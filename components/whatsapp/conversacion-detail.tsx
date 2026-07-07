@@ -8,6 +8,7 @@ import {
   markConversationAsReadAction,
   updateConversationFollowUpAction,
 } from "@/app/(dashboard)/whatsapp/actions";
+import { AiSummaryCard } from "./ai-summary-card";
 import { ConversacionInterestBadge } from "./conversacion-interest-badge";
 import { ConversacionStatusBadge } from "./conversacion-status-badge";
 
@@ -21,6 +22,15 @@ type Conversation = {
   interes_compra: string | null;
   unread_count: number | null;
   resumen_ia: string | null;
+  ia_estado: string | null;
+  ia_resumen: string | null;
+  ia_interes_compra: string | null;
+  ia_score: number | null;
+  ia_intencion: string | null;
+  ia_proximo_paso: string | null;
+  ia_procesado_at: string | null;
+  ia_modelo: string | null;
+  ia_error: string | null;
   intencion_detectada: string | null;
   proxima_accion_sugerida: string | null;
   requiere_atencion: boolean | null;
@@ -209,6 +219,8 @@ export function ConversacionDetail({ conversation }: { conversation: Conversatio
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <div className="space-y-6">
+          <AiSummaryCard conversation={conversation} />
+
           <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
             <h3 className="text-base font-semibold text-[#111827]">Datos de la conversación</h3>
             <div className="mt-4 grid gap-4 md:grid-cols-2">

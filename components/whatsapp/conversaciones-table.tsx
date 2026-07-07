@@ -24,6 +24,15 @@ type Conversation = {
   unread_count: number | null;
   resumen_ia: string | null;
   interes_compra: string | null;
+  ia_estado: string | null;
+  ia_resumen: string | null;
+  ia_interes_compra: string | null;
+  ia_score: number | null;
+  ia_intencion: string | null;
+  ia_proximo_paso: string | null;
+  ia_procesado_at: string | null;
+  ia_modelo: string | null;
+  ia_error: string | null;
   intencion_detectada: string | null;
   proxima_accion_sugerida: string | null;
   requiere_atencion: boolean | null;
@@ -60,6 +69,7 @@ type Conversation = {
 
 const statuses = ["", "abierta", "en_seguimiento", "cerrada", "archivada"] as const;
 const interests = ["", "alto", "medio", "bajo", "sin_interes", "no_detectado"] as const;
+const aiFilters = ["", "alto", "requiere_atencion", "sin_resumen"] as const;
 
 function formatDateTime(value: string | null) {
   if (!value) return "—";
@@ -87,6 +97,14 @@ function getSellerName(conversation: Conversation) {
   return conversation.vendedor?.nombre ?? conversation.vendedor?.email ?? "—";
 }
 
+function getAiInterest(conversation: Conversation) {
+  return conversation.ia_interes_compra ?? conversation.interes_compra;
+}
+
+function hasAiSummary(conversation: Conversation) {
+  return Boolean(conversation.ia_resumen);
+}
+
 function getVehicleSummary(conversation: Conversation) {
   const vehicle = conversation.vehiculo;
   if (!vehicle) return "—";
@@ -106,6 +124,9 @@ function getSearchableText(conversation: Conversation) {
     conversation.vendedor?.email,
     conversation.last_message_preview,
     conversation.resumen_ia,
+    conversation.ia_resumen,
+    conversation.ia_intencion,
+    conversation.ia_proximo_paso,
     conversation.vehiculo?.marca,
     conversation.vehiculo?.modelo,
     conversation.vehiculo?.dominio,
@@ -121,6 +142,7 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
   const [sellerFilter, setSellerFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
   const [interestFilter, setInterestFilter] = useState<(typeof interests)[number]>("");
+  const [aiFilter, setAiFilter] = useState<(typeof aiFilters)[number]>("");
   const [onlyAttention, setOnlyAttention] = useState(false);
 
   const instanceOptions = useMemo(() => {
@@ -156,11 +178,14 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
       if (statusFilter && conversation.estado !== statusFilter) return false;
       if (interestFilter && conversation.interes_compra !== interestFilter) return false;
       if (onlyAttention && !conversation.requiere_atencion) return false;
+      if (aiFilter === "alto" && getAiInterest(conversation) !== "alto") return false;
+      if (aiFilter === "requiere_atencion" && !conversation.requiere_atencion) return false;
+      if (aiFilter === "sin_resumen" && hasAiSummary(conversation)) return false;
 
       if (!normalizedQuery) return true;
       return getSearchableText(conversation).includes(normalizedQuery);
     });
-  }, [conversaciones, interestFilter, instanceFilter, onlyAttention, query, sellerFilter, statusFilter]);
+  }, [aiFilter, conversaciones, interestFilter, instanceFilter, onlyAttention, query, sellerFilter, statusFilter]);
 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
@@ -259,6 +284,17 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
             <option value="sin_interes">Sin interés</option>
             <option value="no_detectado">No detectado</option>
           </select>
+
+          <select
+            value={aiFilter}
+            onChange={(event) => setAiFilter(event.target.value as (typeof aiFilters)[number])}
+            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+          >
+            <option value="">Filtro IA</option>
+            <option value="alto">Interés alto</option>
+            <option value="requiere_atencion">Requiere atención</option>
+            <option value="sin_resumen">Sin resumen IA</option>
+          </select>
         </div>
       </div>
 
@@ -273,6 +309,7 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
               <th className="px-4 py-3">Último mensaje</th>
               <th className="px-4 py-3">No leídos</th>
               <th className="px-4 py-3">Interés</th>
+              <th className="px-4 py-3">IA</th>
               <th className="px-4 py-3">Estado</th>
               <th className="px-4 py-3">Acción</th>
             </tr>
@@ -325,6 +362,19 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
                     <ConversacionInterestBadge interest={conversation.interes_compra} />
                   </td>
                   <td className="px-4 py-3 align-middle">
+                    <div className="space-y-1">
+                      <ConversacionInterestBadge interest={getAiInterest(conversation)} />
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#6B7280]">
+                        <span>{conversation.ia_score != null ? `Score ${conversation.ia_score}` : "Sin score"}</span>
+                        {conversation.requiere_atencion ? (
+                          <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#FEF3C7] px-2 py-0.5 text-[#92400E]">
+                            Atención
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 align-middle">
                     <ConversacionStatusBadge status={conversation.estado} />
                   </td>
                   <td className="px-4 py-3 align-middle">
@@ -339,7 +389,7 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
               ))
             ) : (
               <tr>
-                <td colSpan={9} className="px-4 py-14 text-center text-sm text-[#6B7280]">
+                <td colSpan={10} className="px-4 py-14 text-center text-sm text-[#6B7280]">
                   No hay conversaciones que coincidan con los filtros.
                 </td>
               </tr>

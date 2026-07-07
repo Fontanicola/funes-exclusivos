@@ -13,6 +13,7 @@ import {
   logoutEvolutionInstance,
   setEvolutionWebhook,
 } from "@/lib/evolution/client";
+import { summarizeWhatsappConversation } from "@/lib/ai/conversation-summary";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type ActionState = {
@@ -599,4 +600,189 @@ export async function updateConversationFollowUpAction(
   revalidatePath("/whatsapp");
   revalidatePath(`/whatsapp/${conversationId}`);
   return { success: true };
+}
+
+export async function generateConversationAiSummaryAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  if (isDemoMode) {
+    return { error: "Modo demo activo: conectá Supabase para generar resúmenes IA reales." };
+  }
+
+  const auth = await getAuthUser();
+  if ("error" in auth) return { error: auth.error };
+
+  const conversationId = toOptionalString(formData.get("conversation_id"));
+  if (!conversationId) return { error: "La conversación es obligatoria." };
+
+  const { data: actor } = await auth.supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", auth.user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  const actorRecord = actor ?? null;
+  if (!actorRecord || !actorRecord.activo || !["admin", "vendedor"].includes(actorRecord.rol ?? "")) {
+    return { error: "No tenés permisos para generar resúmenes IA." };
+  }
+
+  const { data: conversation } = await auth.supabase
+    .from("conversaciones")
+    .select(
+      "id,lead_id,vendedor_id,contacto_nombre,contacto_telefono,contacto_email,estado,canal,resumen_ia,interes_compra,ia_estado,ia_resumen,ia_interes_compra,ia_score,ia_intencion,ia_proximo_paso,ia_procesado_at,ia_error,requiere_atencion,lead:leads!conversaciones_lead_id_fkey(id,nombre,telefono,email,estado,origen,nivel_interes),vendedor:empleados!conversaciones_vendedor_id_fkey(id,nombre,email,rol),vehiculo:vehiculos!conversaciones_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio)"
+    )
+    .eq("id", conversationId)
+    .maybeSingle<{
+      id: string;
+      lead_id: string | null;
+      vendedor_id: string | null;
+      contacto_nombre: string | null;
+      contacto_telefono: string | null;
+      contacto_email: string | null;
+      estado: string | null;
+      canal: string | null;
+      resumen_ia: string | null;
+      interes_compra: string | null;
+      ia_estado: string | null;
+      ia_resumen: string | null;
+      ia_interes_compra: string | null;
+      ia_score: number | null;
+      ia_intencion: string | null;
+      ia_proximo_paso: string | null;
+      ia_procesado_at: string | null;
+      ia_error: string | null;
+      requiere_atencion: boolean | null;
+      lead: {
+        id: string;
+        nombre: string | null;
+        telefono: string | null;
+        email: string | null;
+        estado: string | null;
+        origen: string | null;
+        nivel_interes: number | null;
+      } | null;
+      vendedor: {
+        id: string;
+        nombre: string | null;
+        email: string | null;
+        rol: string | null;
+      } | null;
+      vehiculo: {
+        id: string;
+        marca: string | null;
+        modelo: string | null;
+        version: string | null;
+        anio: number | null;
+        dominio: string | null;
+      } | null;
+    }>();
+
+  if (!conversation) {
+    return { error: "No encontramos la conversación seleccionada." };
+  }
+
+  if (actorRecord.rol !== "admin" && conversation.vendedor_id !== auth.user.id) {
+    return { error: "No tenés permisos para procesar esta conversación." };
+  }
+
+  const { data: messages } = await auth.supabase
+    .from("conversacion_mensajes")
+    .select("id,tipo,body,from_me,direction,sent_at,created_at")
+    .eq("conversacion_id", conversationId)
+    .order("sent_at", { ascending: false, nullsFirst: false })
+    .limit(40);
+
+  const orderedMessages = [...(messages ?? [])].reverse();
+
+  if (!orderedMessages.length) {
+    return { error: "No hay mensajes para resumir." };
+  }
+
+  const pendingUpdate = await auth.supabase
+    .from("conversaciones")
+    .update({
+      ia_estado: "pendiente",
+      ia_error: null,
+      updated_by: auth.user.id,
+    })
+    .eq("id", conversationId);
+
+  if (pendingUpdate.error) {
+    return { error: "No pudimos preparar la conversación para el resumen IA." };
+  }
+
+  try {
+    const summary = await summarizeWhatsappConversation(conversation, orderedMessages);
+    const shouldEscalateLead = summary.interes_compra === "alto" && conversation.lead_id;
+
+    const updates: Record<string, unknown> = {
+      ia_estado: "procesado",
+      ia_resumen: summary.resumen,
+      ia_interes_compra: summary.interes_compra,
+      interes_compra: summary.interes_compra,
+      ia_intencion: summary.intencion,
+      ia_proximo_paso: summary.proximo_paso,
+      ia_score: summary.score,
+      ia_modelo: cleanEnvValue(process.env.OPENAI_MODEL) || "gpt-4o-mini",
+      ia_procesado_at: new Date().toISOString(),
+      requiere_atencion: summary.requiere_atencion,
+      ia_error: null,
+      updated_by: auth.user.id,
+    };
+
+    const { error: updateError } = await auth.supabase
+      .from("conversaciones")
+      .update(updates)
+      .eq("id", conversationId);
+
+    if (updateError) {
+      return { error: "No pudimos guardar el resumen IA en la conversación." };
+    }
+
+    if (shouldEscalateLead && conversation.lead_id) {
+      const currentLeadLevel = conversation.lead?.nivel_interes ?? null;
+      const nextLeadLevel = currentLeadLevel == null ? 5 : Math.max(currentLeadLevel, 5);
+
+      const { error: leadError } = await auth.supabase
+        .from("leads")
+        .update({
+          nivel_interes: nextLeadLevel,
+          updated_by: auth.user.id,
+        })
+        .eq("id", conversation.lead_id);
+
+      if (leadError) {
+        console.warn("[WhatsApp AI] no pudimos actualizar el lead desde el resumen", {
+          conversationId,
+          leadId: conversation.lead_id,
+          error: leadError.message,
+        });
+      }
+    }
+
+    revalidatePath("/whatsapp");
+    revalidatePath(`/whatsapp/${conversationId}`);
+    revalidatePath("/crm");
+    revalidatePath("/dashboard");
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "No pudimos generar el resumen IA.";
+    await auth.supabase
+      .from("conversaciones")
+      .update({
+        ia_estado: "error",
+        ia_error: message.slice(0, 240),
+        updated_by: auth.user.id,
+      })
+      .eq("id", conversationId);
+
+    revalidatePath("/whatsapp");
+    revalidatePath(`/whatsapp/${conversationId}`);
+    revalidatePath("/crm");
+    revalidatePath("/dashboard");
+
+    return { error: message };
+  }
 }

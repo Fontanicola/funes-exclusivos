@@ -811,3 +811,49 @@
 - Las fechas visibles en la UI de WhatsApp se formatean con zona horaria explícita de Argentina para que server y client no diverjan.
 - El QR de WhatsApp se normaliza para aceptar base64 crudo, data URLs y URLs remotas sin romper la UI.
 - La configuración del webhook se manda desde el servidor con la secret ya codificada y sin concatenar eventos al query param.
+
+## Resumen IA y detección de interés de compra en WhatsApp
+
+### Qué se construyó
+
+- Se agregó un wrapper server-side mínimo para OpenAI usando `fetch` contra la API oficial de chat completions.
+- Se incorporó un flujo manual para generar resúmenes IA de conversaciones de WhatsApp desde la ficha de conversación.
+- La IA devuelve resumen, interés de compra, score, intención, próximo paso y flag de atención.
+- La vista de conversación ahora muestra una tarjeta ejecutiva de IA con estado, resumen y acción para regenerar.
+- El listado de conversaciones expone interés IA, score y filtros para interés alto, requiere atención y sin resumen IA.
+- Se completaron mocks de conversaciones para mostrar estados de IA procesado, pendiente y error.
+
+### Paths modificados
+
+- `.env.example`
+- `lib/ai/openai.ts`
+- `lib/ai/conversation-summary.ts`
+- `app/(dashboard)/whatsapp/actions.ts`
+- `app/(dashboard)/whatsapp/page.tsx`
+- `app/(dashboard)/whatsapp/[id]/page.tsx`
+- `components/whatsapp/conversacion-detail.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+- `components/whatsapp/conversacion-interest-badge.tsx`
+- `components/whatsapp/ai-summary-card.tsx`
+- `lib/mock-data.ts`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+- `public.leads`
+- `public.empleados`
+
+### Variables de entorno necesarias
+
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+
+### Decisiones técnicas tomadas
+
+- La generación IA es manual para evitar consumo innecesario y poder revisar el resultado antes de persistirlo.
+- Si OpenAI no está configurado o falla la llamada, el sistema devuelve un error visible y marca la conversación con estado IA de error.
+- Si OpenAI responde pero el JSON viene mal formado, se usa un fallback seguro para no bloquear la operación comercial.
+- El lead sólo se refuerza cuando el interés detectado es alto, elevando su nivel de interés sin pisar notas ni otros datos sensibles.
+- El listado de WhatsApp sigue siendo compatible con los campos legacy `resumen_ia` e `interes_compra`, pero prioriza los campos `ia_*` para la propuesta comercial.
