@@ -60,39 +60,27 @@ function getEmployeeName(instance: Instance) {
   return instance.empleado?.nombre ?? instance.empleado?.email ?? "Sin vendedor";
 }
 
-function getQrPreview(qrCode: string | null, qrBase64: string | null) {
-  const rawQr = qrBase64 ?? qrCode;
-  if (!rawQr) return null;
-  if (rawQr.startsWith("data:image/")) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={rawQr} alt="QR de WhatsApp" className="h-40 w-40 rounded-2xl border border-[#E5E7EB] bg-white p-2" />
-    );
-  }
+function looksLikeBase64(value: string) {
+  return /^[A-Za-z0-9+/=]+$/.test(value) && value.length > 32;
+}
 
-  if (/^[A-Za-z0-9+/=]+$/.test(rawQr) && rawQr.length > 32) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={`data:image/png;base64,${rawQr}`}
-        alt="QR de WhatsApp"
-        className="h-40 w-40 rounded-2xl border border-[#E5E7EB] bg-white p-2"
-      />
-    );
+function getQrDisplay(qrCode: string | null, qrBase64: string | null) {
+  const rawQr = qrBase64 ?? qrCode;
+  if (!rawQr) return { kind: "none" as const };
+
+  if (rawQr.startsWith("data:image/")) {
+    return { kind: "image" as const, src: rawQr };
   }
 
   if (rawQr.startsWith("http")) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={rawQr} alt="QR de WhatsApp" className="h-40 w-40 rounded-2xl border border-[#E5E7EB] bg-white p-2" />
-    );
+    return { kind: "image" as const, src: rawQr };
   }
 
-  return (
-    <div className="flex h-40 w-40 items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-3 text-center text-xs text-[#6B7280]">
-      <span className="break-all font-mono">QR recibido en formato texto</span>
-    </div>
-  );
+  if (looksLikeBase64(rawQr)) {
+    return { kind: "image" as const, src: `data:image/png;base64,${rawQr}` };
+  }
+
+  return { kind: "code" as const, code: rawQr };
 }
 
 function ActionButton({
@@ -143,9 +131,9 @@ export function WhatsappInstanceCard({
   canManageAll?: boolean;
 }) {
   const [showQr, setShowQr] = useState(instance.estado === "qr_pendiente");
-  const qrPreview = useMemo(() => getQrPreview(instance.qr_code, instance.qr_base64), [instance.qr_base64, instance.qr_code]);
-  const qrAvailable = Boolean(instance.qr_code || instance.qr_base64);
+  const qrDisplay = useMemo(() => getQrDisplay(instance.qr_code, instance.qr_base64), [instance.qr_base64, instance.qr_code]);
   const [qrExpired, setQrExpired] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setShowQr(instance.estado === "qr_pendiente");
@@ -160,6 +148,21 @@ export function WhatsappInstanceCard({
     const expiresAt = new Date(instance.qr_expires_at);
     setQrExpired(!Number.isNaN(expiresAt.getTime()) && expiresAt.getTime() < Date.now());
   }, [instance.qr_expires_at]);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timeout = window.setTimeout(() => setCopied(false), 1500);
+    return () => window.clearTimeout(timeout);
+  }, [copied]);
+
+  async function handleCopyCode(code: string) {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   return (
     <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
@@ -210,11 +213,33 @@ export function WhatsappInstanceCard({
               </p>
               {qrExpired ? <p className="text-xs text-[#6B7280]">QR vencido, refrescalo.</p> : null}
             </div>
-            {qrPreview ?? (
-              <div className="flex h-40 w-40 items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white px-3 text-center text-xs text-[#6B7280]">
-                {qrAvailable ? "QR disponible" : "Sin QR"}
+            {qrDisplay.kind === "image" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={qrDisplay.src}
+                alt="QR de WhatsApp"
+                className="h-44 w-44 rounded-2xl border border-[#E5E7EB] bg-white p-2"
+              />
+            ) : qrDisplay.kind === "code" ? (
+              <div className="w-full space-y-2 rounded-2xl border border-[#E5E7EB] bg-white p-3">
+                <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Formato: código</p>
+                <p className="break-all rounded-xl border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-3 py-2 font-mono text-xs text-[#111827]">
+                  {qrDisplay.code}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleCopyCode(qrDisplay.code)}
+                  className="inline-flex h-8 items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-3 text-xs font-medium text-[#111827] transition hover:bg-white"
+                >
+                  {copied ? "Copiado" : "Copiar código"}
+                </button>
+              </div>
+            ) : (
+              <div className="flex h-44 w-44 items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white px-3 text-center text-xs text-[#6B7280]">
+                QR no disponible. Probá refrescar QR.
               </div>
             )}
+            {qrDisplay.kind === "image" ? <p className="text-xs text-[#6B7280]">Formato: imagen</p> : null}
           </div>
         ) : null}
       </div>

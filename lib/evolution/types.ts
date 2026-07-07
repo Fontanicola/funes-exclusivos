@@ -40,9 +40,12 @@ export type EvolutionQrResponse = {
   } | null;
   qrcode?: string | null;
   qrCode?: string | null;
+  qr?: string | null;
   code?: string | null;
   pairingCode?: string | null;
+  base64?: string | null;
   expiresAt?: string | null;
+  data?: Record<string, unknown> | null;
   [key: string]: unknown;
 };
 
@@ -71,7 +74,10 @@ export type EvolutionMessageUpsertPayload = {
 
 export type NormalizedEvolutionQr = {
   instanceName: string | null;
+  qrBase64: string | null;
   qrCode: string | null;
+  pairingCode: string | null;
+  expiresAt: string | null;
   rawPayload: unknown;
 };
 
@@ -110,4 +116,3 @@ export type EvolutionConnectionStateResponse = {
   } | null;
   [key: string]: unknown;
 };
-

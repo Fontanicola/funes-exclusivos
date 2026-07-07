@@ -21,6 +21,21 @@ export function cleanEnvValue(value: string | undefined) {
     .trim();
 }
 
+function collectObjectKeys(value: unknown, output = new Set<string>()) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return output;
+  for (const key of Object.keys(value as Record<string, unknown>)) {
+    output.add(key);
+  }
+  const record = value as Record<string, unknown>;
+  if (record.data && typeof record.data === "object") {
+    collectObjectKeys(record.data, output);
+  }
+  if (record.instance && typeof record.instance === "object") {
+    collectObjectKeys(record.instance, output);
+  }
+  return output;
+}
+
 function getEvolutionConfig(): EvolutionConfig {
   const baseUrl = cleanEnvValue(process.env.EVOLUTION_API_BASE_URL).replace(/\/+$/, "");
   const apiKey = cleanEnvValue(process.env.EVOLUTION_API_KEY);
@@ -89,10 +104,23 @@ function buildWebhookUrl() {
   return `${appUrl}/api/evolution/webhook?secret=${encodeURIComponent(webhookSecret)}`;
 }
 
-function normalizeCreateResponse(response: EvolutionInstanceCreateResponse) {
+export function extractQrFromEvolutionResponse(response: unknown): {
+  qrBase64?: string;
+  qrCode?: string;
+  pairingCode?: string;
+  expiresAt?: string | null;
+} {
+  const normalized = normalizeQrPayload(response);
+  const keys = Array.from(collectObjectKeys(response)).sort();
+  if (keys.length > 0) {
+    console.info("Evolution QR payload keys:", keys.join(", "));
+  }
+
   return {
-    ...response,
-    qrcode: normalizeQrPayload(response).qrCode,
+    qrBase64: normalized.qrBase64 ?? undefined,
+    qrCode: normalized.qrCode ?? undefined,
+    pairingCode: normalized.pairingCode ?? undefined,
+    expiresAt: normalized.expiresAt ?? undefined,
   };
 }
 
@@ -100,23 +128,21 @@ export async function createEvolutionInstance(params: {
   instanceName: string;
   qrcode?: boolean;
 }) {
-  return normalizeCreateResponse(
-    await evolutionFetch<EvolutionInstanceCreateResponse>("/instance/create", {
-      method: "POST",
-      body: JSON.stringify({
-        instanceName: params.instanceName,
-        qrcode: params.qrcode ?? true,
-        integration: "WHATSAPP-BAILEYS",
-        webhook: {
-          enabled: true,
-          url: buildWebhookUrl(),
-          byEvents: true,
-          base64: false,
-          events: ["QRCODE_UPDATED", "CONNECTION_UPDATE", "MESSAGES_UPSERT"],
-        },
-      }),
-    })
-  );
+  return evolutionFetch<EvolutionInstanceCreateResponse>("/instance/create", {
+    method: "POST",
+    body: JSON.stringify({
+      instanceName: params.instanceName,
+      qrcode: params.qrcode ?? true,
+      integration: "WHATSAPP-BAILEYS",
+      webhook: {
+        enabled: true,
+        url: buildWebhookUrl(),
+        byEvents: true,
+        base64: false,
+        events: ["QRCODE_UPDATED", "CONNECTION_UPDATE", "MESSAGES_UPSERT"],
+      },
+    }),
+  });
 }
 
 export async function connectEvolutionInstance(instanceName: string) {

@@ -51,6 +51,8 @@ export function extractInstanceName(payload: EvolutionWebhookPayload) {
     source?.instanceName,
     source?.instance,
     source && isRecord(source.data) ? source.data.instanceName : null,
+    source && isRecord(source.data) ? source.data.instance : null,
+    source && isRecord(source.data) ? source.data.instanceName : null,
     source && isRecord(source.data) ? source.data.instance : null
   );
 }
@@ -85,30 +87,49 @@ export function detectEvolutionEvent(payload: EvolutionWebhookPayload) {
 export function normalizeQrPayload(payload: unknown): NormalizedEvolutionQr {
   const source = isRecord(payload) ? payload : null;
   const data = source && isRecord(source.data) ? source.data : null;
+  const qrBase64 = firstString(
+    data?.base64,
+    data?.qrcode,
+    data?.qr,
+    source?.base64,
+    source?.qrcode,
+    source?.qr
+  );
   const qrCode = firstString(
     data?.qrcode,
     data?.qr,
     data?.qrCode,
-    data?.base64,
     data?.code,
     data?.pairingCode,
     source?.qrcode,
     source?.qr,
     source?.qrCode,
-    source?.base64,
     source?.code,
     source?.pairingCode
   );
+  const pairingCode = firstString(data?.pairingCode, source?.pairingCode, data?.code, source?.code);
+  const expiresAt = firstString(data?.expiresAt, data?.expires_at, source?.expiresAt, source?.expires_at);
+
+  const normalizedQrBase64 =
+    qrBase64 && qrBase64.startsWith("data:image/")
+      ? qrBase64
+      : qrBase64 && /^[A-Za-z0-9+/=]+$/.test(qrBase64) && qrBase64.length > 32
+        ? qrBase64
+        : null;
+
+  const normalizedQrCode =
+    qrCode && qrCode.startsWith("data:image/")
+      ? null
+      : qrCode && /^[A-Za-z0-9+/=]+$/.test(qrCode) && qrCode.length > 32
+        ? null
+        : qrCode;
 
   return {
     instanceName: source ? extractInstanceName(source as EvolutionWebhookPayload) : null,
-    qrCode: qrCode
-      ? qrCode.startsWith("data:image/") || qrCode.startsWith("http")
-        ? qrCode
-        : qrCode.length > 32
-          ? `data:image/png;base64,${qrCode}`
-          : qrCode
-      : null,
+    qrBase64: normalizedQrBase64 ?? null,
+    qrCode: normalizedQrCode ?? null,
+    pairingCode: pairingCode ?? null,
+    expiresAt: expiresAt ?? null,
     rawPayload: payload,
   };
 }

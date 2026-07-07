@@ -100,15 +100,17 @@ export async function POST(request: NextRequest) {
   }
 
   if (event === "QRCODE_UPDATED") {
-    const { qrCode } = normalizeQrPayload(payload);
+    const { qrBase64, qrCode, pairingCode, expiresAt } = normalizeQrPayload(payload);
     const updates: Record<string, unknown> = {
       estado: "qr_pendiente",
+      qr_base64: qrBase64 ?? null,
+      qr_code: pairingCode ?? qrCode ?? null,
+      last_error: null,
       last_sync_at: new Date().toISOString(),
     };
 
-    if (qrCode) {
-      updates.qr_code = qrCode;
-      updates.qr_expires_at = new Date(Date.now() + 2 * 60 * 1000).toISOString();
+    if (expiresAt) {
+      updates.qr_expires_at = expiresAt;
     }
 
     await supabase.from("whatsapp_instancias").update(updates).eq("id", instance.id);

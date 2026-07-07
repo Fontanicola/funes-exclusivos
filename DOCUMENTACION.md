@@ -694,6 +694,42 @@
 - Adjuntos multimedia completos, audio y transcripción.
 - Automatizaciones más finas sobre leads, ventas y seguimiento desde WhatsApp.
 
+## Corrección QR Evolution: imagen escaneable
+
+### Qué se corrigió
+
+- Se amplió la normalización de respuestas de QR de Evolution para soportar `base64`, `qrcode`, `qr`, `code` y `pairingCode` tanto en raíz como dentro de `data`.
+- Se dejó de tratar todo QR textual como estado final: si la respuesta trae imagen/base64, se renderiza como `<img>`; si trae código de vinculación, se muestra como código copiable.
+- Se guardan por separado `qr_base64` y `qr_code` en Supabase para tolerar distintos formatos devueltos por Evolution.
+- El webhook de `QRCODE_UPDATED` ahora persiste también `qr_base64` y `qr_expires_at` cuando vienen en la carga útil.
+
+### Paths modificados
+
+- `lib/evolution/client.ts`
+- `lib/evolution/payload-normalizer.ts`
+- `app/(dashboard)/whatsapp/actions.ts`
+- `app/api/evolution/webhook/route.ts`
+- `components/whatsapp/whatsapp-instance-card.tsx`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+
+- `public.whatsapp_instancias`
+
+### Decisiones técnicas tomadas
+
+- Se agregó `extractQrFromEvolutionResponse(response)` para normalizar respuestas de Evolution sin asumir un único shape.
+- Se prioriza `qr_base64` para imágenes y `qr_code` para pairing codes o textos de vinculación.
+- La UI ahora muestra diagnóstico visual mínimo: `Formato: imagen` o `Formato: código`.
+- El estado de `QR no disponible` solo aparece cuando no se puede derivar ni una imagen ni un código de la respuesta.
+
+### Variables de entorno involucradas
+
+- `EVOLUTION_API_BASE_URL`
+- `EVOLUTION_API_KEY`
+- `EVOLUTION_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+
 ## Corrección Evolution API: secret y hidratación WhatsApp
 
 ### Qué se corrigió
