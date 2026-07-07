@@ -693,3 +693,49 @@
 - Sincronización histórica masiva de conversaciones previas.
 - Adjuntos multimedia completos, audio y transcripción.
 - Automatizaciones más finas sobre leads, ventas y seguimiento desde WhatsApp.
+
+## Corrección Evolution API: secret y hidratación WhatsApp
+
+### Qué se corrigió
+
+- Se endureció la validación del webhook de Evolution para aceptar el secret limpio y también variantes con sufijos de evento como `SECRET/qrcode-updated`.
+- Se limpiaron caracteres invisibles problemáticos en env vars y headers para evitar errores de ByteString al construir requests hacia Evolution.
+- Se corrigieron fuentes de hydration mismatch en WhatsApp relacionadas con fechas dinámicas y render del QR.
+- Se incorporó soporte para almacenar y renderizar `qr_base64` además de `qr_code`, para tolerar respuestas diferentes de Evolution.
+
+### Paths modificados
+
+- `app/api/evolution/webhook/route.ts`
+- `lib/evolution/client.ts`
+- `lib/evolution/payload-normalizer.ts`
+- `app/(dashboard)/whatsapp/actions.ts`
+- `components/whatsapp/whatsapp-instance-card.tsx`
+- `components/whatsapp/whatsapp-instances-grid.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+- `components/whatsapp/conversacion-messages.tsx`
+- `app/(dashboard)/whatsapp/page.tsx`
+- `app/(dashboard)/whatsapp/conexiones/page.tsx`
+
+### Tablas de Supabase involucradas
+
+- `public.whatsapp_instancias`
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+- `public.leads`
+- `public.empleados`
+
+### Variables de entorno involucradas
+
+- `EVOLUTION_API_BASE_URL`
+- `EVOLUTION_API_KEY`
+- `EVOLUTION_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+### Decisiones técnicas tomadas
+
+- El secret del webhook se sanitiza en ambos extremos, recortando sufijos de evento y eliminando caracteres invisibles antes de comparar.
+- Los logs de seguridad muestran el secret enmascarado, nunca en texto completo.
+- Las fechas visibles en la UI de WhatsApp se formatean con zona horaria explícita de Argentina para que server y client no diverjan.
+- El QR de WhatsApp se normaliza para aceptar base64 crudo, data URLs y URLs remotas sin romper la UI.
+- La configuración del webhook se manda desde el servidor con la secret ya codificada y sin concatenar eventos al query param.

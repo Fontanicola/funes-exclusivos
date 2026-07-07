@@ -61,10 +61,25 @@ export function detectEvolutionEvent(payload: EvolutionWebhookPayload) {
     payload.event,
     source?.event,
     source && isRecord(source.data) ? source.data.event : null,
-    source && isRecord(source.message) ? source.message.event : null
+    source && isRecord(source.message) ? source.message.event : null,
+    source && isRecord(source.data) ? source.data.type : null,
+    source && isRecord(source.message) ? source.message.type : null
   );
 
-  return event ? event.toUpperCase() : null;
+  if (!event) return null;
+
+  const normalized = event.toLowerCase().replace(/[\s_.]+/g, "-");
+  if (["qrcode-updated", "qrcodeupdated", "qr", "qr-updated"].includes(normalized)) {
+    return "QRCODE_UPDATED";
+  }
+  if (["connection-update", "connectionupdated", "connection-state"].includes(normalized)) {
+    return "CONNECTION_UPDATE";
+  }
+  if (["messages-upsert", "message-upsert", "message-updated"].includes(normalized)) {
+    return "MESSAGES_UPSERT";
+  }
+
+  return event.toUpperCase();
 }
 
 export function normalizeQrPayload(payload: unknown): NormalizedEvolutionQr {
@@ -72,11 +87,15 @@ export function normalizeQrPayload(payload: unknown): NormalizedEvolutionQr {
   const data = source && isRecord(source.data) ? source.data : null;
   const qrCode = firstString(
     data?.qrcode,
+    data?.qr,
     data?.qrCode,
+    data?.base64,
     data?.code,
     data?.pairingCode,
     source?.qrcode,
+    source?.qr,
     source?.qrCode,
+    source?.base64,
     source?.code,
     source?.pairingCode
   );
@@ -296,4 +315,3 @@ export const getEvolutionInstanceName = extractInstanceName;
 export const normalizeQr = (payload: unknown) => normalizeQrPayload(payload).qrCode;
 export const normalizeConnectionState = (payload: unknown) => normalizeConnectionPayload(payload).state;
 export const normalizeEvolutionMessage = normalizeMessagePayload;
-

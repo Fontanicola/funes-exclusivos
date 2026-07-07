@@ -14,14 +14,30 @@ type EvolutionConfig = {
   webhookSecret: string;
 };
 
-function getEvolutionConfig(): EvolutionConfig {
-  const baseUrl = process.env.EVOLUTION_API_BASE_URL?.replace(/\/+$/, "");
-  const apiKey = process.env.EVOLUTION_API_KEY;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
-  const webhookSecret = process.env.EVOLUTION_WEBHOOK_SECRET;
+export function cleanEnvValue(value: string | undefined) {
+  return (value ?? "")
+    .replace(/[\u2028\u2029\u200B\uFEFF]/g, "")
+    .replace(/[\r\n]/g, "")
+    .trim();
+}
 
-  if (!baseUrl || !apiKey || !appUrl || !webhookSecret) {
-    throw new Error("Evolution API no está configurada. Revisá variables de entorno.");
+function getEvolutionConfig(): EvolutionConfig {
+  const baseUrl = cleanEnvValue(process.env.EVOLUTION_API_BASE_URL).replace(/\/+$/, "");
+  const apiKey = cleanEnvValue(process.env.EVOLUTION_API_KEY);
+  const appUrl = cleanEnvValue(process.env.NEXT_PUBLIC_APP_URL).replace(/\/+$/, "");
+  const webhookSecret = cleanEnvValue(process.env.EVOLUTION_WEBHOOK_SECRET);
+
+  if (!baseUrl) {
+    throw new Error("Evolution API no está configurada: falta EVOLUTION_API_BASE_URL");
+  }
+  if (!apiKey) {
+    throw new Error("Evolution API no está configurada: falta EVOLUTION_API_KEY");
+  }
+  if (!appUrl) {
+    throw new Error("Evolution API no está configurada: falta NEXT_PUBLIC_APP_URL");
+  }
+  if (!webhookSecret) {
+    throw new Error("Evolution API no está configurada: falta EVOLUTION_WEBHOOK_SECRET");
   }
 
   return { baseUrl, apiKey, appUrl, webhookSecret };
@@ -29,10 +45,11 @@ function getEvolutionConfig(): EvolutionConfig {
 
 async function evolutionFetch<T>(path: string, init: RequestInit = {}) {
   const { baseUrl, apiKey } = getEvolutionConfig();
+  const safeApiKey = cleanEnvValue(apiKey);
   const response = await fetch(`${baseUrl}${path}`, {
     ...init,
     headers: {
-      apikey: apiKey,
+      apikey: safeApiKey,
       "Content-Type": "application/json",
       ...(init.headers ?? {}),
     },
@@ -137,6 +154,8 @@ export async function deleteEvolutionInstance(instanceName: string) {
 
 export async function setEvolutionWebhook(instanceName: string) {
   const { appUrl, webhookSecret } = getEvolutionConfig();
+  const webhookUrl = `${appUrl}/api/evolution/webhook?secret=***`;
+  console.info("[Evolution] set webhook", { instanceName, webhookUrl });
   return evolutionFetch<Record<string, unknown>>(`/webhook/set/${encodeURIComponent(instanceName)}`, {
     method: "POST",
     body: JSON.stringify({
@@ -155,4 +174,3 @@ export async function setEvolutionWebhook(instanceName: string) {
 export const getEvolutionInstanceQr = fetchEvolutionQr;
 export const getEvolutionInstanceStatus = getEvolutionConnectionState;
 export const disconnectEvolutionInstance = logoutEvolutionInstance;
-

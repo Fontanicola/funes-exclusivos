@@ -4,10 +4,13 @@ import { revalidatePath } from "next/cache";
 import { isDemoMode } from "@/lib/demo-mode";
 import {
   createEvolutionInstance,
+  cleanEnvValue,
   deleteEvolutionInstance,
+  connectEvolutionInstance,
   fetchEvolutionQr,
   getEvolutionConnectionState,
   logoutEvolutionInstance,
+  setEvolutionWebhook,
 } from "@/lib/evolution/client";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -50,6 +53,14 @@ async function isAdmin(supabase: ReturnType<typeof createSupabaseServerClient>, 
 
 function demoModeError() {
   return { error: "Modo demo activo: conectá Supabase y Evolution API para ejecutar esta acción." };
+}
+
+function extractQrPayload(value: unknown) {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const trimmed = value.trim();
+  if (trimmed.startsWith("data:image/")) return trimmed;
+  if (trimmed.startsWith("http")) return trimmed;
+  return trimmed;
 }
 
 async function getEmployee(
@@ -101,32 +112,54 @@ export async function createWhatsappInstanceAction(
   }
 
   const instanceName = `funes_emp_${targetEmployeeId.slice(0, 8)}`;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
-  const webhookSecret = process.env.EVOLUTION_WEBHOOK_SECRET;
+  const appUrl = cleanEnvValue(process.env.NEXT_PUBLIC_APP_URL).replace(/\/+$/, "");
+  const webhookSecret = cleanEnvValue(process.env.EVOLUTION_WEBHOOK_SECRET);
 
   if (!appUrl || !webhookSecret) {
     return { error: "Faltan variables de entorno de Evolution API." };
   }
 
   let qrCode: string | null = null;
+  let qrBase64: string | null = null;
 
   try {
     const createResult = await createEvolutionInstance({ instanceName });
+    try {
+      await setEvolutionWebhook(instanceName);
+    } catch (error) {
+      console.error("[Evolution] no pudimos configurar el webhook", {
+        instanceName,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
     const initialQr =
-      (typeof createResult.qrcode === "string" && createResult.qrcode) ||
-      (typeof createResult.qrCode === "string" && createResult.qrCode) ||
+      extractQrPayload(createResult.qrcode) ||
+      extractQrPayload(createResult.qrCode) ||
+      extractQrPayload(createResult.code) ||
       null;
 
     if (initialQr) {
       qrCode = initialQr;
+      qrBase64 = initialQr.startsWith("data:image/") || initialQr.startsWith("http") ? null : initialQr;
     } else {
+      try {
+        await connectEvolutionInstance(instanceName);
+      } catch {
+        // No-op: Evolution a veces requiere connect antes de devolver QR.
+      }
+
       const qrResult = await fetchEvolutionQr(instanceName);
-      qrCode =
-        (typeof qrResult.qrcode === "string" && qrResult.qrcode) ||
-        (typeof qrResult.qrCode === "string" && qrResult.qrCode) ||
-        (typeof qrResult.code === "string" && qrResult.code) ||
+      const fetchedQr =
+        extractQrPayload(qrResult.qrcode) ||
+        extractQrPayload(qrResult.qrCode) ||
+        extractQrPayload(qrResult.code) ||
         null;
+
+      qrCode = fetchedQr;
+      qrBase64 = fetchedQr && !fetchedQr.startsWith("data:image/") && !fetchedQr.startsWith("http") ? fetchedQr : null;
     }
+
   } catch (error) {
     return {
       error:
@@ -144,6 +177,7 @@ export async function createWhatsappInstanceAction(
     instance_name: instanceName,
     estado: qrCode ? "qr_pendiente" : "conectando",
     qr_code: qrCode,
+    qr_base64: qrBase64,
     qr_expires_at: qrExpiresAt,
     evolution_base_url: process.env.EVOLUTION_API_BASE_URL ?? null,
     webhook_url: webhookUrl,
@@ -195,14 +229,16 @@ export async function refreshWhatsappQrAction(
   }
 
   let qrCode: string | null = null;
+  let qrBase64: string | null = null;
 
   try {
     const qrResult = await fetchEvolutionQr(instance.instance_name);
     qrCode =
-      (typeof qrResult.qrcode === "string" && qrResult.qrcode) ||
-      (typeof qrResult.qrCode === "string" && qrResult.qrCode) ||
-      (typeof qrResult.code === "string" && qrResult.code) ||
+      extractQrPayload(qrResult.qrcode) ||
+      extractQrPayload(qrResult.qrCode) ||
+      extractQrPayload(qrResult.code) ||
       null;
+    qrBase64 = qrCode && !qrCode.startsWith("data:image/") && !qrCode.startsWith("http") ? qrCode : null;
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "No pudimos refrescar el QR.",
@@ -213,6 +249,7 @@ export async function refreshWhatsappQrAction(
     .from("whatsapp_instancias")
     .update({
       qr_code: qrCode,
+      qr_base64: qrBase64,
       qr_expires_at: qrCode ? new Date(Date.now() + 2 * 60 * 1000).toISOString() : null,
       estado: "qr_pendiente",
       updated_by: auth.user.id,
@@ -269,6 +306,7 @@ export async function disconnectWhatsappInstanceAction(
       estado: "desconectado",
       last_disconnection_at: new Date().toISOString(),
       qr_code: null,
+      qr_base64: null,
       qr_expires_at: null,
       updated_by: auth.user.id,
     })
@@ -395,6 +433,7 @@ export async function deleteWhatsappInstanceAction(
       activo: false,
       estado: "desconectado",
       qr_code: null,
+      qr_base64: null,
       qr_expires_at: null,
       updated_by: auth.user.id,
     })

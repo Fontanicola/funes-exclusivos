@@ -29,6 +29,7 @@ type Instance = {
   telefono_conectado: string | null;
   nombre_perfil: string | null;
   qr_code: string | null;
+  qr_base64: string | null;
   qr_expires_at: string | null;
   last_connection_at: string | null;
   last_disconnection_at: string | null;
@@ -100,7 +101,7 @@ export default async function WhatsappConnectionsPage() {
       supabase
         .from("whatsapp_instancias")
         .select(
-          "id,empleado_id,provider,instance_name,estado,telefono_conectado,nombre_perfil,qr_code,qr_expires_at,last_connection_at,last_disconnection_at,last_sync_at,last_error,activo,created_at,empleado:empleados!whatsapp_instancias_empleado_id_fkey(id,nombre,email,rol)"
+          "id,empleado_id,provider,instance_name,estado,telefono_conectado,nombre_perfil,qr_code,qr_base64,qr_expires_at,last_connection_at,last_disconnection_at,last_sync_at,last_error,activo,created_at,empleado:empleados!whatsapp_instancias_empleado_id_fkey(id,nombre,email,rol)"
         )
         .eq("activo", true)
         .order("created_at", { ascending: true }),

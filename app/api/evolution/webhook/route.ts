@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   detectEvolutionEvent,
@@ -12,9 +12,19 @@ import type { EvolutionWebhookPayload } from "@/lib/evolution/types";
 
 export const dynamic = "force-dynamic";
 
-function getWebhookSecret(request: Request) {
-  const url = new URL(request.url);
-  return url.searchParams.get("secret");
+function sanitizeWebhookSecret(value: string | null): string {
+  return (value ?? "")
+    .replace(/[\u2028\u2029\u200B\uFEFF]/g, "")
+    .replace(/[\r\n]/g, "")
+    .trim()
+    .split("/")[0]
+    .trim();
+}
+
+function maskSecret(value: string) {
+  if (!value) return "";
+  if (value.length <= 10) return `${value.slice(0, 2)}***${value.slice(-2)}`;
+  return `${value.slice(0, 6)}***${value.slice(-4)}`;
 }
 
 function isInboundMessage(direction: string) {
@@ -48,11 +58,15 @@ async function findLeadByPhone(
   );
 }
 
-export async function POST(request: Request) {
-  const expectedSecret = process.env.EVOLUTION_WEBHOOK_SECRET;
-  const receivedSecret = getWebhookSecret(request);
+export async function POST(request: NextRequest) {
+  const expectedSecret = sanitizeWebhookSecret(process.env.EVOLUTION_WEBHOOK_SECRET ?? "");
+  const receivedSecret = sanitizeWebhookSecret(request.nextUrl.searchParams.get("secret"));
 
   if (!expectedSecret || receivedSecret !== expectedSecret) {
+    console.error("invalid webhook secret", {
+      received: maskSecret(receivedSecret),
+      expected: maskSecret(expectedSecret),
+    });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -70,6 +84,8 @@ export async function POST(request: Request) {
   if (!event || !instanceName) {
     return NextResponse.json({ ignored: true });
   }
+
+  console.info("[Evolution webhook]", { event, instanceName });
 
   const supabase = createSupabaseAdminClient();
 
@@ -96,6 +112,7 @@ export async function POST(request: Request) {
     }
 
     await supabase.from("whatsapp_instancias").update(updates).eq("id", instance.id);
+    console.info("[Evolution webhook]", { event, instanceName, ok: true });
     return NextResponse.json({ ok: true });
   }
 
@@ -139,6 +156,7 @@ export async function POST(request: Request) {
       .update(updates)
       .eq("id", instance.id);
 
+    console.info("[Evolution webhook]", { event, instanceName, ok: true });
     return NextResponse.json({ ok: true });
   }
 
@@ -298,6 +316,7 @@ export async function POST(request: Request) {
 
     await supabase.from("conversaciones").update(conversationUpdates).eq("id", conversationId);
 
+    console.info("[Evolution webhook]", { event, instanceName, ok: true });
     return NextResponse.json({ ok: true });
   }
 
