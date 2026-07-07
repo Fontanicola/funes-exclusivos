@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import QRCode from "qrcode";
+import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import {
   deleteWhatsappInstanceAction,
@@ -61,26 +62,23 @@ function getEmployeeName(instance: Instance) {
 }
 
 function looksLikeBase64(value: string) {
-  return /^[A-Za-z0-9+/=]+$/.test(value) && value.length > 32;
+  return /^[A-Za-z0-9+/=]+$/.test(value) && value.length > 64;
 }
 
-function getQrDisplay(qrCode: string | null, qrBase64: string | null) {
-  const rawQr = qrBase64 ?? qrCode;
-  if (!rawQr) return { kind: "none" as const };
+function isLikelyImageDataUrl(value: string | null) {
+  return typeof value === "string" && value.startsWith("data:image/");
+}
 
-  if (rawQr.startsWith("data:image/")) {
-    return { kind: "image" as const, src: rawQr };
-  }
+function isLikelyImageBase64(value: string | null) {
+  return typeof value === "string" && looksLikeBase64(value);
+}
 
-  if (rawQr.startsWith("http")) {
-    return { kind: "image" as const, src: rawQr };
-  }
-
-  if (looksLikeBase64(rawQr)) {
-    return { kind: "image" as const, src: `data:image/png;base64,${rawQr}` };
-  }
-
-  return { kind: "code" as const, code: rawQr };
+function isLikelyWhatsappQrCode(value: string | null) {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  if (isLikelyImageDataUrl(trimmed) || isLikelyImageBase64(trimmed)) return false;
+  return trimmed.startsWith("2@") || trimmed.includes(",") || trimmed.length > 16;
 }
 
 function ActionButton({
@@ -131,9 +129,9 @@ export function WhatsappInstanceCard({
   canManageAll?: boolean;
 }) {
   const [showQr, setShowQr] = useState(instance.estado === "qr_pendiente");
-  const qrDisplay = useMemo(() => getQrDisplay(instance.qr_code, instance.qr_base64), [instance.qr_base64, instance.qr_code]);
+  const [qrImageSrc, setQrImageSrc] = useState<string | null>(null);
+  const [qrError, setQrError] = useState<string | null>(null);
   const [qrExpired, setQrExpired] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setShowQr(instance.estado === "qr_pendiente");
@@ -150,19 +148,51 @@ export function WhatsappInstanceCard({
   }, [instance.qr_expires_at]);
 
   useEffect(() => {
-    if (!copied) return;
-    const timeout = window.setTimeout(() => setCopied(false), 1500);
-    return () => window.clearTimeout(timeout);
-  }, [copied]);
+    let cancelled = false;
 
-  async function handleCopyCode(code: string) {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-    } catch {
-      setCopied(false);
+    async function resolveQr() {
+      setQrError(null);
+      setQrImageSrc(null);
+
+      const directImage = instance.qr_base64 ?? instance.qr_code;
+      const candidates = [instance.qr_base64, instance.qr_code].filter(
+        (value): value is string => typeof value === "string" && value.trim().length > 0
+      );
+
+      const imageCandidate = candidates.find(
+        (value) => isLikelyImageDataUrl(value) || isLikelyImageBase64(value)
+      );
+
+      if (imageCandidate) {
+        const resolvedSrc = imageCandidate.startsWith("data:image/")
+          ? imageCandidate
+          : `data:image/png;base64,${imageCandidate}`;
+        if (!cancelled) setQrImageSrc(resolvedSrc);
+        return;
+      }
+
+      const rawCandidate = candidates.find((value) => isLikelyWhatsappQrCode(value));
+      if (rawCandidate) {
+        try {
+          const url = await QRCode.toDataURL(rawCandidate, { margin: 2, width: 220 });
+          if (!cancelled) setQrImageSrc(url);
+        } catch {
+          if (!cancelled) setQrError("No pudimos generar la imagen QR. Probá refrescar QR.");
+        }
+        return;
+      }
+
+      if (!directImage && !cancelled) {
+        setQrImageSrc(null);
+      }
     }
-  }
+
+    resolveQr();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [instance.qr_base64, instance.qr_code]);
 
   return (
     <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
@@ -213,33 +243,23 @@ export function WhatsappInstanceCard({
               </p>
               {qrExpired ? <p className="text-xs text-[#6B7280]">QR vencido, refrescalo.</p> : null}
             </div>
-            {qrDisplay.kind === "image" ? (
+            {qrError ? (
+              <div className="flex h-44 w-44 items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white px-3 text-center text-xs text-[#6B7280]">
+                {qrError}
+              </div>
+            ) : qrImageSrc ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={qrDisplay.src}
+                src={qrImageSrc}
                 alt="QR de WhatsApp"
                 className="h-44 w-44 rounded-2xl border border-[#E5E7EB] bg-white p-2"
               />
-            ) : qrDisplay.kind === "code" ? (
-              <div className="w-full space-y-2 rounded-2xl border border-[#E5E7EB] bg-white p-3">
-                <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Formato: código</p>
-                <p className="break-all rounded-xl border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-3 py-2 font-mono text-xs text-[#111827]">
-                  {qrDisplay.code}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => handleCopyCode(qrDisplay.code)}
-                  className="inline-flex h-8 items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-3 text-xs font-medium text-[#111827] transition hover:bg-white"
-                >
-                  {copied ? "Copiado" : "Copiar código"}
-                </button>
-              </div>
             ) : (
               <div className="flex h-44 w-44 items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white px-3 text-center text-xs text-[#6B7280]">
                 QR no disponible. Probá refrescar QR.
               </div>
             )}
-            {qrDisplay.kind === "image" ? <p className="text-xs text-[#6B7280]">Formato: imagen</p> : null}
+            {qrImageSrc ? <p className="text-xs text-[#6B7280]">Escaneá este QR desde WhatsApp para conectar la cuenta.</p> : null}
           </div>
         ) : null}
       </div>

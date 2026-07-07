@@ -25,6 +25,26 @@ function firstString(...values: unknown[]) {
   return null;
 }
 
+export function isLikelyImageDataUrl(value: string | null | undefined) {
+  return typeof value === "string" && value.startsWith("data:image/");
+}
+
+export function isLikelyImageBase64(value: string | null | undefined) {
+  return (
+    typeof value === "string" &&
+    /^[A-Za-z0-9+/=]+$/.test(value) &&
+    value.length > 64
+  );
+}
+
+export function isLikelyWhatsappQrCode(value: string | null | undefined) {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  if (isLikelyImageDataUrl(trimmed) || isLikelyImageBase64(trimmed)) return false;
+  return trimmed.startsWith("2@") || trimmed.includes(",") || trimmed.length > 16;
+}
+
 function getNestedRecord(value: unknown, key: string) {
   if (!isRecord(value)) return null;
   const nested = value[key];
@@ -87,47 +107,32 @@ export function detectEvolutionEvent(payload: EvolutionWebhookPayload) {
 export function normalizeQrPayload(payload: unknown): NormalizedEvolutionQr {
   const source = isRecord(payload) ? payload : null;
   const data = source && isRecord(source.data) ? source.data : null;
-  const qrBase64 = firstString(
+  const rawValue = firstString(
     data?.base64,
-    data?.qrcode,
-    data?.qr,
-    source?.base64,
-    source?.qrcode,
-    source?.qr
-  );
-  const qrCode = firstString(
     data?.qrcode,
     data?.qr,
     data?.qrCode,
     data?.code,
     data?.pairingCode,
+    source?.base64,
     source?.qrcode,
     source?.qr,
     source?.qrCode,
     source?.code,
     source?.pairingCode
   );
+  const qrBase64 =
+    isLikelyImageDataUrl(rawValue) || isLikelyImageBase64(rawValue)
+      ? rawValue
+      : null;
+  const qrCode = isLikelyWhatsappQrCode(rawValue) ? rawValue : null;
   const pairingCode = firstString(data?.pairingCode, source?.pairingCode, data?.code, source?.code);
   const expiresAt = firstString(data?.expiresAt, data?.expires_at, source?.expiresAt, source?.expires_at);
 
-  const normalizedQrBase64 =
-    qrBase64 && qrBase64.startsWith("data:image/")
-      ? qrBase64
-      : qrBase64 && /^[A-Za-z0-9+/=]+$/.test(qrBase64) && qrBase64.length > 32
-        ? qrBase64
-        : null;
-
-  const normalizedQrCode =
-    qrCode && qrCode.startsWith("data:image/")
-      ? null
-      : qrCode && /^[A-Za-z0-9+/=]+$/.test(qrCode) && qrCode.length > 32
-        ? null
-        : qrCode;
-
   return {
     instanceName: source ? extractInstanceName(source as EvolutionWebhookPayload) : null,
-    qrBase64: normalizedQrBase64 ?? null,
-    qrCode: normalizedQrCode ?? null,
+    qrBase64: qrBase64 ?? null,
+    qrCode: qrCode ?? null,
     pairingCode: pairingCode ?? null,
     expiresAt: expiresAt ?? null,
     rawPayload: payload,

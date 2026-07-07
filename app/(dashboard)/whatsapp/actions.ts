@@ -114,6 +114,7 @@ export async function createWhatsappInstanceAction(
 
   let qrCode: string | null = null;
   let qrBase64: string | null = null;
+  let qrExpiresAt: string | null = null;
 
   try {
     const createResult = await createEvolutionInstance({ instanceName });
@@ -130,6 +131,7 @@ export async function createWhatsappInstanceAction(
 
     qrBase64 = initialQr.qrBase64 ?? null;
     qrCode = initialQr.pairingCode ?? initialQr.qrCode ?? null;
+    qrExpiresAt = initialQr.expiresAt ?? null;
 
     if (!qrBase64 && !qrCode) {
       try {
@@ -142,6 +144,7 @@ export async function createWhatsappInstanceAction(
       const fetchedQr = extractQrFromEvolutionResponse(qrResult);
       qrBase64 = fetchedQr.qrBase64 ?? null;
       qrCode = fetchedQr.pairingCode ?? fetchedQr.qrCode ?? null;
+      qrExpiresAt = fetchedQr.expiresAt ?? qrExpiresAt;
     }
 
   } catch (error) {
@@ -152,8 +155,6 @@ export async function createWhatsappInstanceAction(
   }
 
   const webhookUrl = `${appUrl}/api/evolution/webhook?secret=${encodeURIComponent(webhookSecret)}`;
-  const now = new Date();
-  const qrExpiresAt = qrCode ? new Date(now.getTime() + 2 * 60 * 1000).toISOString() : null;
 
   const { error } = await auth.supabase.from("whatsapp_instancias").insert({
     empleado_id: targetEmployeeId,
@@ -162,7 +163,7 @@ export async function createWhatsappInstanceAction(
     estado: qrCode ? "qr_pendiente" : "conectando",
     qr_code: qrCode,
     qr_base64: qrBase64,
-    qr_expires_at: qrExpiresAt,
+    qr_expires_at: qrExpiresAt ?? (qrCode || qrBase64 ? new Date(Date.now() + 2 * 60 * 1000).toISOString() : null),
     evolution_base_url: process.env.EVOLUTION_API_BASE_URL ?? null,
     webhook_url: webhookUrl,
     activo: true,
@@ -214,18 +215,21 @@ export async function refreshWhatsappQrAction(
 
   let qrCode: string | null = null;
   let qrBase64: string | null = null;
+  let qrExpiresAt: string | null = null;
 
   try {
     const connectResult = await connectEvolutionInstance(instance.instance_name);
     const normalizedConnect = extractQrFromEvolutionResponse(connectResult);
     qrBase64 = normalizedConnect.qrBase64 ?? null;
     qrCode = normalizedConnect.pairingCode ?? normalizedConnect.qrCode ?? null;
+    qrExpiresAt = normalizedConnect.expiresAt ?? null;
 
     if (!qrBase64 && !qrCode) {
       const qrResult = await fetchEvolutionQr(instance.instance_name);
       const normalizedQr = extractQrFromEvolutionResponse(qrResult);
       qrBase64 = normalizedQr.qrBase64 ?? null;
       qrCode = normalizedQr.pairingCode ?? normalizedQr.qrCode ?? null;
+      qrExpiresAt = normalizedQr.expiresAt ?? qrExpiresAt;
     }
   } catch (error) {
     return {
@@ -256,7 +260,7 @@ export async function refreshWhatsappQrAction(
     .update({
       qr_code: qrCode,
       qr_base64: qrBase64,
-      qr_expires_at: qrCode ? new Date(Date.now() + 2 * 60 * 1000).toISOString() : null,
+      qr_expires_at: qrExpiresAt ?? (qrCode || qrBase64 ? new Date(Date.now() + 2 * 60 * 1000).toISOString() : null),
       estado: "qr_pendiente",
       last_error: null,
       last_sync_at: new Date().toISOString(),

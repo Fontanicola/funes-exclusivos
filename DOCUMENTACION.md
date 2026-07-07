@@ -730,6 +730,42 @@
 - `EVOLUTION_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_APP_URL`
 
+## Corrección QR raw text de WhatsApp
+
+### Qué se corrigió
+
+- Se dejó de tratar el QR raw text de Evolution como si fuera una imagen base64.
+- La UI ahora convierte el texto raw del QR en una imagen escaneable usando `qrcode` en el cliente.
+- La normalización distingue explícitamente entre:
+  - `qr_base64` para data URLs o base64 de imagen real
+  - `qr_code` para texto raw, `pairingCode` o payload de vinculación de WhatsApp
+- Se evita mostrar el contenido raw completo en pantalla.
+
+### Paths modificados
+
+- `package.json`
+- `components/whatsapp/whatsapp-instance-card.tsx`
+- `app/(dashboard)/whatsapp/actions.ts`
+- `app/api/evolution/webhook/route.ts`
+- `lib/evolution/client.ts`
+- `lib/evolution/payload-normalizer.ts`
+- `DOCUMENTACION.md`
+
+### Dependencias agregadas
+
+- `qrcode`
+- `@types/qrcode`
+
+### Tablas de Supabase involucradas
+
+- `public.whatsapp_instancias`
+
+### Decisiones técnicas tomadas
+
+- Se usa `QRCode.toDataURL(...)` únicamente en el cliente para generar el PNG del código raw.
+- La persistencia en Supabase mantiene el QR raw en `qr_code` y reserva `qr_base64` solo para imágenes reales.
+- La tarjeta muestra una imagen QR escaneable, y si la generación falla, un mensaje claro para refrescar el QR.
+
 ## Corrección Evolution API: secret y hidratación WhatsApp
 
 ### Qué se corrigió
