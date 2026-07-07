@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isDemoMode } from "@/lib/demo-mode";
-import { mockLeadInteracciones, mockLeads } from "@/lib/mock-data";
+import { mockEmpleados, mockLeadInteracciones, mockLeads, mockVentas, mockVehiculos } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { LeadDetail } from "@/components/crm/lead-detail";
 import { LeadInteractionForm } from "@/components/crm/lead-interaction-form";
 import { LeadInteractionsTimeline } from "@/components/crm/lead-interactions-timeline";
 import { LeadOriginBadge } from "@/components/crm/lead-origin-badge";
@@ -23,7 +24,10 @@ type Lead = {
   nivel_interes: number | null;
   proximo_contacto: string | null;
   notas: string | null;
+  venta_id: string | null;
+  fecha_ganado: string | null;
   created_at: string | null;
+  moneda_presupuesto?: string | null;
   vehiculo: {
     id: string;
     marca: string | null;
@@ -37,6 +41,19 @@ type Lead = {
     nombre: string | null;
     email: string | null;
     rol: string | null;
+  } | null;
+  venta: {
+    id: string;
+    fecha_venta: string | null;
+    precio_venta: number | null;
+    moneda: string | null;
+    estado: string | null;
+    vehiculo: {
+      id: string;
+      marca: string | null;
+      modelo: string | null;
+      dominio: string | null;
+    } | null;
   } | null;
 };
 
@@ -56,9 +73,10 @@ type Interaction = {
   } | null;
 };
 
-type RawLead = Omit<Lead, "vehiculo" | "vendedor"> & {
+type RawLead = Omit<Lead, "vehiculo" | "vendedor" | "venta"> & {
   vehiculo: Lead["vehiculo"] | Lead["vehiculo"][] | null;
   vendedor: Lead["vendedor"] | Lead["vendedor"][] | null;
+  venta: Lead["venta"] | Lead["venta"][] | null;
 };
 
 type RawInteraction = Omit<Interaction, "created_by"> & {
@@ -118,18 +136,57 @@ export default async function LeadDetailPage({
 }) {
   let lead: Lead | null = null;
   let interactions: Interaction[] = [];
+  let vehicles: Array<{
+    id: string;
+    marca: string | null;
+    modelo: string | null;
+    version: string | null;
+    anio: number | null;
+    dominio: string | null;
+    precio_venta: number | null;
+    precio_moneda: string | null;
+    estado: string | null;
+  }> = [];
+  let sellers: Array<{
+    id: string;
+    nombre: string | null;
+    email: string | null;
+    rol: string | null;
+    activo: boolean | null;
+  }> = [];
 
   if (isDemoMode) {
-    lead = (mockLeads.find((item) => item.id === params.id) ?? null) as Lead | null;
+    const demoLead = (mockLeads.find((item) => item.id === params.id) ?? null) as Lead | null;
+    const demoSale = demoLead?.venta_id
+      ? ((mockVentas.find((item) => item.id === demoLead.venta_id) ?? null) as Lead["venta"])
+      : null;
+
+    lead = demoLead ? { ...demoLead, venta: demoSale } : null;
     interactions = (mockLeadInteracciones.filter((item) => item.lead_id === params.id) ?? []) as Interaction[];
+    vehicles = mockVehiculos
+      .filter((vehicle) => vehicle.estado === "en_stock")
+      .map((vehicle) => ({
+        id: vehicle.id,
+        marca: vehicle.marca ?? null,
+        modelo: vehicle.modelo ?? null,
+        version: vehicle.version ?? null,
+        anio: vehicle.anio ?? null,
+        dominio: vehicle.dominio ?? null,
+        precio_venta: vehicle.precio_venta ?? null,
+        precio_moneda: vehicle.precio_moneda ?? null,
+        estado: vehicle.estado ?? null,
+      }));
+    sellers = mockEmpleados.filter(
+      (employee) => employee.activo && ["admin", "vendedor"].includes(employee.rol ?? "")
+    );
   } else {
     const supabase = createSupabaseServerClient();
 
-    const [leadResult, interactionsResult] = await Promise.all([
+    const [leadResult, interactionsResult, vehiclesResult, sellersResult] = await Promise.all([
       supabase
         .from("leads")
         .select(
-          "id,nombre,telefono,email,documento,origen,estado,presupuesto_min,presupuesto_max,presupuesto_moneda,nivel_interes,proximo_contacto,notas,created_at,vehiculo:vehiculos!leads_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio),vendedor:empleados!leads_vendedor_id_fkey(id,nombre,email,rol)"
+          "id,nombre,telefono,email,documento,origen,estado,presupuesto_min,presupuesto_max,presupuesto_moneda,moneda_presupuesto:presupuesto_moneda,nivel_interes,proximo_contacto,notas,venta_id,fecha_ganado,created_at,vehiculo:vehiculos!leads_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio),vendedor:empleados!leads_vendedor_id_fkey(id,nombre,email,rol),venta:ventas!leads_venta_id_fkey(id,fecha_venta,precio_venta,moneda,estado,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,dominio))"
         )
         .eq("id", params.id)
         .maybeSingle(),
@@ -138,6 +195,18 @@ export default async function LeadDetailPage({
         .select("id,lead_id,tipo,titulo,contenido,fecha,created_at,created_by:empleados!lead_interacciones_created_by_fkey(id,nombre,email,rol)")
         .eq("lead_id", params.id)
         .order("fecha", { ascending: false }),
+      supabase
+        .from("vehiculos")
+        .select("id,marca,modelo,version,anio,dominio,precio_venta,precio_moneda,estado")
+        .eq("estado", "en_stock")
+        .order("marca", { ascending: true })
+        .order("modelo", { ascending: true }),
+      supabase
+        .from("empleados")
+        .select("id,nombre,email,rol,activo")
+        .eq("activo", true)
+        .in("rol", ["admin", "vendedor"])
+        .order("nombre", { ascending: true }),
     ]);
 
     const rawLead = leadResult.data as RawLead | null;
@@ -146,6 +215,7 @@ export default async function LeadDetailPage({
           ...rawLead,
           vehiculo: normalizeSingleRelation(rawLead.vehiculo),
           vendedor: normalizeSingleRelation(rawLead.vendedor),
+          venta: normalizeSingleRelation(rawLead.venta),
         }
       : null;
 
@@ -153,6 +223,9 @@ export default async function LeadDetailPage({
       ...interaction,
       created_by: normalizeSingleRelation(interaction.created_by),
     }));
+
+    vehicles = (vehiclesResult.data ?? []) as typeof vehicles;
+    sellers = (sellersResult.data ?? []) as typeof sellers;
   }
 
   if (!lead) {
@@ -187,6 +260,8 @@ export default async function LeadDetailPage({
           </div>
         </div>
       </header>
+
+      <LeadDetail lead={lead} sale={lead.venta ?? null} vehicles={vehicles} sellers={sellers} />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <div className="space-y-6">
@@ -240,9 +315,9 @@ export default async function LeadDetailPage({
               <div>
                 <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Presupuesto</p>
                 <p className="mt-1 text-sm text-[#111827]">
-                  {formatMoney(lead.presupuesto_min, lead.presupuesto_moneda)}
+                  {formatMoney(lead.presupuesto_min, lead.presupuesto_moneda ?? lead.moneda_presupuesto ?? null)}
                   {lead.presupuesto_max && lead.presupuesto_max !== lead.presupuesto_min
-                    ? ` - ${formatMoney(lead.presupuesto_max, lead.presupuesto_moneda)}`
+                    ? ` - ${formatMoney(lead.presupuesto_max, lead.presupuesto_moneda ?? lead.moneda_presupuesto ?? null)}`
                     : ""}
                 </p>
               </div>

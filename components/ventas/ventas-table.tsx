@@ -47,6 +47,14 @@ type Venta = {
   importe_gestoria?: number | null;
   importe_escribania?: number | null;
   resultado_operativo?: number | null;
+  lead_id?: string | null;
+  lead?: {
+    id: string;
+    nombre: string | null;
+    telefono: string | null;
+    origen: string | null;
+    estado: string | null;
+  } | null;
 };
 
 const paymentMethods = ["", "transferencia", "efectivo", "dolares", "pesos", "permuta"] as const;
@@ -146,6 +154,9 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
         venta.cliente_telefono,
         venta.cliente_email,
         venta.cliente_documento,
+        venta.lead?.nombre,
+        venta.lead?.telefono,
+        venta.lead?.origen,
         venta.vehiculo?.marca,
         venta.vehiculo?.modelo,
         venta.vehiculo?.dominio,
@@ -260,6 +271,12 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
                         <p className="text-sm text-[#6B7280]">
                           {getClientSubtitle(venta)}
                         </p>
+                        {venta.lead ? (
+                          <p className="text-xs text-[#9CA3AF]">
+                            CRM · {venta.lead.nombre ?? "Lead"}{" "}
+                            {venta.lead.origen ? `· ${venta.lead.origen}` : ""}
+                          </p>
+                        ) : null}
                       </div>
                     </td>
                     <td className="px-4 py-3 align-middle">

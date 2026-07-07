@@ -19,7 +19,7 @@ export function LeadStatusBadge({ status }: { status: LeadStatus }) {
     interesado: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
     negociacion: "border-[#E5E7EB] bg-[#F3F4F6] text-[#111827]",
     reservado: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
-    ganado: "border-[#D1FAE5] bg-[#F0FDF4] text-[#166534]",
+    ganado: "border-[#BBF7D0] bg-[#ECFDF5] text-[#166534]",
     perdido: "border-[#F3F4F6] bg-[#FAFAFA] text-[#6B7280]",
   };
 

@@ -13,15 +13,10 @@ export type EvolutionConnectionState =
   | "connecting"
   | "qr"
   | "error"
+  | "pause"
   | string;
 
-export type EvolutionWebhookEvent =
-  | "QRCODE_UPDATED"
-  | "CONNECTION_UPDATE"
-  | "MESSAGES_UPSERT"
-  | string;
-
-export type EvolutionCreateInstanceResponse = {
+export type EvolutionInstanceCreateResponse = {
   instance?: {
     instanceName?: string | null;
     instanceId?: string | null;
@@ -51,6 +46,62 @@ export type EvolutionQrResponse = {
   [key: string]: unknown;
 };
 
+export type EvolutionWebhookPayload = {
+  event?: string | null;
+  instance?: string | null;
+  instanceName?: string | null;
+  data?: unknown;
+  message?: unknown;
+  [key: string]: unknown;
+};
+
+export type EvolutionMessageUpsertPayload = {
+  instanceName?: string | null;
+  externalChatId?: string | null;
+  externalMessageId?: string | null;
+  fromMe?: boolean | null;
+  contactPhone?: string | null;
+  contactName?: string | null;
+  body?: string | null;
+  messageType?: string | null;
+  sentAt?: string | null;
+  rawPayload?: unknown;
+  isGroup?: boolean;
+};
+
+export type NormalizedEvolutionQr = {
+  instanceName: string | null;
+  qrCode: string | null;
+  rawPayload: unknown;
+};
+
+export type NormalizedEvolutionConnection = {
+  instanceName: string | null;
+  state: EvolutionConnectionState | null;
+  status: string | null;
+  phoneNumber: string | null;
+  profileName: string | null;
+  reason: string | null;
+  rawPayload: unknown;
+};
+
+export type NormalizedEvolutionMessage = {
+  instanceName: string | null;
+  externalMessageId: string | null;
+  externalChatId: string | null;
+  direction: "inbound" | "outbound";
+  fromNumber: string | null;
+  toNumber: string | null;
+  contactName: string | null;
+  body: string | null;
+  messageType: string | null;
+  sentAt: string | null;
+  isGroup: boolean;
+  rawPayload: unknown;
+};
+
+// Backwards-compatible aliases for existing imports.
+export type EvolutionCreateInstanceResponse = EvolutionInstanceCreateResponse;
 export type EvolutionConnectionStateResponse = {
   instance?: {
     instanceName?: string | null;
@@ -60,24 +111,3 @@ export type EvolutionConnectionStateResponse = {
   [key: string]: unknown;
 };
 
-export type EvolutionWebhookPayload = {
-  event?: EvolutionWebhookEvent | string | null;
-  instance?: string | null;
-  instanceName?: string | null;
-  data?: unknown;
-  message?: unknown;
-  [key: string]: unknown;
-};
-
-export type NormalizedEvolutionMessage = {
-  externalMessageId: string | null;
-  externalChatId: string | null;
-  direction: "inbound" | "outbound" | string;
-  fromNumber: string | null;
-  toNumber: string | null;
-  contactName: string | null;
-  body: string | null;
-  messageType: string | null;
-  sentAt: string | null;
-  rawPayload: unknown;
-};

@@ -156,9 +156,23 @@ function getHighInterestCount(conversations: Conversation[]) {
 export default async function WhatsappPage() {
   let instancias: Instance[] = mockWhatsappInstancias as Instance[];
   let conversaciones: Conversation[] = mockConversaciones as Conversation[];
+  let canManageAll = true;
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { data: currentEmployee } = user
+      ? await supabase
+          .from("empleados")
+          .select("id,nombre,email,rol,activo")
+          .eq("id", user.id)
+          .maybeSingle<{ id: string; nombre: string | null; email: string | null; rol: string | null; activo: boolean | null }>()
+      : { data: null };
+
+    canManageAll = currentEmployee?.rol === "admin" && currentEmployee?.activo === true;
 
     const [instancesResult, conversationsResult] = await Promise.all([
       supabase
@@ -173,8 +187,8 @@ export default async function WhatsappPage() {
         .select(
           "id,whatsapp_instancia_id,lead_id,vendedor_id,vehiculo_interes_id,canal,estado,contacto_nombre,contacto_telefono,contacto_numero_normalizado,contacto_email,ultimo_mensaje_at,last_message_preview,mensajes_count,unread_count,resumen_ia,interes_compra,intencion_detectada,proxima_accion_sugerida,requiere_atencion,created_at,instancia:whatsapp_instancias!conversaciones_whatsapp_instancia_id_fkey(id,instance_name,estado,telefono_conectado),lead:leads!conversaciones_lead_id_fkey(id,nombre,telefono,email,estado,origen),vendedor:empleados!conversaciones_vendedor_id_fkey(id,nombre,email,rol),vehiculo:vehiculos!conversaciones_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio)"
         )
-        .order("ultimo_mensaje_at", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false }),
+      .order("ultimo_mensaje_at", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false }),
     ]);
 
     instancias = ((instancesResult.data ?? []) as unknown as RawInstance[]).map((instance) => ({
@@ -189,6 +203,11 @@ export default async function WhatsappPage() {
       vendedor: normalizeSingleRelation(conversation.vendedor),
       vehiculo: normalizeSingleRelation(conversation.vehiculo),
     }));
+
+    if (!canManageAll && currentEmployee) {
+      instancias = instancias.filter((instance) => instance.empleado_id === currentEmployee.id);
+      conversaciones = conversaciones.filter((conversation) => conversation.vendedor_id === currentEmployee.id);
+    }
   }
 
   const problematicInstances = instancias.filter((instance) =>
@@ -232,7 +251,7 @@ export default async function WhatsappPage() {
         <KpiCard label="Interés alto" value={getHighInterestCount(conversaciones)} />
       </div>
 
-      <WhatsappInstancesGrid instancias={instancias} />
+      <WhatsappInstancesGrid instancias={instancias} canManageAll={canManageAll} />
       <ConversacionesTable conversaciones={conversaciones} />
     </section>
   );

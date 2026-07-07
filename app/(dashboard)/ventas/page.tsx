@@ -37,6 +37,7 @@ type Venta = {
   importe_gestoria?: number | null;
   importe_escribania?: number | null;
   resultado_operativo?: number | null;
+  lead_id?: string | null;
   vehiculo: {
     id: string;
     marca: string | null;
@@ -52,11 +53,18 @@ type Venta = {
     email: string | null;
     rol: string | null;
   } | null;
+  lead?: {
+    id: string;
+    nombre: string | null;
+    telefono: string | null;
+    origen: string | null;
+    estado: string | null;
+  } | null;
   pagos?: Array<Record<string, any>>;
   entrega?: Record<string, any> | null;
 };
 
-type RawVenta = Omit<Venta, "vehiculo" | "vendedor"> & {
+type RawVenta = Omit<Venta, "vehiculo" | "vendedor" | "lead"> & {
   vehiculo:
     | Venta["vehiculo"]
     | Venta["vehiculo"][]
@@ -64,6 +72,10 @@ type RawVenta = Omit<Venta, "vehiculo" | "vendedor"> & {
   vendedor:
     | Venta["vendedor"]
     | Venta["vendedor"][]
+    | null;
+  lead:
+    | Venta["lead"]
+    | Venta["lead"][]
     | null;
 };
 
@@ -175,7 +187,7 @@ export default async function VentasPage() {
     const { data } = await supabase
       .from("ventas")
       .select(
-        "id,fecha_venta,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,precio_venta,moneda,metodo_pago,estado,monto_permuta,precio_infoauto,info_historica_compra,costo_reposicion,costo_historico,margen_reposicion,margen_historico,rotacion_dias,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,created_at,vehiculo_id,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio,fotos),vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email,rol)"
+        "id,fecha_venta,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,precio_venta,moneda,metodo_pago,estado,monto_permuta,precio_infoauto,info_historica_compra,costo_reposicion,costo_historico,margen_reposicion,margen_historico,rotacion_dias,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,created_at,vehiculo_id,lead_id,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio,fotos),vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email,rol),lead:leads!ventas_lead_id_fkey(id,nombre,telefono,origen,estado)"
       )
       .order("fecha_venta", { ascending: false })
       .order("created_at", { ascending: false });
@@ -184,6 +196,7 @@ export default async function VentasPage() {
       ...venta,
       vehiculo: normalizeSingleRelation(venta.vehiculo),
       vendedor: normalizeSingleRelation(venta.vendedor),
+      lead: normalizeSingleRelation(venta.lead),
     }));
 
     const saleIds = baseVentas.map((venta) => venta.id);

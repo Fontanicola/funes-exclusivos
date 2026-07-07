@@ -1,7 +1,10 @@
 import type {
   EvolutionConnectionState,
+  EvolutionMessageUpsertPayload,
   EvolutionWebhookPayload,
+  NormalizedEvolutionConnection,
   NormalizedEvolutionMessage,
+  NormalizedEvolutionQr,
 } from "./types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -28,65 +31,148 @@ function getNestedRecord(value: unknown, key: string) {
   return isRecord(nested) ? nested : null;
 }
 
-export function normalizePhoneNumber(value: string | null | undefined) {
-  if (!value) return null;
-  const digits = value.replace(/\D/g, "");
-  return digits || null;
-}
-
-export function getEvolutionEvent(payload: EvolutionWebhookPayload) {
-  const rawEvent = firstString(
-    payload.event,
-    isRecord(payload.data) ? payload.data.event : null,
-    isRecord(payload.message) ? payload.message.event : null
-  );
-
-  return rawEvent ? rawEvent.toUpperCase() : null;
-}
-
-export function getEvolutionInstanceName(payload: EvolutionWebhookPayload) {
-  return firstString(
-    payload.instanceName,
-    payload.instance,
-    isRecord(payload.data) ? payload.data.instanceName : null,
-    isRecord(payload.data) ? payload.data.instance : null,
-    isRecord(payload.message) ? payload.message.instanceName : null
-  );
-}
-
-function extractMessageSource(payload: EvolutionWebhookPayload) {
+function getCandidateSource(payload: EvolutionWebhookPayload) {
   if (isRecord(payload.data)) return payload.data;
   if (isRecord(payload.message)) return payload.message;
   return isRecord(payload) ? payload : null;
 }
 
+export function normalizePhone(raw: string | null | undefined) {
+  if (!raw) return null;
+  const digits = raw.replace(/\D/g, "");
+  return digits || null;
+}
+
+export function extractInstanceName(payload: EvolutionWebhookPayload) {
+  const source = getCandidateSource(payload);
+  return firstString(
+    payload.instanceName,
+    payload.instance,
+    source?.instanceName,
+    source?.instance,
+    source && isRecord(source.data) ? source.data.instanceName : null,
+    source && isRecord(source.data) ? source.data.instance : null
+  );
+}
+
+export function detectEvolutionEvent(payload: EvolutionWebhookPayload) {
+  const source = getCandidateSource(payload);
+  const event = firstString(
+    payload.event,
+    source?.event,
+    source && isRecord(source.data) ? source.data.event : null,
+    source && isRecord(source.message) ? source.message.event : null
+  );
+
+  return event ? event.toUpperCase() : null;
+}
+
+export function normalizeQrPayload(payload: unknown): NormalizedEvolutionQr {
+  const source = isRecord(payload) ? payload : null;
+  const data = source && isRecord(source.data) ? source.data : null;
+  const qrCode = firstString(
+    data?.qrcode,
+    data?.qrCode,
+    data?.code,
+    data?.pairingCode,
+    source?.qrcode,
+    source?.qrCode,
+    source?.code,
+    source?.pairingCode
+  );
+
+  return {
+    instanceName: source ? extractInstanceName(source as EvolutionWebhookPayload) : null,
+    qrCode: qrCode
+      ? qrCode.startsWith("data:image/") || qrCode.startsWith("http")
+        ? qrCode
+        : qrCode.length > 32
+          ? `data:image/png;base64,${qrCode}`
+          : qrCode
+      : null,
+    rawPayload: payload,
+  };
+}
+
+export function normalizeConnectionPayload(payload: unknown): NormalizedEvolutionConnection {
+  const source = isRecord(payload) ? payload : null;
+  const data = source && isRecord(source.data) ? source.data : null;
+  const rawState = firstString(
+    data?.status,
+    data?.state,
+    source?.status,
+    source?.state,
+    source?.connectionState,
+    data?.connectionState
+  );
+
+  let state: EvolutionConnectionState | null = null;
+  if (rawState) {
+    const normalized = rawState.toLowerCase();
+    if (["open", "connected", "conectado", "online"].includes(normalized)) state = "open";
+    else if (["close", "closed", "disconnected", "desconectado", "offline"].includes(normalized)) state = "close";
+    else if (["connecting", "conectando", "pairing"].includes(normalized)) state = "connecting";
+    else if (["qr", "qrcode", "qr_pendiente", "qr pending", "pairingcode"].includes(normalized)) state = "qr";
+    else if (["error", "failed", "failure"].includes(normalized)) state = "error";
+    else if (["pause", "paused", "pausado"].includes(normalized)) state = "pause";
+    else state = rawState;
+  }
+
+  const phoneNumber = normalizePhone(
+    firstString(data?.phoneNumber, data?.phone_number, data?.userJid, data?.wid, data?.me)
+  );
+
+  const profileName = firstString(data?.profileName, data?.name, data?.pushName, data?.push_name);
+  const reason = firstString(data?.reason, data?.message, source?.reason, source?.message);
+
+  return {
+    instanceName: source ? extractInstanceName(source as EvolutionWebhookPayload) : null,
+    state,
+    status: rawState,
+    phoneNumber,
+    profileName,
+    reason,
+    rawPayload: payload,
+  };
+}
+
 function extractMessageBody(source: Record<string, unknown> | null) {
   if (!source) return null;
 
-  const message = getNestedRecord(source, "message");
-  const nestedMessage = message ?? getNestedRecord(getNestedRecord(source, "data"), "message");
-  const extendedTextMessage = nestedMessage ? getNestedRecord(nestedMessage, "extendedTextMessage") : null;
-  const imageMessage = nestedMessage ? getNestedRecord(nestedMessage, "imageMessage") : null;
-  const videoMessage = nestedMessage ? getNestedRecord(nestedMessage, "videoMessage") : null;
-  const documentMessage = nestedMessage ? getNestedRecord(nestedMessage, "documentMessage") : null;
-  const buttonsResponseMessage = nestedMessage ? getNestedRecord(nestedMessage, "buttonsResponseMessage") : null;
-  const listResponseMessage = nestedMessage ? getNestedRecord(nestedMessage, "listResponseMessage") : null;
+  const message = getNestedRecord(source, "message") ?? getNestedRecord(getNestedRecord(source, "data"), "message");
+  const conversationMessage = firstString(
+    source.body,
+    source.text,
+    source.content,
+    source.messageText,
+    message?.conversation
+  );
+  if (conversationMessage) return conversationMessage;
 
-  const parts = [
-    firstString(source.body),
-    firstString(source.text),
-    firstString(source.content),
-    firstString(source.messageText),
-    firstString(nestedMessage?.conversation),
-    firstString(extendedTextMessage?.text),
-    firstString(imageMessage?.caption),
-    firstString(videoMessage?.caption),
-    firstString(documentMessage?.caption),
-    firstString(buttonsResponseMessage?.selectedButtonId, buttonsResponseMessage?.selectedDisplayText),
-    firstString(listResponseMessage?.title),
-  ];
+  const extendedTextMessage = message ? getNestedRecord(message, "extendedTextMessage") : null;
+  const imageMessage = message ? getNestedRecord(message, "imageMessage") : null;
+  const videoMessage = message ? getNestedRecord(message, "videoMessage") : null;
+  const documentMessage = message ? getNestedRecord(message, "documentMessage") : null;
+  const audioMessage = message ? getNestedRecord(message, "audioMessage") : null;
+  const stickerMessage = message ? getNestedRecord(message, "stickerMessage") : null;
+  const buttonsResponseMessage = message ? getNestedRecord(message, "buttonsResponseMessage") : null;
+  const listResponseMessage = message ? getNestedRecord(message, "listResponseMessage") : null;
 
-  return firstString(...parts);
+  return firstString(
+    extendedTextMessage?.text,
+    imageMessage?.caption,
+    videoMessage?.caption,
+    documentMessage?.caption,
+    audioMessage?.caption,
+    buttonsResponseMessage?.selectedButtonId,
+    buttonsResponseMessage?.selectedDisplayText,
+    listResponseMessage?.title,
+    stickerMessage ? "Sticker" : null,
+    imageMessage ? "Imagen" : null,
+    videoMessage ? "Video" : null,
+    documentMessage ? "Documento" : null,
+    audioMessage ? "Audio" : null
+  );
 }
 
 function extractTimestamp(value: unknown) {
@@ -106,60 +192,19 @@ function extractTimestamp(value: unknown) {
   return null;
 }
 
-export function normalizeQr(payload: unknown) {
-  const source = isRecord(payload) ? payload : null;
-  const data = source && isRecord(source.data) ? source.data : null;
-  const candidate = firstString(
-    data?.qrcode,
-    data?.qrCode,
-    data?.code,
-    data?.pairingCode,
-    source?.qrcode,
-    source?.qrCode,
-    source?.code,
-    source?.pairingCode
-  );
-
-  if (!candidate) return null;
-  if (candidate.startsWith("data:image/")) return candidate;
-  if (candidate.startsWith("http")) return candidate;
-  if (candidate.length > 32) {
-    return `data:image/png;base64,${candidate}`;
-  }
-
-  return candidate;
-}
-
-export function normalizeConnectionState(payload: unknown): EvolutionConnectionState | null {
-  const source = isRecord(payload) ? payload : null;
-  const data = source && isRecord(source.data) ? source.data : null;
-  const rawState = firstString(
-    data?.status,
-    data?.state,
-    source?.status,
-    source?.state,
-    source?.connectionState,
-    data?.connectionState
-  );
-
-  if (!rawState) return null;
-
-  const normalized = rawState.toLowerCase();
-  if (["open", "connected", "conectado", "online"].includes(normalized)) return "open";
-  if (["close", "closed", "disconnected", "desconectado", "offline"].includes(normalized)) return "close";
-  if (["connecting", "conectando", "pairing"].includes(normalized)) return "connecting";
-  if (["qr", "qrcode", "qr_pendente", "qr pending", "pairingcode"].includes(normalized)) return "qr";
-  if (["error", "failed", "failure"].includes(normalized)) return "error";
-  if (["pause", "paused", "pausado"].includes(normalized)) return "pause";
-
-  return rawState as EvolutionConnectionState;
-}
-
-export function normalizeEvolutionMessage(payload: EvolutionWebhookPayload): NormalizedEvolutionMessage {
-  const source = extractMessageSource(payload);
+export function normalizeMessagePayload(payload: EvolutionWebhookPayload): NormalizedEvolutionMessage {
+  const source = getCandidateSource(payload);
   const key = source && isRecord(source.key) ? source.key : null;
   const nestedMessage = source && isRecord(source.message) ? source.message : null;
   const message = nestedMessage ?? source;
+  const remoteJid = firstString(
+    key?.remoteJid,
+    source?.remoteJid,
+    source?.remote_jid,
+    nestedMessage?.remoteJid,
+    nestedMessage?.remote_jid
+  );
+  const isGroup = Boolean(remoteJid?.endsWith("@g.us"));
 
   const fromMeValue =
     typeof key?.fromMe === "boolean"
@@ -174,15 +219,6 @@ export function normalizeEvolutionMessage(payload: EvolutionWebhookPayload): Nor
               ? nestedMessage.from_me
               : false;
 
-  const remoteJid = firstString(
-    key?.remoteJid,
-    source?.remoteJid,
-    source?.remote_jid,
-    nestedMessage?.remoteJid,
-    nestedMessage?.remote_jid
-  );
-
-  const participant = firstString(key?.participant, source?.participant, nestedMessage?.participant);
   const contactName = firstString(
     source?.pushName,
     source?.push_name,
@@ -200,7 +236,6 @@ export function normalizeEvolutionMessage(payload: EvolutionWebhookPayload): Nor
     nestedMessage?.message_type,
     typeof message === "object" && message ? Object.keys(message)[0] : null
   );
-
   const externalMessageId = firstString(
     key?.id,
     source?.messageId,
@@ -209,7 +244,6 @@ export function normalizeEvolutionMessage(payload: EvolutionWebhookPayload): Nor
     nestedMessage?.messageId,
     nestedMessage?.message_id
   );
-
   const sentAt = extractTimestamp(
     source?.timestamp ??
       source?.messageTimestamp ??
@@ -220,21 +254,46 @@ export function normalizeEvolutionMessage(payload: EvolutionWebhookPayload): Nor
       nestedMessage?.messageTimestamp
   );
 
-  const senderNumber = normalizePhoneNumber(
-    fromMeValue ? participant ?? remoteJid : participant ?? remoteJid
+  const senderNumber = normalizePhone(
+    fromMeValue ? firstString(key?.participant, source?.participant, nestedMessage?.participant) ?? remoteJid : remoteJid
   );
-  const remoteNumber = normalizePhoneNumber(remoteJid);
+  const remoteNumber = normalizePhone(remoteJid);
 
-  return {
-    externalMessageId,
+  const normalized: EvolutionMessageUpsertPayload = {
+    instanceName: extractInstanceName(payload),
     externalChatId: remoteJid,
-    direction: fromMeValue ? "outbound" : "inbound",
-    fromNumber: fromMeValue ? remoteNumber : senderNumber,
-    toNumber: fromMeValue ? senderNumber : remoteNumber,
+    externalMessageId,
+    fromMe: fromMeValue,
+    contactPhone: senderNumber,
     contactName,
-    body,
+    body: body ?? null,
     messageType,
     sentAt,
     rawPayload: payload,
+    isGroup,
+  };
+
+  return {
+    instanceName: normalized.instanceName ?? null,
+    externalMessageId: normalized.externalMessageId ?? null,
+    externalChatId: normalized.externalChatId ?? null,
+    direction: fromMeValue ? "outbound" : "inbound",
+    fromNumber: fromMeValue ? remoteNumber : senderNumber,
+    toNumber: fromMeValue ? senderNumber : remoteNumber,
+    contactName: normalized.contactName ?? null,
+    body: normalized.body ?? null,
+    messageType: normalized.messageType ?? null,
+    sentAt: normalized.sentAt ?? null,
+    isGroup,
+    rawPayload: payload,
   };
 }
+
+// Backwards-compatible aliases for existing imports.
+export const normalizePhoneNumber = normalizePhone;
+export const getEvolutionEvent = detectEvolutionEvent;
+export const getEvolutionInstanceName = extractInstanceName;
+export const normalizeQr = (payload: unknown) => normalizeQrPayload(payload).qrCode;
+export const normalizeConnectionState = (payload: unknown) => normalizeConnectionPayload(payload).state;
+export const normalizeEvolutionMessage = normalizeMessagePayload;
+

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
-  getEvolutionEvent,
-  getEvolutionInstanceName,
-  normalizeConnectionState,
-  normalizeEvolutionMessage,
-  normalizePhoneNumber,
-  normalizeQr,
+  detectEvolutionEvent,
+  extractInstanceName,
+  normalizeConnectionPayload,
+  normalizeMessagePayload,
+  normalizePhone,
+  normalizeQrPayload,
 } from "@/lib/evolution/payload-normalizer";
 import type { EvolutionWebhookPayload } from "@/lib/evolution/types";
 
@@ -44,7 +44,7 @@ async function findLeadByPhone(
     .limit(25);
 
   return (
-    data?.find((lead) => normalizePhoneNumber(lead.telefono ?? "") === phone) ?? data?.[0] ?? null
+    data?.find((lead) => normalizePhone(lead.telefono ?? "") === phone) ?? data?.[0] ?? null
   );
 }
 
@@ -64,8 +64,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  const event = getEvolutionEvent(payload);
-  const instanceName = getEvolutionInstanceName(payload);
+  const event = detectEvolutionEvent(payload);
+  const instanceName = extractInstanceName(payload);
 
   if (!event || !instanceName) {
     return NextResponse.json({ ignored: true });
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
   }
 
   if (event === "QRCODE_UPDATED") {
-    const qrCode = normalizeQr(payload);
+    const { qrCode } = normalizeQrPayload(payload);
     const updates: Record<string, unknown> = {
       estado: "qr_pendiente",
       last_sync_at: new Date().toISOString(),
@@ -100,49 +100,30 @@ export async function POST(request: Request) {
   }
 
   if (event === "CONNECTION_UPDATE") {
-    const normalizedState = normalizeConnectionState(payload);
-    const data = typeof payload.data === "object" && payload.data ? (payload.data as Record<string, unknown>) : null;
+    const connection = normalizeConnectionPayload(payload);
+    const rawState = connection.state;
     const connectionState =
-      normalizedState === "open"
+      rawState === "open"
         ? "conectado"
-        : normalizedState === "close"
+        : rawState === "close"
           ? "desconectado"
-          : normalizedState === "connecting"
+          : rawState === "connecting"
             ? "conectando"
-            : normalizedState === "qr"
+            : rawState === "qr"
               ? "qr_pendiente"
-              : normalizedState === "pause"
+              : rawState === "pause"
                 ? "pausado"
-                : normalizedState === "error"
+                : rawState === "error"
                   ? "error"
                   : "desconectado";
-
-    const telephone = [
-      data?.phoneNumber,
-      data?.phone_number,
-      data?.userJid,
-      data?.wid,
-      data?.me,
-    ]
-      .map((value) => (typeof value === "string" ? normalizePhoneNumber(value) : null))
-      .find(Boolean) ?? null;
-
-    const profileName = [
-      data?.profileName,
-      data?.name,
-      data?.pushName,
-      data?.push_name,
-    ]
-      .map((value) => (typeof value === "string" ? value.trim() : null))
-      .find(Boolean) ?? null;
 
     const updates: Record<string, unknown> = {
       estado: connectionState,
       last_sync_at: new Date().toISOString(),
     };
 
-    if (telephone) updates.telefono_conectado = telephone;
-    if (profileName) updates.nombre_perfil = profileName;
+    if (connection.phoneNumber) updates.telefono_conectado = connection.phoneNumber;
+    if (connection.profileName) updates.nombre_perfil = connection.profileName;
     if (connectionState === "conectado") {
       updates.last_connection_at = new Date().toISOString();
       updates.qr_code = null;
@@ -150,12 +131,7 @@ export async function POST(request: Request) {
       updates.last_error = null;
     } else if (connectionState === "desconectado" || connectionState === "error") {
       updates.last_disconnection_at = new Date().toISOString();
-      updates.last_error =
-        typeof data?.reason === "string"
-          ? data.reason
-          : typeof data?.message === "string"
-            ? data.message
-            : null;
+      updates.last_error = connection.reason;
     }
 
     await supabase
@@ -167,14 +143,19 @@ export async function POST(request: Request) {
   }
 
   if (event === "MESSAGES_UPSERT") {
-    const normalized = normalizeEvolutionMessage(payload);
-    if (!normalized.body && !normalized.externalMessageId) {
+    const normalized = normalizeMessagePayload(payload);
+    if (
+      !normalized.instanceName ||
+      !normalized.externalChatId ||
+      !normalized.externalMessageId ||
+      normalized.isGroup
+    ) {
       return NextResponse.json({ ignored: true });
     }
 
     const fromNumber = normalized.direction === "outbound" ? normalized.toNumber : normalized.fromNumber;
     const toNumber = normalized.direction === "outbound" ? normalized.fromNumber : normalized.toNumber;
-    const contactNumber = normalizePhoneNumber(fromNumber ?? toNumber);
+    const contactNumber = normalizePhone(fromNumber ?? toNumber);
     const contactName = normalized.contactName ?? contactNumber ?? "Sin nombre";
 
     let lead = await findLeadByPhone(supabase, contactNumber);
@@ -268,6 +249,25 @@ export async function POST(request: Request) {
     const externalMessageId =
       normalized.externalMessageId ?? `${conversationId}:${normalized.sentAt ?? Date.now()}`;
 
+    const { data: existingMessage } = await supabase
+      .from("conversacion_mensajes")
+      .select("id")
+      .eq("external_message_id", externalMessageId)
+      .maybeSingle<{ id: string }>();
+
+    if (existingMessage) {
+      return NextResponse.json({ ok: true, ignored: "duplicate_message" });
+    }
+
+    const { data: currentConversation } = await supabase
+      .from("conversaciones")
+      .select("mensajes_count,unread_count")
+      .eq("id", conversationId)
+      .maybeSingle<{ mensajes_count: number | null; unread_count: number | null }>();
+
+    const currentMessages = currentConversation?.mensajes_count ?? 0;
+    const currentUnread = currentConversation?.unread_count ?? 0;
+
     await supabase.from("conversacion_mensajes").upsert(
       {
         conversacion_id: conversationId,
@@ -284,14 +284,19 @@ export async function POST(request: Request) {
       { onConflict: "external_message_id" }
     );
 
-    await supabase
-      .from("conversaciones")
-      .update({
-        ultimo_mensaje_at: normalized.sentAt ?? new Date().toISOString(),
-        last_message_preview: previewMessage(normalized.body),
-        updated_by: instance.empleado_id,
-      })
-      .eq("id", conversationId);
+    const conversationUpdates: Record<string, unknown> = {
+      mensajes_count: currentMessages + 1,
+      unread_count: isInboundMessage(normalized.direction) ? currentUnread + 1 : currentUnread,
+      ultimo_mensaje_at: normalized.sentAt ?? new Date().toISOString(),
+      last_message_preview: previewMessage(normalized.body),
+      updated_by: instance.empleado_id,
+    };
+
+    if (isInboundMessage(normalized.direction)) {
+      conversationUpdates.requiere_atencion = true;
+    }
+
+    await supabase.from("conversaciones").update(conversationUpdates).eq("id", conversationId);
 
     return NextResponse.json({ ok: true });
   }

@@ -69,6 +69,7 @@ export default async function WhatsappConnectionsPage() {
   let instancias: Instance[] = mockWhatsappInstancias as Instance[];
   let employees: Employee[] = getEmployeesFromInstances(instancias);
   let canManageAll = true;
+  let currentEmployee: Employee | null = null;
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
@@ -76,7 +77,7 @@ export default async function WhatsappConnectionsPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { data: currentEmployee } = user
+    const { data: employee } = user
       ? await supabase
           .from("empleados")
           .select("id,nombre,email,rol,activo")
@@ -84,7 +85,16 @@ export default async function WhatsappConnectionsPage() {
           .maybeSingle<Employee & { activo: boolean | null }>()
       : { data: null };
 
-    canManageAll = currentEmployee?.rol === "admin" && currentEmployee.activo === true;
+    currentEmployee = employee
+      ? {
+          id: employee.id,
+          nombre: employee.nombre,
+          email: employee.email,
+          rol: employee.rol,
+        }
+      : null;
+
+    canManageAll = employee?.rol === "admin" && employee.activo === true;
 
     const [instancesResult, employeesResult] = await Promise.all([
       supabase
@@ -108,13 +118,14 @@ export default async function WhatsappConnectionsPage() {
     }));
 
     if (!canManageAll && currentEmployee) {
-      instancias = instancias.filter((instance) => instance.empleado_id === currentEmployee.id);
+      const employee = currentEmployee;
+      instancias = instancias.filter((instance) => instance.empleado_id === employee.id);
       employees = [
         {
-          id: currentEmployee.id,
-          nombre: currentEmployee.nombre,
-          email: currentEmployee.email,
-          rol: currentEmployee.rol,
+          id: employee.id,
+          nombre: employee.nombre,
+          email: employee.email,
+          rol: employee.rol,
         },
       ];
     } else {
@@ -147,17 +158,16 @@ export default async function WhatsappConnectionsPage() {
       </header>
 
       <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-        {canManageAll ? (
-          <aside className="xl:sticky xl:top-6 xl:self-start">
-            <WhatsappInstanceCreateForm employees={employees} />
-          </aside>
-        ) : (
-          <aside className="xl:sticky xl:top-6 xl:self-start rounded-2xl border border-[#E5E7EB] bg-white p-4 text-sm text-[#6B7280] shadow-sm">
-            Esta vista muestra solo tu instancia de WhatsApp y sus acciones disponibles.
-          </aside>
-        )}
+        <aside className="xl:sticky xl:top-6 xl:self-start">
+          <WhatsappInstanceCreateForm employees={employees} />
+          {!canManageAll && currentEmployee ? (
+            <p className="mt-3 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-xs leading-5 text-[#6B7280]">
+              Estás viendo solo tu instancia. La conexión se crea y administra para {currentEmployee.nombre ?? currentEmployee.email ?? "tu usuario"}.
+            </p>
+          ) : null}
+        </aside>
 
-        <WhatsappInstancesGrid instancias={instancias} />
+        <WhatsappInstancesGrid instancias={instancias} canManageAll={canManageAll} />
       </div>
     </section>
   );

@@ -580,3 +580,116 @@
 - El dashboard no necesitó una fórmula nueva para este caso: al consolidar todos los egresos de Caja, los pagos de liquidaciones ya entran naturalmente en el saldo y en el P&L.
 - En Caja se agregó una lectura específica del origen `comision` para que el movimiento se explique como “Pago de liquidación” y no se mezcle con otros egresos operativos.
 - El modo demo quedó poblado con una liquidación pagada, una cerrada y una anulada para validar los estados más importantes sin depender de Supabase real.
+
+## Integración CRM → Ventas
+
+### Qué se integró
+
+- La ficha de lead ahora muestra su relación con ventas, el estado comercial y una acción para convertirlo en operación cuando todavía no tiene venta asociada.
+- Se creó el formulario de conversión de lead a venta con cliente prellenado, vendedor activo, vehículo de stock, pagos iniciales y bloque de permuta cuando corresponde.
+- La Server Action de CRM reutiliza la RPC `public.registrar_venta(...)` y, después de crear la venta, enlaza `lead_id` y `vendedor_id`, marca el lead como `ganado` y dispara las integraciones automáticas de pagos, Caja, entrega pendiente y comisión.
+- Se extrajo la lógica común de postventa a `lib/ventas-integrations.ts` para evitar duplicación entre la venta manual y la conversión desde CRM.
+- La tabla de ventas ahora muestra una referencia discreta al lead cuando la operación proviene de CRM.
+- Los mocks quedaron alineados para demostrar un lead ganado con venta asociada, una oportunidad aún sin convertir y un lead perdido.
+
+### Paths modificados
+
+- `app/(dashboard)/crm/[id]/page.tsx`
+- `app/(dashboard)/crm/actions.ts`
+- `components/crm/lead-detail.tsx`
+- `components/crm/lead-convert-sale-form.tsx`
+- `components/crm/lead-status-badge.tsx`
+- `app/(dashboard)/ventas/page.tsx`
+- `components/ventas/ventas-table.tsx`
+- `app/(dashboard)/ventas/actions.ts`
+- `lib/ventas-integrations.ts`
+- `lib/mock-data.ts`
+
+### Tablas de Supabase involucradas
+
+- `public.leads`
+- `public.ventas`
+- `public.vehiculos`
+- `public.ventas_pagos`
+- `public.ventas_entregas`
+- `public.caja_movimientos`
+- `public.comisiones`
+- `public.empleados`
+
+### Decisiones técnicas tomadas
+
+- Se reutilizó la misma lógica de pagos, Caja, entrega y comisión para el alta manual de ventas y para la conversión desde CRM, manteniendo una sola ruta de integración postventa.
+- La conversión prioriza validaciones de permisos, estado del lead, existencia del vehículo en stock y vendedor activo antes de llamar la RPC, para evitar crear operaciones inconsistentes.
+- La venta puede quedar creada aunque falle un paso posterior no reversible, pero se devuelve un error claro cuando falla el vínculo al lead, el registro de pagos, Caja o la entrega pendiente.
+- El lead se marca como `ganado` con fecha de ganancia en el momento de la conversión, mientras que la venta queda asociada al `lead_id` para que CRM y Ventas se enlacen sin ambigüedad.
+- En demo mode se agregaron los casos mínimos para mostrar la transición realista entre prospecto, venta cerrada y lead perdido sin tocar Supabase.
+
+## Integración WhatsApp real con Evolution API
+
+### Qué se integró
+
+- Se habilitó la creación real de instancias de WhatsApp por vendedor contra Evolution API, con QR inicial, webhook configurado y persistencia en Supabase.
+- Se agregó el webhook `/api/evolution/webhook` para procesar eventos `QRCODE_UPDATED`, `CONNECTION_UPDATE` y `MESSAGES_UPSERT`, sincronizando instancias, conversaciones, leads y mensajes.
+- La bandeja de WhatsApp ahora filtra por usuario: admin ve todo y vendedor ve sus propias instancias y conversaciones.
+- Se incorporaron acciones reales para crear, refrescar QR, sincronizar estado, desconectar y eliminar instancias, más marcar conversaciones como leídas.
+- La ficha de conversación quedó preparada para seguimiento operativo, y el demo mode mantiene mocks compatibles con la nueva integración.
+
+### Paths modificados
+
+- `.env.example`
+- `lib/evolution/types.ts`
+- `lib/evolution/client.ts`
+- `lib/evolution/payload-normalizer.ts`
+- `lib/supabase/admin.ts`
+- `app/api/evolution/webhook/route.ts`
+- `app/(dashboard)/whatsapp/actions.ts`
+- `app/(dashboard)/whatsapp/conexiones/page.tsx`
+- `app/(dashboard)/whatsapp/page.tsx`
+- `app/(dashboard)/whatsapp/[id]/page.tsx`
+- `components/whatsapp/whatsapp-instances-grid.tsx`
+- `components/whatsapp/whatsapp-instance-card.tsx`
+- `components/whatsapp/whatsapp-connection-alert.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+- `components/whatsapp/conversacion-detail.tsx`
+- `components/whatsapp/conversacion-messages.tsx`
+- `lib/mock-data.ts`
+
+### Tablas de Supabase involucradas
+
+- `public.whatsapp_instancias`
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+- `public.leads`
+- `public.empleados`
+
+### Variables de entorno necesarias
+
+- `EVOLUTION_API_BASE_URL`
+- `EVOLUTION_API_KEY`
+- `EVOLUTION_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+### Eventos Evolution usados
+
+- `QRCODE_UPDATED`
+- `CONNECTION_UPDATE`
+- `MESSAGES_UPSERT`
+
+### Decisiones técnicas tomadas
+
+- Se usó `SUPABASE_SERVICE_ROLE_KEY` solamente en webhook/server actions de infraestructura, nunca en cliente.
+- El webhook valida `EVOLUTION_WEBHOOK_SECRET` por query param antes de procesar cualquier payload.
+- Los payloads de Evolution se normalizan de forma tolerante a variantes de versión para no depender de una única forma de respuesta.
+- Los mensajes duplicados se bloquean por `external_message_id` antes de incrementar contadores o reinsertar filas.
+- Los mensajes de grupo se ignoran para no contaminar la bandeja operativa comercial.
+- La creación de instancias se apoya en la webhook URL pública del proyecto y en la configuración de Evolution sin exponer la API key al cliente.
+- Los vendedores pueden crear y gestionar su propia instancia; los administradores ven todo y conservan la capacidad de eliminación.
+
+### Gaps pendientes
+
+- Envío de mensajes salientes desde la bandeja de WhatsApp.
+- Resumen IA y clasificación automática avanzada de conversaciones.
+- Sincronización histórica masiva de conversaciones previas.
+- Adjuntos multimedia completos, audio y transcripción.
+- Automatizaciones más finas sobre leads, ventas y seguimiento desde WhatsApp.

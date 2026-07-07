@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { isDemoMode } from "@/lib/demo-mode";
 import {
   createEvolutionInstance,
-  disconnectEvolutionInstance,
-  getEvolutionInstanceQr,
-  getEvolutionInstanceStatus,
+  deleteEvolutionInstance,
+  fetchEvolutionQr,
+  getEvolutionConnectionState,
+  logoutEvolutionInstance,
 } from "@/lib/evolution/client";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -73,15 +74,17 @@ export async function createWhatsappInstanceAction(
   const auth = await getAuthUser();
   if ("error" in auth) return { error: auth.error };
 
-  if (!(await isAdmin(auth.supabase, auth.user.id))) {
-    return { error: "No tenés permisos para crear instancias de WhatsApp." };
-  }
+  const admin = await isAdmin(auth.supabase, auth.user.id);
 
   const empleadoId = toOptionalString(formData.get("empleado_id") ?? formData.get("employee_id"));
 
-  if (!empleadoId) return { error: "El vendedor es obligatorio." };
+  const targetEmployeeId = empleadoId || auth.user.id;
 
-  const employee = await getEmployee(auth.supabase, empleadoId);
+  if (!admin && targetEmployeeId !== auth.user.id) {
+    return { error: "Solo podés crear tu propia instancia de WhatsApp." };
+  }
+
+  const employee = await getEmployee(auth.supabase, targetEmployeeId);
   if (!employee || employee.activo !== true) {
     return { error: "El vendedor seleccionado no existe o está inactivo." };
   }
@@ -89,7 +92,7 @@ export async function createWhatsappInstanceAction(
   const { data: existingInstance } = await auth.supabase
     .from("whatsapp_instancias")
     .select("id,estado,activo")
-    .eq("empleado_id", empleadoId)
+    .eq("empleado_id", targetEmployeeId)
     .eq("activo", true)
     .maybeSingle<{ id: string; estado: string | null; activo: boolean | null }>();
 
@@ -97,7 +100,7 @@ export async function createWhatsappInstanceAction(
     return { error: "Ese vendedor ya tiene una instancia activa de WhatsApp." };
   }
 
-  const instanceName = `funes_emp_${empleadoId.slice(0, 8)}`;
+  const instanceName = `funes_emp_${targetEmployeeId.slice(0, 8)}`;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
   const webhookSecret = process.env.EVOLUTION_WEBHOOK_SECRET;
 
@@ -108,7 +111,7 @@ export async function createWhatsappInstanceAction(
   let qrCode: string | null = null;
 
   try {
-    const createResult = await createEvolutionInstance(instanceName);
+    const createResult = await createEvolutionInstance({ instanceName });
     const initialQr =
       (typeof createResult.qrcode === "string" && createResult.qrcode) ||
       (typeof createResult.qrCode === "string" && createResult.qrCode) ||
@@ -117,7 +120,7 @@ export async function createWhatsappInstanceAction(
     if (initialQr) {
       qrCode = initialQr;
     } else {
-      const qrResult = await getEvolutionInstanceQr(instanceName);
+      const qrResult = await fetchEvolutionQr(instanceName);
       qrCode =
         (typeof qrResult.qrcode === "string" && qrResult.qrcode) ||
         (typeof qrResult.qrCode === "string" && qrResult.qrCode) ||
@@ -136,7 +139,7 @@ export async function createWhatsappInstanceAction(
   const qrExpiresAt = qrCode ? new Date(now.getTime() + 2 * 60 * 1000).toISOString() : null;
 
   const { error } = await auth.supabase.from("whatsapp_instancias").insert({
-    empleado_id: empleadoId,
+    empleado_id: targetEmployeeId,
     provider: "evolution_api",
     instance_name: instanceName,
     estado: qrCode ? "qr_pendiente" : "conectando",
@@ -194,7 +197,7 @@ export async function refreshWhatsappQrAction(
   let qrCode: string | null = null;
 
   try {
-    const qrResult = await getEvolutionInstanceQr(instance.instance_name);
+    const qrResult = await fetchEvolutionQr(instance.instance_name);
     qrCode =
       (typeof qrResult.qrcode === "string" && qrResult.qrcode) ||
       (typeof qrResult.qrCode === "string" && qrResult.qrCode) ||
@@ -234,10 +237,6 @@ export async function disconnectWhatsappInstanceAction(
   const auth = await getAuthUser();
   if ("error" in auth) return { error: auth.error };
 
-  if (!(await isAdmin(auth.supabase, auth.user.id))) {
-    return { error: "No tenés permisos para desconectar instancias de WhatsApp." };
-  }
-
   const instanceId = toOptionalString(formData.get("whatsapp_instance_id") ?? formData.get("instancia_id"));
   if (!instanceId) return { error: "La instancia es obligatoria." };
 
@@ -257,7 +256,7 @@ export async function disconnectWhatsappInstanceAction(
   }
 
   try {
-    await disconnectEvolutionInstance(instance.instance_name);
+    await logoutEvolutionInstance(instance.instance_name);
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "No pudimos desconectar la instancia en Evolution.",
@@ -277,6 +276,132 @@ export async function disconnectWhatsappInstanceAction(
 
   if (error) {
     return { error: "No pudimos actualizar el estado de la instancia." };
+  }
+
+  revalidatePath("/whatsapp");
+  revalidatePath("/whatsapp/conexiones");
+  return { success: true };
+}
+
+export async function syncWhatsappConnectionAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  if (isDemoMode) return demoModeError();
+
+  const auth = await getAuthUser();
+  if ("error" in auth) return { error: auth.error };
+
+  const instanceId = toOptionalString(formData.get("whatsapp_instance_id") ?? formData.get("instancia_id"));
+  if (!instanceId) return { error: "La instancia es obligatoria." };
+
+  const { data: instance } = await auth.supabase
+    .from("whatsapp_instancias")
+    .select("id,empleado_id,instance_name,estado,activo")
+    .eq("id", instanceId)
+    .maybeSingle<{ id: string; empleado_id: string | null; instance_name: string | null; estado: string | null; activo: boolean | null }>();
+
+  if (!instance) {
+    return { error: "No encontramos la instancia seleccionada." };
+  }
+
+  const admin = await isAdmin(auth.supabase, auth.user.id);
+  if (!admin && instance.empleado_id !== auth.user.id) {
+    return { error: "No podés sincronizar esta instancia." };
+  }
+
+  if (!instance.instance_name) {
+    return { error: "La instancia no tiene un nombre válido en Evolution." };
+  }
+
+  try {
+    const result = await getEvolutionConnectionState(instance.instance_name);
+    const rawState = String(result.instance?.status ?? result.instance?.state ?? "").toLowerCase();
+    const nextState =
+      rawState === "open"
+        ? "conectado"
+        : rawState === "connecting"
+          ? "conectando"
+          : rawState === "qr"
+            ? "qr_pendiente"
+            : rawState === "pause"
+              ? "pausado"
+              : rawState === "error"
+                ? "error"
+                : rawState === "close"
+                  ? "desconectado"
+                  : instance.estado ?? "desconectado";
+
+    const { error } = await auth.supabase
+      .from("whatsapp_instancias")
+      .update({
+        estado: nextState,
+        last_sync_at: new Date().toISOString(),
+        updated_by: auth.user.id,
+      })
+      .eq("id", instance.id);
+
+    if (error) {
+      return { error: "No pudimos guardar el estado sincronizado." };
+    }
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "No pudimos sincronizar la conexión.",
+    };
+  }
+
+  revalidatePath("/whatsapp");
+  revalidatePath("/whatsapp/conexiones");
+  return { success: true };
+}
+
+export async function deleteWhatsappInstanceAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  if (isDemoMode) return demoModeError();
+
+  const auth = await getAuthUser();
+  if ("error" in auth) return { error: auth.error };
+
+  if (!(await isAdmin(auth.supabase, auth.user.id))) {
+    return { error: "No tenés permisos para eliminar instancias de WhatsApp." };
+  }
+
+  const instanceId = toOptionalString(formData.get("whatsapp_instance_id") ?? formData.get("instancia_id"));
+  if (!instanceId) return { error: "La instancia es obligatoria." };
+
+  const { data: instance } = await auth.supabase
+    .from("whatsapp_instancias")
+    .select("id,instance_name")
+    .eq("id", instanceId)
+    .maybeSingle<{ id: string; instance_name: string | null }>();
+
+  if (!instance?.instance_name) {
+    return { error: "No encontramos la instancia seleccionada." };
+  }
+
+  try {
+    await deleteEvolutionInstance(instance.instance_name);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "No pudimos eliminar la instancia en Evolution.",
+    };
+  }
+
+  const { error } = await auth.supabase
+    .from("whatsapp_instancias")
+    .update({
+      activo: false,
+      estado: "desconectado",
+      qr_code: null,
+      qr_expires_at: null,
+      updated_by: auth.user.id,
+    })
+    .eq("id", instance.id);
+
+  if (error) {
+    return { error: "No pudimos desactivar la instancia en Supabase." };
   }
 
   revalidatePath("/whatsapp");
@@ -312,10 +437,10 @@ export async function pauseWhatsappInstanceAction(
 
   const nextState =
     instance.estado === "pausado"
-      ? await (async () => {
+        ? await (async () => {
           if (!instance.instance_name) return "desconectado";
           try {
-            const statusResult = await getEvolutionInstanceStatus(instance.instance_name);
+            const statusResult = await getEvolutionConnectionState(instance.instance_name);
             const rawStatus =
               statusResult.instance?.status ?? statusResult.instance?.state ?? "close";
             return String(rawStatus).toLowerCase() === "open"

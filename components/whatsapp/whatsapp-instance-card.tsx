@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import {
+  deleteWhatsappInstanceAction,
   disconnectWhatsappInstanceAction,
-  pauseWhatsappInstanceAction,
+  syncWhatsappConnectionAction,
   refreshWhatsappQrAction,
 } from "@/app/(dashboard)/whatsapp/actions";
 import { WhatsappInstanceStatusBadge } from "./whatsapp-instance-status-badge";
@@ -103,7 +103,11 @@ function ActionButton({
   label,
   tone = "neutral",
 }: {
-  action: typeof refreshWhatsappQrAction | typeof disconnectWhatsappInstanceAction | typeof pauseWhatsappInstanceAction;
+  action:
+    | typeof refreshWhatsappQrAction
+    | typeof syncWhatsappConnectionAction
+    | typeof disconnectWhatsappInstanceAction
+    | typeof deleteWhatsappInstanceAction;
   instanceId: string;
   instanceName: string | null;
   label: string;
@@ -132,7 +136,13 @@ function ActionButton({
   );
 }
 
-export function WhatsappInstanceCard({ instance }: { instance: Instance }) {
+export function WhatsappInstanceCard({
+  instance,
+  canManageAll = false,
+}: {
+  instance: Instance;
+  canManageAll?: boolean;
+}) {
   const [showQr, setShowQr] = useState(instance.estado === "qr_pendiente");
   const qrPreview = useMemo(() => getQrPreview(instance.qr_code), [instance.qr_code]);
   const qrAvailable = Boolean(instance.qr_code);
@@ -218,18 +228,27 @@ export function WhatsappInstanceCard({ instance }: { instance: Instance }) {
           label="Refrescar QR"
         />
         <ActionButton
+          action={syncWhatsappConnectionAction}
+          instanceId={instance.id}
+          instanceName={instance.instance_name}
+          label="Sincronizar"
+        />
+        <ActionButton
           action={disconnectWhatsappInstanceAction}
           instanceId={instance.id}
           instanceName={instance.instance_name}
           label="Desconectar"
           tone="danger"
         />
-        <ActionButton
-          action={pauseWhatsappInstanceAction}
-          instanceId={instance.id}
-          instanceName={instance.instance_name}
-          label={instance.estado === "pausado" ? "Reactivar" : "Pausar"}
-        />
+        {canManageAll ? (
+          <ActionButton
+            action={deleteWhatsappInstanceAction}
+            instanceId={instance.id}
+            instanceName={instance.instance_name}
+            label="Eliminar"
+            tone="danger"
+          />
+        ) : null}
       </div>
     </article>
   );
