@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { canManageSales } from "@/lib/auth/permissions";
 import { isDemoMode } from "@/lib/demo-mode";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -35,6 +36,16 @@ export async function createLeadAction(
 
   if (!user) {
     return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
+  }
+
+  const { data: actor } = await supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  if (!actor || actor.activo !== true || !canManageSales(actor.rol)) {
+    return { error: "No tenés permisos para crear leads." };
   }
 
   const nombre = toOptionalString(formData.get("nombre"));
@@ -107,6 +118,16 @@ export async function createLeadInteractionAction(
 
   if (!user) {
     return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
+  }
+
+  const { data: actor } = await supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  if (!actor || actor.activo !== true || !canManageSales(actor.rol)) {
+    return { error: "No tenés permisos para registrar interacciones." };
   }
 
   const leadId = toOptionalString(formData.get("lead_id"));
@@ -234,6 +255,10 @@ export async function convertLeadToVentaAction(
     return { error: "Este lead ya fue convertido en venta." };
   }
 
+  if (actorRecord.rol === "vendedor" && leadRecord.vendedor_id && leadRecord.vendedor_id !== user.id) {
+    return { error: "No podés convertir un lead asignado a otro vendedor." };
+  }
+
   const selectedVehicle = vehicleResult.data as {
     id: string;
     marca: string | null;
@@ -261,6 +286,10 @@ export async function convertLeadToVentaAction(
 
   if (!sellerRecord || !sellerRecord.activo || !["admin", "vendedor"].includes(sellerRecord.rol ?? "")) {
     return { error: "El vendedor seleccionado no está activo." };
+  }
+
+  if (actorRecord.rol === "vendedor" && sellerRecord.id !== user.id) {
+    return { error: "No podés registrar ventas para otro vendedor." };
   }
 
   let montoPermuta: number | null = null;

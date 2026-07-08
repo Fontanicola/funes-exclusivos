@@ -6,6 +6,7 @@ import type {
   ReactNode,
   TextareaHTMLAttributes,
 } from "react";
+import Link from "next/link";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 import { updateVehiculoCatalogoAction } from "@/app/(dashboard)/catalogo/actions";
@@ -320,6 +321,16 @@ function CatalogoRow({
             <input type="hidden" name="vehiculo_id" value={vehicle.id} />
             <SubmitButton />
           </form>
+          {vehicle.catalogo_publicado ? (
+            <Link
+              href={`/catalogo/${vehicle.id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-9 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+            >
+              Ver
+            </Link>
+          ) : null}
           {state.error ? (
             <p className="max-w-[180px] text-xs leading-5 text-[#B45309]">{state.error}</p>
           ) : null}

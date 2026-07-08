@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockCatalogoConfig, mockVehiculos } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -93,6 +94,7 @@ export default async function CatalogoPage() {
         .select(
           "id,marca,modelo,version,anio,color,km,dominio,precio_venta,precio_moneda,estado,fotos,catalogo_publicado,catalogo_destacado,catalogo_titulo,catalogo_descripcion,catalogo_orden,created_at"
         )
+        .order("catalogo_destacado", { ascending: false, nullsFirst: false })
         .order("catalogo_orden", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false }),
     ]);
@@ -110,13 +112,23 @@ export default async function CatalogoPage() {
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
-            Catálogo
-          </h1>
-          <p className="text-sm leading-6 text-[#6B7280]">
-            Configuración de publicación online
-          </p>
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
+              Catálogo
+            </h1>
+            <p className="text-sm leading-6 text-[#6B7280]">
+              Configuración de publicación online
+            </p>
+          </div>
+          <Link
+            href="/catalogo"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+          >
+            Ver catálogo público
+          </Link>
         </div>
         {isDemoMode ? (
           <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">

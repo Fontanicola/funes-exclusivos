@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { canManageSales } from "@/lib/auth/permissions";
 import { isDemoMode } from "@/lib/demo-mode";
 import {
   buildPermutaPayload,
@@ -36,6 +37,16 @@ export async function createVentaAction(
     return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
   }
 
+  const { data: actor } = await supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  if (!actor || actor.activo !== true || !canManageSales(actor.rol)) {
+    return { error: "No tenés permisos para registrar ventas." };
+  }
+
   const vehiculoId = toOptionalString(formData.get("vehiculo_id"));
   const clienteNombre = toOptionalString(formData.get("cliente_nombre"));
   const clienteTelefono = toOptionalString(formData.get("cliente_telefono"));
@@ -62,6 +73,10 @@ export async function createVentaAction(
   }
   if (!["transferencia", "efectivo", "dolares", "pesos", "permuta"].includes(metodoPago)) {
     return { error: "El método de pago no es válido." };
+  }
+
+  if (actor.rol === "vendedor" && sellerId !== user.id) {
+    return { error: "No podés registrar ventas para otro vendedor." };
   }
 
   let montoPermuta: number | null = null;

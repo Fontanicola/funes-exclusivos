@@ -2,28 +2,42 @@ import type { Metadata } from "next";
 import { isDemoMode } from "@/lib/demo-mode";
 import {
   mockCajaMovimientos,
+  mockComisionLiquidaciones,
   mockComisiones,
   mockConversaciones,
+  mockEmpleados,
+  mockGestoriaPresupuestos,
   mockGestoriaTramites,
   mockLeads,
+  mockRecordatorios,
+  mockVehiculoGastos,
+  mockVehiculoDocumentos,
   mockVehiculos,
   mockVentas,
+  mockVentasEntregas,
+  mockVentasPagos,
   mockWhatsappInstancias,
+  mockComprasVehiculos,
 } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { calculateDashboardMetrics } from "@/lib/dashboard-metrics";
+import { buildDashboardMetrics } from "@/lib/dashboard-metrics";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { PnlSummary } from "@/components/dashboard/pnl-summary";
 import { InventorySummary } from "@/components/dashboard/inventory-summary";
 import { CommercialSummary } from "@/components/dashboard/commercial-summary";
 import { OperationsSummary } from "@/components/dashboard/operations-summary";
 import { DashboardAlerts } from "@/components/dashboard/dashboard-alerts";
-import { formatCurrencyByCurrency } from "@/lib/dashboard-metrics";
+import { VendorActivitySummary } from "@/components/dashboard/vendor-activity-summary";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Dashboard | Funes Exclusivos",
+};
+
+type QueryResult<T> = {
+  data: T[];
+  error: unknown;
 };
 
 type RawRelation<T> = T | T[] | null;
@@ -33,166 +47,206 @@ function normalizeSingleRelation<T>(value: RawRelation<T>) {
   return value ?? null;
 }
 
-export default async function DashboardPage() {
-  let data: any = {
-    vehiculos: mockVehiculos,
-    ventas: mockVentas,
-    ventasEntregas: mockVentas.map((venta, index) => ({
-      id: `delivery_${venta.id}`,
-      venta_id: venta.id,
-      estado: index % 3 === 0 ? "pendiente" : index % 3 === 1 ? "entregada" : "observada",
-      created_at: venta.created_at,
-    })),
-    cajaMovimientos: mockCajaMovimientos,
-    comisiones: mockComisiones,
-    leads: mockLeads,
-    gestoriaTramites: mockGestoriaTramites,
-    whatsappInstancias: mockWhatsappInstancias,
-    conversaciones: mockConversaciones,
-  };
+async function safeSelect<T>(
+  promise: PromiseLike<{ data: T[] | null; error: unknown }>
+): Promise<QueryResult<T>> {
+  try {
+    const result = await promise;
+    if (result.error) {
+      console.error("Dashboard query failed", result.error);
+      return { data: [], error: result.error };
+    }
 
-  if (!isDemoMode) {
-    const supabase = createSupabaseServerClient();
+    return { data: result.data ?? [], error: null };
+  } catch (error) {
+    console.error("Dashboard query threw", error);
+    return { data: [], error };
+  }
+}
 
-    const [
-      vehiculosResult,
-      ventasResult,
-      ventasEntregasResult,
-      cajaResult,
-      comisionesResult,
-      leadsResult,
-      gestoriaResult,
-      whatsappResult,
-      conversacionesResult,
-    ] = await Promise.all([
-      supabase
-        .from("vehiculos")
-        .select(
-          "id,estado,precio_venta,precio_moneda,costo_adquisicion,costo_moneda,catalogo_publicado,catalogo_destacado,created_at"
-        )
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("ventas")
-        .select(
-          "id,fecha_venta,precio_venta,moneda,estado,vendedor_id,vehiculo_id,created_at,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,costo_adquisicion,costo_moneda)"
-        )
-        .order("created_at", { ascending: false }),
-      supabase.from("ventas_entregas").select("*").order("created_at", { ascending: false }),
-      supabase
-        .from("caja_movimientos")
-        .select("id,tipo,origen,compra_id,venta_id,venta_pago_id,comision_liquidacion_id,monto,importe,moneda,fecha,medio,cuenta,concepto,created_at")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("comisiones")
-        .select("id,monto_comision,moneda,estado,fecha_generada,fecha_pago,created_at")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("leads")
-        .select("id,estado,origen,vendedor_id,proximo_contacto,created_at")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("gestoria_tramites")
-        .select("id,estado,fecha_vencimiento,created_at")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("whatsapp_instancias")
-        .select("id,estado,last_sync_at,created_at,empleado:empleados!whatsapp_instancias_empleado_id_fkey(id,nombre,email,rol)")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("conversaciones")
-        .select("id,estado,interes_compra,requiere_atencion,unread_count,created_at")
-        .order("created_at", { ascending: false }),
-    ]);
-
-    data = {
-      vehiculos: vehiculosResult.data ?? [],
-      ventas: (ventasResult.data ?? []).map((sale) => ({
-        ...sale,
-        vehiculo: normalizeSingleRelation((sale as { vehiculo?: unknown }).vehiculo as RawRelation<any>),
-      })),
-      ventasEntregas: ventasEntregasResult.data ?? [],
-      cajaMovimientos: cajaResult.data ?? [],
-      comisiones: comisionesResult.data ?? [],
-      leads: leadsResult.data ?? [],
-      gestoriaTramites: gestoriaResult.data ?? [],
-      whatsappInstancias: (whatsappResult.data ?? []).map((instance) => ({
-        ...instance,
-        empleado: normalizeSingleRelation((instance as { empleado?: unknown }).empleado as RawRelation<any>),
-      })),
-      conversaciones: conversacionesResult.data ?? [],
+async function loadDashboardData() {
+  if (isDemoMode) {
+    return {
+      vehiculos: mockVehiculos,
+      ventas: mockVentas,
+      ventasPagos: mockVentasPagos,
+      ventasEntregas: mockVentasEntregas,
+      vehiculoGastos: mockVehiculoGastos,
+      vehiculoDocumentos: mockVehiculoDocumentos,
+      comprasVehiculos: mockComprasVehiculos,
+      cajaMovimientos: mockCajaMovimientos,
+      comisiones: mockComisiones,
+      comisionLiquidaciones: mockComisionLiquidaciones,
+      leads: mockLeads,
+      empleados: mockEmpleados,
+      gestoriaTramites: mockGestoriaTramites,
+      gestoriaPresupuestos: mockGestoriaPresupuestos,
+      whatsappInstancias: mockWhatsappInstancias,
+      conversaciones: mockConversaciones,
+      recordatorios: mockRecordatorios,
     };
   }
 
-  const metrics = calculateDashboardMetrics(data);
-  const stockPublicationRate =
-    metrics.inventory.totalStock > 0
-      ? Math.round((metrics.inventory.published / metrics.inventory.totalStock) * 100)
-      : 0;
+  const supabase = createSupabaseServerClient();
 
-  const topKpis = [
-    {
-      title: "Stock total",
-      value: `${metrics.inventory.totalStock}`,
-      description: `${metrics.inventory.published} publicados · ${metrics.inventory.highlighted} destacados`,
-      href: "/inventario",
-      tone: "neutral" as const,
-      featured: true,
-      badge: "Catálogo",
-      progress: {
-        value: stockPublicationRate,
-        label: "Publicación",
-      },
-      note: metrics.inventory.totalStock
-        ? `Sin publicar: ${metrics.inventory.unpublishedStock}`
-        : "Sin stock cargado",
-    },
-    {
-      title: "Ventas del mes",
-      value: `${metrics.commercial.salesCount}`,
-      description: `Registradas por ${formatCurrencyByCurrency(metrics.pnl.sales)}`,
-      href: "/ventas",
-      tone: "success" as const,
-      badge: "Cierres",
-      note: metrics.commercial.wonLeads
-        ? `${metrics.commercial.wonLeads} leads ganados en el período`
-        : "Sin cierres todavía",
-    },
-    {
-      title: "Ingresos del mes",
-      value: formatCurrencyByCurrency(metrics.pnl.cashIncome),
-      description: "Cobros confirmados en caja.",
-      href: "/caja",
-      tone: "highlight" as const,
-      badge: "Caja",
-      note: formatCurrencyByCurrency(metrics.pnl.operatingResult),
-    },
-    {
-      title: "Leads activos",
-      value: `${metrics.commercial.activeLeads}`,
-      description: `${metrics.commercial.negotiationLeads} en negociación · ${metrics.commercial.wonLeads} ganados`,
-      href: "/crm",
-      tone: "info" as const,
-      badge: "Pipeline",
-      progress: {
-        value:
-          metrics.commercial.activeLeads > 0
-            ? Math.min(100, Math.round((metrics.commercial.negotiationLeads / metrics.commercial.activeLeads) * 100))
-            : 0,
-        label: "Negociación",
-      },
-    },
-    {
-      title: "WhatsApps desconectados",
-      value: `${metrics.operations.whatsappDisconnected}`,
-      description: `${metrics.operations.whatsappConnected} conectados · seguimiento operativo`,
-      href: "/whatsapp/conexiones",
-      tone: "critical" as const,
-      badge: "Atención",
-      note: metrics.operations.whatsappDisconnected ? "Requiere revisión" : "Todo conectado",
-    },
-  ];
+  const [
+    vehiculosResult,
+    ventasResult,
+    ventasPagosResult,
+    ventasEntregasResult,
+    vehiculoGastosResult,
+    vehiculoDocumentosResult,
+    comprasVehiculosResult,
+    cajaResult,
+    comisionesResult,
+    comisionLiquidacionesResult,
+    leadsResult,
+    empleadosResult,
+    gestoriaTramitesResult,
+    gestoriaPresupuestosResult,
+    whatsappResult,
+    conversacionesResult,
+    recordatoriosResult,
+  ] = await Promise.all([
+    safeSelect(
+      supabase
+        .from("vehiculos")
+        .select(
+          "id,estado,precio_venta,precio_contado,precio_permuta,precio_moneda,costo_adquisicion,costo_reposicion,costo_moneda,catalogo_publicado,catalogo_destacado,estado_preparacion,precio_infoauto_actual,fotos,created_at"
+        )
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("ventas")
+        .select(
+          "id,vehiculo_id,lead_id,vendedor_id,fecha_venta,precio_venta,moneda,estado,monto_permuta,costo_historico,costo_reposicion,precio_infoauto,info_historica_compra,margen_reposicion,margen_historico,rotacion_dias,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,created_at,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,costo_adquisicion,costo_moneda,costo_reposicion,precio_venta,precio_moneda),lead:leads!ventas_lead_id_fkey(id,nombre,origen,estado)"
+        )
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("ventas_pagos")
+        .select("id,venta_id,tipo,fecha,importe,moneda,medio,detalle,created_at")
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(supabase.from("ventas_entregas").select("*").order("created_at", { ascending: false })),
+    safeSelect(
+      supabase
+        .from("vehiculo_gastos")
+        .select("id,vehiculo_id,tipo,monto,moneda,fecha,detalle,created_at")
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("vehiculo_documentos")
+        .select(
+          "id,vehiculo_id,tipo,estado,titulo,descripcion,archivo_path,archivo_nombre,archivo_mime_type,archivo_size_bytes,fecha_emision,fecha_vencimiento,observaciones,created_at,vehiculo:vehiculos!vehiculo_documentos_vehiculo_id_fkey(id,marca,modelo,dominio,estado,estado_preparacion,fotos)"
+        )
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("compras_vehiculos")
+        .select("id,vehiculo_id,proveedor_id,fecha,nro_operacion,precio_compra,precio_boleto,moneda,diferencia_b,deuda_pendiente,observaciones,created_at")
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("caja_movimientos")
+        .select("id,tipo,origen,compra_id,venta_id,venta_pago_id,comision_liquidacion_id,monto,importe,moneda,fecha,medio,cuenta,concepto,created_at")
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("comisiones")
+        .select("id,venta_id,vendedor_id,monto_comision,moneda,estado,fecha_generada,fecha_pago,created_at")
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("comision_liquidaciones")
+        .select("id,vendedor_id,periodo,estado,moneda,neto_a_cobrar,fecha_pago,fecha_cierre,created_at")
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("leads")
+        .select("id,estado,origen,vendedor_id,proximo_contacto,created_at")
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("empleados")
+        .select("id,nombre,email,rol,activo")
+        .order("nombre", { ascending: true })
+    ),
+    safeSelect(
+      supabase
+        .from("gestoria_tramites")
+        .select("id,estado,fecha_vencimiento,created_at")
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("gestoria_presupuestos")
+        .select("id,estado,fecha,total,moneda,created_at")
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("whatsapp_instancias")
+        .select("id,estado,last_sync_at,created_at,empleado:empleados!whatsapp_instancias_empleado_id_fkey(id,nombre,email,rol)")
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("conversaciones")
+        .select(
+          "id,estado,interes_compra,ia_interes_compra,ia_estado,ia_resumen,ia_score,ia_proximo_paso,ia_procesado_at,requiere_atencion,unread_count,created_at,vendedor_id"
+        )
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect(
+      supabase
+        .from("recordatorios")
+        .select("id,tipo,estado,prioridad,titulo,descripcion,fecha_vencimiento,fecha_completado,fecha_pospuesto,asignado_a,lead_id,conversacion_id,venta_id,entrega_id,tramite_id,vehiculo_id,comision_liquidacion_id,origen_automatico,created_at,updated_at")
+        .order("fecha_vencimiento", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: false })
+    ),
+  ]);
 
-  const mediumRows = metrics.operations.cajaByMedium.slice(0, 4);
+  return {
+    vehiculos: vehiculosResult.data,
+    ventas: ventasResult.data.map((sale) => ({
+      ...sale,
+      vehiculo: normalizeSingleRelation((sale as { vehiculo?: unknown }).vehiculo as RawRelation<any>),
+      lead: normalizeSingleRelation((sale as { lead?: unknown }).lead as RawRelation<any>),
+    })),
+    ventasPagos: ventasPagosResult.data,
+    ventasEntregas: ventasEntregasResult.data,
+    vehiculoGastos: vehiculoGastosResult.data,
+    vehiculoDocumentos: vehiculoDocumentosResult.data,
+    comprasVehiculos: comprasVehiculosResult.data,
+    cajaMovimientos: cajaResult.data,
+    comisiones: comisionesResult.data,
+    comisionLiquidaciones: comisionLiquidacionesResult.data,
+    leads: leadsResult.data,
+    empleados: empleadosResult.data,
+    gestoriaTramites: gestoriaTramitesResult.data,
+    gestoriaPresupuestos: gestoriaPresupuestosResult.data,
+    whatsappInstancias: whatsappResult.data.map((instance) => ({
+      ...instance,
+      empleado: normalizeSingleRelation((instance as { empleado?: unknown }).empleado as RawRelation<any>),
+    })),
+    conversaciones: conversacionesResult.data,
+    recordatorios: recordatoriosResult.data,
+  };
+}
+
+export default async function DashboardPage() {
+  const data = await loadDashboardData();
+  const metrics = buildDashboardMetrics(data);
 
   return (
     <section className="space-y-8">
@@ -206,112 +260,37 @@ export default async function DashboardPage() {
         <div className="max-w-3xl space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Dashboard</h1>
           <p className="text-sm leading-6 text-[#6B7280]">
-            P&amp;L, operación comercial y estado general del negocio.
+            P&amp;L, operación comercial, inventario y estado general del negocio.
           </p>
         </div>
       </header>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        {topKpis.map((kpi) => (
+        {metrics.topKpis.map((kpi, index) => (
           <KpiCard
             key={kpi.title}
             title={kpi.title}
             value={kpi.value}
             description={kpi.description}
             href={kpi.href}
-            tone={kpi.tone}
-            featured={kpi.featured}
+            variant={
+              kpi.tone === "highlight"
+                ? "highlight"
+                : kpi.tone === "success"
+                  ? "positive"
+                  : kpi.tone === "critical"
+                    ? "danger"
+                    : kpi.tone === "warning"
+                      ? "warning"
+                      : "default"
+            }
+            featured={index === 0}
             badge={kpi.badge}
             progress={kpi.progress}
             note={kpi.note}
-            className={kpi.featured ? "md:col-span-2 xl:col-span-2" : ""}
+            className={index === 0 ? "md:col-span-2 xl:col-span-2" : ""}
           />
         ))}
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.84fr)]">
-        <section className="rounded-[32px] border border-[#E5E7EB] bg-white p-5 shadow-sm">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <h2 className="text-base font-semibold text-[#111827]">Caja por medio</h2>
-              <p className="mt-1 text-sm text-[#6B7280]">Distribución operativa de movimientos del mes.</p>
-            </div>
-            <span className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
-              Top medios
-            </span>
-          </div>
-
-          <div className="mt-5 space-y-4">
-            {mediumRows.length ? (
-              mediumRows.map((item) => {
-                const max = Math.max(...mediumRows.map((medium) => medium.count), 1);
-                const width = Math.max(8, (item.count / max) * 100);
-
-                return (
-                  <div key={item.medium} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-medium text-[#111827]">{item.medium}</p>
-                        <p className="text-xs text-[#6B7280]">{item.count} movimientos</p>
-                      </div>
-                      <p className="text-sm font-medium text-[#111827]">
-                        {formatCurrencyByCurrency(item.totals)}
-                      </p>
-                    </div>
-                    <div className="h-2 rounded-full bg-[#F3F4F6]">
-                      <div className="h-2 rounded-full bg-[#111827]" style={{ width: `${width}%` }} />
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]">
-                Sin movimientos por medio todavía.
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section className="rounded-[32px] border border-[#E5E7EB] bg-white p-5 shadow-sm">
-          <div>
-            <h2 className="text-base font-semibold text-[#111827]">Entrega y preparación</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">Estado de entrega usado y preparación de stock.</p>
-          </div>
-
-          <div className="mt-5 space-y-4">
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-                <p className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Pendiente</p>
-                <p className="mt-2 text-2xl font-semibold text-[#111827]">{metrics.operations.deliveryPending}</p>
-              </div>
-              <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-                <p className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Entregadas</p>
-                <p className="mt-2 text-2xl font-semibold text-[#111827]">{metrics.operations.deliveryDelivered}</p>
-              </div>
-              <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-                <p className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Observadas</p>
-                <p className="mt-2 text-2xl font-semibold text-[#111827]">{metrics.operations.deliveryObserved}</p>
-              </div>
-            </div>
-
-            <div className="rounded-[28px] bg-[#FAFAFA] p-4">
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3">
-                  <p className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Pendiente</p>
-                  <p className="mt-2 text-lg font-semibold text-[#111827]">{metrics.inventory.preparationPending}</p>
-                </div>
-                <div className="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3">
-                  <p className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">En proceso</p>
-                  <p className="mt-2 text-lg font-semibold text-[#111827]">{metrics.inventory.preparationInProgress}</p>
-                </div>
-                <div className="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3">
-                  <p className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Listo</p>
-                  <p className="mt-2 text-lg font-semibold text-[#111827]">{metrics.inventory.preparationReady}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
@@ -319,10 +298,14 @@ export default async function DashboardPage() {
           sales={metrics.pnl.sales}
           cashIncome={metrics.pnl.cashIncome}
           cashExpense={metrics.pnl.cashExpense}
+          purchases={metrics.pnl.purchases}
           commissionsPaid={metrics.pnl.commissionsPaid}
+          otherExpenses={metrics.pnl.otherExpenses}
           operatingResult={metrics.pnl.operatingResult}
+          annualOperatingResult={metrics.pnl.annualOperatingResult}
           salesCount={metrics.pnl.salesCount}
           salesMarginDescription={metrics.pnl.salesMarginDescription}
+          monthlySeriesByCurrency={metrics.pnl.monthlySeriesByCurrency}
         />
         <InventorySummary
           totalStock={metrics.inventory.totalStock}
@@ -332,10 +315,15 @@ export default async function DashboardPage() {
           published={metrics.inventory.published}
           highlighted={metrics.inventory.highlighted}
           unpublishedStock={metrics.inventory.unpublishedStock}
+          publishedWithoutPhoto={metrics.inventory.publishedWithoutPhoto}
+          vehiclesWithoutPrice={metrics.inventory.vehiclesWithoutPrice}
+          preparationPending={metrics.inventory.preparationPending}
+          preparationInProgress={metrics.inventory.preparationInProgress}
+          preparationReady={metrics.inventory.preparationReady}
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)]">
         <CommercialSummary
           salesCount={metrics.commercial.salesCount}
           activeLeads={metrics.commercial.activeLeads}
@@ -344,17 +332,27 @@ export default async function DashboardPage() {
           highInterestConversations={metrics.commercial.highInterestConversations}
           attentionConversations={metrics.commercial.attentionConversations}
           nextContactLeads={metrics.commercial.nextContactLeads}
+          openConversations={metrics.commercial.openConversations}
+          leadStages={metrics.commercial.leadStages}
         />
+        <VendorActivitySummary vendors={metrics.vendorActivity} />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <OperationsSummary
           pendingTramites={metrics.operations.pendingTramites}
           overdueTramites={metrics.operations.overdueTramites}
+          pendingBudgets={metrics.operations.pendingBudgets}
+          pendingLiquidations={metrics.operations.pendingLiquidations}
           commissionsPending={metrics.operations.commissionsPending}
           whatsappConnected={metrics.operations.whatsappConnected}
           whatsappDisconnected={metrics.operations.whatsappDisconnected}
+          deliveryPending={metrics.operations.deliveryPending}
+          deliveryDelivered={metrics.operations.deliveryDelivered}
+          deliveryObserved={metrics.operations.deliveryObserved}
         />
+        <DashboardAlerts alerts={metrics.alerts} />
       </div>
-
-      <DashboardAlerts alerts={metrics.alerts} />
     </section>
   );
 }

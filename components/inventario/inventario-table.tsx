@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { PencilLine, Search, SlidersHorizontal, X } from "lucide-react";
+import { Eye, PencilLine, Search, SlidersHorizontal, X } from "lucide-react";
 import { VehiculoStatusBadge } from "./vehiculo-status-badge";
 
 type Vehiculo = {
@@ -108,7 +108,15 @@ function getExternalBadge(value: boolean | null) {
   return value ? "border-[#D1FAE5] bg-[#ECFDF5] text-[#065F46]" : "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]";
 }
 
-export function InventarioTable({ vehiculos, proveedores = [] }: { vehiculos: Vehiculo[]; proveedores?: Proveedor[] }) {
+export function InventarioTable({
+  vehiculos,
+  proveedores = [],
+  canEdit = true,
+}: {
+  vehiculos: Vehiculo[];
+  proveedores?: Proveedor[];
+  canEdit?: boolean;
+}) {
   const [query, setQuery] = useState("");
   const [onlyStock, setOnlyStock] = useState(false);
 
@@ -319,13 +327,24 @@ export function InventarioTable({ vehiculos, proveedores = [] }: { vehiculos: Ve
                       {formatDate(vehiculo.fecha_ingreso)}
                     </td>
                     <td className="px-4 py-3 align-middle">
-                      <Link
-                        href={`/inventario/${vehiculo.id}/editar`}
-                        className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-                      >
-                        <PencilLine className="h-4 w-4 text-[#6B7280]" />
-                        Editar
-                      </Link>
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          href={`/inventario/${vehiculo.id}`}
+                          className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+                        >
+                          <Eye className="h-4 w-4 text-[#6B7280]" />
+                          Ver
+                        </Link>
+                        {canEdit ? (
+                          <Link
+                            href={`/inventario/${vehiculo.id}/editar`}
+                            className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+                          >
+                            <PencilLine className="h-4 w-4 text-[#6B7280]" />
+                            Editar
+                          </Link>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 );

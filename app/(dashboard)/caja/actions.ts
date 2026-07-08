@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { canManageCaja } from "@/lib/auth/permissions";
 import { isDemoMode } from "@/lib/demo-mode";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -50,6 +51,16 @@ export async function createCajaMovimientoAction(
 
   if (!user) {
     return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
+  }
+
+  const { data: employee } = await supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  if (!employee || employee.activo !== true || !canManageCaja(employee.rol)) {
+    return { error: "No tenés permisos para guardar movimientos de caja." };
   }
 
   const tipo = toLowerTrimmed(formData.get("tipo"));

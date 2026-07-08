@@ -857,3 +857,286 @@
 - Si OpenAI responde pero el JSON viene mal formado, se usa un fallback seguro para no bloquear la operación comercial.
 - El lead sólo se refuerza cuando el interés detectado es alto, elevando su nivel de interés sin pisar notas ni otros datos sensibles.
 - El listado de WhatsApp sigue siendo compatible con los campos legacy `resumen_ia` e `interes_compra`, pero prioriza los campos `ia_*` para la propuesta comercial.
+
+## Catálogo online público sincronizado con inventario
+
+### Qué se construyó
+
+- Se creó la ruta pública `/catalogo` sin layout privado ni autenticación.
+- El catálogo público lee `catalogo_config` para activar/desactivar el sitio y controlar la presentación.
+- Se implementó listado público de vehículos publicados y en stock con orden por destacados, orden catálogo y fecha de alta.
+- Se construyó la ruta pública de detalle `/catalogo/[id]` con galería simple, ficha técnica, precios visibles según configuración y CTA a WhatsApp.
+- Se agregaron componentes públicos especializados para header, filtros, grilla, card, detalle y empty state.
+- Se mantuvo la configuración interna del catálogo en `/dashboard/catalogo` para evitar conflicto de rutas con el sitio público.
+
+### Paths modificados
+
+- `app/catalogo/page.tsx`
+- `app/catalogo/[id]/page.tsx`
+- `components/catalogo-publico/catalogo-header.tsx`
+- `components/catalogo-publico/catalogo-filters.tsx`
+- `components/catalogo-publico/catalogo-vehicle-card.tsx`
+- `components/catalogo-publico/catalogo-vehicle-grid.tsx`
+- `components/catalogo-publico/catalogo-vehicle-detail.tsx`
+- `components/catalogo-publico/catalogo-empty-state.tsx`
+- `app/(dashboard)/dashboard/catalogo/page.tsx`
+- `components/catalogo/catalogo-settings-form.tsx`
+- `components/catalogo/catalogo-vehiculos-table.tsx`
+- `components/dashboard/sidebar.tsx`
+- `lib/mock-data.ts`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+
+- `public.catalogo_config`
+- `public.vehiculos`
+
+### Decisiones técnicas tomadas
+
+- La ruta pública se separó completamente del panel privado para evitar que el catálogo dependa del layout autenticado.
+- Se resolvió el conflicto de rutas moviendo la vista interna de configuración a `/dashboard/catalogo` y dejando `/catalogo` como sitio público.
+- El catálogo público sólo expone campos aptos para clientes finales y no incluye costos, gastos, proveedores ni datos internos operativos.
+- Se agregó soporte para mostrar precios, km y dominio según la configuración global del catálogo.
+- Cuando el catálogo está desactivado, se muestra una pantalla pública prolija en lugar de error o redirección.
+- El CTA de WhatsApp normaliza el teléfono antes de construir el link `wa.me`.
+
+## Dashboard ejecutivo y P&L financiero
+
+### Qué se construyó
+
+- Se rediseñó el dashboard para que tenga más jerarquía visual, menos monotonía y una lectura ejecutiva más clara.
+- Se agregaron componentes de visualización simples sin dependencias externas: barra horizontal, donut CSS, bloque de gráficos mensuales y tarjeta contenedora para charts.
+- Se incorporó un bloque de P&L mensual y acumulado con series de 12 meses, separadas por moneda.
+- Se amplió el inventario con distribución visual, preparación, unidades sin precio y publicaciones sin foto.
+- Se reforzó el panel comercial con embudo, señales de compra y estado de conversaciones.
+- Se agregó un panel de actividad por vendedor para ver leads, ventas, chats, alertas y comisiones.
+- Se reestructuraron las alertas para darles más presencia y clasificación por severidad.
+- Se extendieron las métricas para tolerar arrays vacíos, nulls y consultas parciales en modo real.
+
+### Paths modificados
+
+- `app/(dashboard)/dashboard/page.tsx`
+- `lib/dashboard-metrics.ts`
+- `components/dashboard/kpi-card.tsx`
+- `components/dashboard/pnl-summary.tsx`
+- `components/dashboard/inventory-summary.tsx`
+- `components/dashboard/commercial-summary.tsx`
+- `components/dashboard/operations-summary.tsx`
+- `components/dashboard/dashboard-alerts.tsx`
+- `components/dashboard/dashboard-chart-card.tsx`
+- `components/dashboard/simple-bar-chart.tsx`
+- `components/dashboard/simple-donut-chart.tsx`
+- `components/dashboard/monthly-pnl-chart.tsx`
+- `components/dashboard/vendor-activity-summary.tsx`
+- `lib/mock-data.ts`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+
+- `public.vehiculos`
+- `public.ventas`
+- `public.ventas_pagos`
+- `public.ventas_entregas`
+- `public.vehiculo_gastos`
+- `public.compras_vehiculos`
+- `public.caja_movimientos`
+- `public.comisiones`
+- `public.comision_liquidaciones`
+- `public.leads`
+- `public.empleados`
+- `public.gestoria_tramites`
+- `public.gestoria_presupuestos`
+- `public.whatsapp_instancias`
+- `public.conversaciones`
+
+### Decisiones técnicas tomadas
+
+- El dashboard usa datos reales o mocks con la misma forma para evitar ramas visuales distintas entre demo y producción.
+- Las queries son tolerantes: si una tabla falla o devuelve vacío, el panel sigue renderizando con fallbacks seguros.
+- No se instalaron librerías de gráficos; todo se resolvió con CSS, `conic-gradient` y barras flexibles.
+- Los importes se muestran separados por moneda para no mezclar ARS y USD.
+- El P&L usa ingresos por ventas y caja, menos compras, comisiones y gastos operativos, manteniendo el criterio de “sin conversión”.
+- La actividad por vendedor se calcula a partir de leads, ventas, conversaciones y comisiones para reflejar trabajo comercial real.
+
+## Alertas y recordatorios automáticos
+
+### Qué se construyó
+
+- Se creó el módulo `/recordatorios` para administrar seguimientos operativos, vencimientos y tareas manuales.
+- Se implementaron acciones server-side para crear, completar, posponer y cancelar recordatorios.
+- Se agregaron badges de estado, prioridad y tipo para visualizar el tipo de alerta de forma compacta.
+- Se incorporó el nuevo acceso `Recordatorios` en la sidebar cerca de CRM y Gestoría.
+- El dashboard ahora consume recordatorios persistidos y genera alertas computadas a partir de CRM, WhatsApp, Gestoría, entregas, comisiones e inventario.
+- Se agregaron mocks demo para que el dashboard y la nueva pantalla se vean poblados sin Supabase real.
+
+### Paths modificados
+
+- `app/(dashboard)/recordatorios/page.tsx`
+- `app/(dashboard)/recordatorios/actions.ts`
+- `components/recordatorios/recordatorios-table.tsx`
+- `components/recordatorios/recordatorio-form.tsx`
+- `components/recordatorios/recordatorio-status-badge.tsx`
+- `components/recordatorios/recordatorio-priority-badge.tsx`
+- `components/recordatorios/recordatorio-type-badge.tsx`
+- `components/dashboard/sidebar.tsx`
+- `app/(dashboard)/dashboard/page.tsx`
+- `components/dashboard/dashboard-alerts.tsx`
+- `lib/dashboard-metrics.ts`
+- `lib/mock-data.ts`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+
+- `public.recordatorios`
+- `public.leads`
+- `public.conversaciones`
+- `public.ventas`
+- `public.ventas_entregas`
+- `public.gestoria_tramites`
+- `public.vehiculos`
+- `public.comision_liquidaciones`
+- `public.empleados`
+
+### Decisiones técnicas tomadas
+
+- Los recordatorios se resolvieron como una pantalla server-rendered con filtros client-side y acciones de estado simples, sin cron jobs ni notificaciones externas.
+- La creación de recordatorios asigna por defecto al usuario actual, y la UI limita los asignados cuando el usuario no es admin.
+- El dashboard no persiste alertas computadas: las calcula en tiempo real a partir de datos operativos y de recordatorios.
+- Las alertas del dashboard ahora muestran la fuente de origen para distinguir rápido si vienen de recordatorios, CRM, WhatsApp, Gestoría, comisiones o inventario.
+- Se priorizan las alertas críticas y vencidas antes que las advertencias y los recordatorios próximos.
+- Todo el flujo quedó compatible con modo demo usando mocks centralizados en `lib/mock-data.ts`.
+
+## Gestión de documentos por vehículo
+
+### Qué se construyó
+
+- Se creó la ficha detallada de vehículo en `/inventario/[id]` con resumen operativo, pricing, estado de preparación y accesos rápidos.
+- Se implementó la gestión de `vehiculo_documentos` con alta, cambio de estado, eliminación y apertura segura mediante signed URLs.
+- Se agregó soporte para adjuntar archivos privados al bucket `vehiculo-documentos` y abrirlos de forma temporal sin exponer URLs públicas.
+- El inventario ahora ofrece acciones directas de `Ver` y `Editar` desde la tabla principal.
+- El dashboard incorporó alertas documentales: vencidos, próximos a vencer y vehículos con documentación clave faltante.
+- Se cargaron mocks demo para que la nueva ficha y las alertas se vean pobladas sin depender de Supabase real.
+
+### Paths modificados
+
+- `app/(dashboard)/inventario/[id]/page.tsx`
+- `app/(dashboard)/inventario/[id]/documentos/actions.ts`
+- `components/inventario/vehiculo-detail.tsx`
+- `components/inventario/vehiculo-documentos-table.tsx`
+- `components/inventario/vehiculo-documento-form.tsx`
+- `components/inventario/vehiculo-documento-status-badge.tsx`
+- `components/inventario/vehiculo-documento-type-badge.tsx`
+- `components/inventario/inventario-table.tsx`
+- `components/dashboard/dashboard-alerts.tsx`
+- `lib/dashboard-metrics.ts`
+- `lib/mock-data.ts`
+- `DOCUMENTACION.md`
+
+### Tablas y bucket involucrados
+
+- `public.vehiculo_documentos`
+- `public.vehiculos`
+- `public.gestoria_tramites`
+- `public.ventas`
+- `public.compras_vehiculos`
+- `public.empleados`
+- Bucket privado de Storage `vehiculo-documentos`
+
+### Decisiones técnicas tomadas
+
+- Los archivos de vehículos se guardan en Storage privado y siempre se abren con signed URLs de corta duración.
+- La UI de documentos quedó restringida por rol: admin y gestor pueden crear/editar, admin puede eliminar.
+- La lógica de acciones valida sesión y perfil operativo antes de tocar documentos, pero no depende de rutas públicas ni de catálogo.
+- El dashboard no persiste alertas documentales; las calcula a partir del inventario y del estado de cada documento.
+- La pantalla de detalle del vehículo combina ficha interna + documentos para reemplazar la navegación dispersa entre inventario, gestoría y ventas.
+- La build del proyecto se validó con `pnpm build` después de aplicar estos cambios.
+
+## Endurecimiento de permisos por rol
+
+### Qué se corrigió
+
+- Se centralizaron helpers de permisos en `lib/auth/permissions.ts` para decidir acceso a rutas, navegación y acciones por rol.
+- El layout privado ahora valida sesión, estado activo del empleado y ruta permitida antes de renderizar el dashboard.
+- El middleware refuerza el acceso a rutas protegidas y redirige a `/dashboard` o `/login` según corresponda.
+- El sidebar y el menú de usuario se adaptaron para mostrar labels y navegación según el rol efectivo.
+- Se blindaron Server Actions de inventario, ventas, caja, CRM, gestoría y WhatsApp con validación explícita de rol activo antes de escribir.
+- Se limitaron acciones visibles en inventario y ventas para que vendedores y gestores vean solo lo que pueden usar.
+
+### Paths modificados
+
+- `lib/auth/permissions.ts`
+- `app/(dashboard)/layout.tsx`
+- `middleware.ts`
+- `components/dashboard/sidebar.tsx`
+- `components/dashboard/user-menu.tsx`
+- `app/(dashboard)/inventario/page.tsx`
+- `components/inventario/inventario-table.tsx`
+- `components/inventario/vehiculo-detail.tsx`
+- `app/(dashboard)/inventario/actions.ts`
+- `app/(dashboard)/ventas/page.tsx`
+- `app/(dashboard)/ventas/actions.ts`
+- `app/(dashboard)/caja/actions.ts`
+- `app/(dashboard)/crm/actions.ts`
+- `app/(dashboard)/gestoria/actions.ts`
+- `app/(dashboard)/catalogo/actions.ts`
+- `app/(dashboard)/whatsapp/actions.ts`
+- `app/(dashboard)/empleados/actions.ts`
+- `app/(dashboard)/configuracion/actions.ts`
+- `app/(dashboard)/recordatorios/actions.ts`
+- `app/(dashboard)/inventario/[id]/documentos/actions.ts`
+
+### Tablas de Supabase involucradas
+
+- `public.empleados`
+- `public.vehiculos`
+- `public.ventas`
+- `public.caja_movimientos`
+- `public.leads`
+- `public.gestoria_tramites`
+- `public.comisiones`
+- `public.whatsapp_instancias`
+- `public.recordatorios`
+- `public.vehiculo_documentos`
+
+### Decisiones técnicas relevantes
+
+- La autorización se valida en tres capas: middleware, layout privado y Server Actions, para no depender solo de ocultar botones.
+- Admin conserva acceso total; vendedor queda limitado a ventas, CRM, WhatsApp propio, recordatorios y lectura operativa; gestor queda enfocado en inventario, caja, gestoria y cargas operativas.
+- Las rutas privadas se bloquean por path efectivo y no solo por menú visible.
+- Los componentes visuales ahora ocultan acciones prohibidas, pero la seguridad real sigue estando en el backend.
+- La lógica se mantuvo compatible con modo demo y sin cambiar el esquema de base de datos.
+
+## QA Producción
+
+### Qué se revisó
+
+- Se validó el build de producción con `npm run build`.
+- Se chequeó el arranque en runtime con `next start` sobre un build limpio.
+- Se recorrieron rutas clave de autenticación, inventario, compras, ventas, caja, comisiones, CRM, gestoría, catálogo, WhatsApp, empleados, configuración y recordatorios.
+- Se verificó explícitamente que el catálogo público no quedara atrapado por el middleware de rutas privadas.
+
+### Paths modificados
+
+- `middleware.ts`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+
+- No se tocó el esquema ni se agregaron tablas nuevas en esta QA.
+- Se reutilizaron las tablas ya presentes en el sistema para validar navegación y permisos.
+
+### Errores encontrados y corregidos
+
+- El catálogo público `/catalogo` estaba siendo tratado como ruta protegida y redirigía a `/login`. Se corrigió removiéndolo del matcher de middleware privado y dejando solo `/dashboard/catalogo` como ruta administrativa.
+- Se validó que `/login` responda 200 y que las rutas privadas redirijan correctamente a `/login` cuando no hay sesión.
+
+### Errores pendientes
+
+- No quedaron errores bloqueantes detectados en la build de producción.
+- Las rutas privadas sin sesión redirigen correctamente; las rutas públicas críticas funcionan sin requerir login.
+
+### Decisiones técnicas
+
+- La QA se validó sobre un build limpio para evitar artefactos `.next` obsoletos.
+- Se mantuvo la separación entre catálogo público (`/catalogo`) y catálogo administrativo (`/dashboard/catalogo`).
+- No se agregaron dependencias ni se hicieron cambios de esquema para esta etapa de estabilización.

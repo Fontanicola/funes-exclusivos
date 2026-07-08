@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { canManageGestoria } from "@/lib/auth/permissions";
 import { isDemoMode } from "@/lib/demo-mode";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -78,6 +79,16 @@ export async function createGestoriaTramiteAction(
 
   if (!user) {
     return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
+  }
+
+  const { data: employee } = await supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  if (!employee || employee.activo !== true || !canManageGestoria(employee.rol)) {
+    return { error: "No tenés permisos para administrar trámites." };
   }
 
   const tipo = toLowerTrimmed(formData.get("tipo"));

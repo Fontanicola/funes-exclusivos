@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BarChart3, Plus } from "lucide-react";
+import { canManageSales } from "@/lib/auth/permissions";
 import { isDemoMode } from "@/lib/demo-mode";
-import { mockVentas } from "@/lib/mock-data";
+import { mockEmpleado, mockVentas } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VentasTable } from "@/components/ventas/ventas-table";
 
@@ -181,16 +182,25 @@ function formatDeliveryState(estado: string | null | undefined) {
 
 export default async function VentasPage() {
   let ventas: Venta[] = mockVentas as Venta[];
+  let canCreateSale = canManageSales(mockEmpleado.rol);
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
-    const { data } = await supabase
-      .from("ventas")
-      .select(
-        "id,fecha_venta,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,precio_venta,moneda,metodo_pago,estado,monto_permuta,precio_infoauto,info_historica_compra,costo_reposicion,costo_historico,margen_reposicion,margen_historico,rotacion_dias,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,created_at,vehiculo_id,lead_id,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio,fotos),vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email,rol),lead:leads!ventas_lead_id_fkey(id,nombre,telefono,origen,estado)"
-      )
-      .order("fecha_venta", { ascending: false })
-      .order("created_at", { ascending: false });
+    const [
+      { data },
+      {
+        data: { user },
+      },
+    ] = await Promise.all([
+      supabase
+        .from("ventas")
+        .select(
+          "id,fecha_venta,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,precio_venta,moneda,metodo_pago,estado,monto_permuta,precio_infoauto,info_historica_compra,costo_reposicion,costo_historico,margen_reposicion,margen_historico,rotacion_dias,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,created_at,vehiculo_id,lead_id,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio,fotos),vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email,rol),lead:leads!ventas_lead_id_fkey(id,nombre,telefono,origen,estado)"
+        )
+        .order("fecha_venta", { ascending: false })
+        .order("created_at", { ascending: false }),
+      supabase.auth.getUser(),
+    ]);
 
     const baseVentas = ((data ?? []) as RawVenta[]).map((venta) => ({
       ...venta,
@@ -221,6 +231,16 @@ export default async function VentasPage() {
       const ventaId = String(entrega?.venta_id ?? "");
       if (!ventaId) continue;
       entregaPorVenta.set(ventaId, entrega);
+    }
+
+    if (user) {
+      const { data: employee } = await supabase
+        .from("empleados")
+        .select("id,rol,activo")
+        .eq("id", user.id)
+        .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+      canCreateSale = canManageSales(employee?.rol ?? null) && employee?.activo === true;
     }
 
     ventas = baseVentas.map((venta) => ({
@@ -265,6 +285,7 @@ export default async function VentasPage() {
               <BarChart3 className="h-4 w-4" />
               Renta
             </Link>
+          {canCreateSale ? (
             <Link
               href="/ventas/nueva"
               className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
@@ -272,7 +293,12 @@ export default async function VentasPage() {
               <Plus className="h-4 w-4" />
               Nueva venta
             </Link>
-          </div>
+          ) : (
+            <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+              Solo lectura para tu rol.
+            </div>
+          )}
+        </div>
         </div>
         {isDemoMode ? (
           <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">

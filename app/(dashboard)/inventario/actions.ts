@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { canManageInventory } from "@/lib/auth/permissions";
 import { isDemoMode } from "@/lib/demo-mode";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -225,6 +226,16 @@ export async function createVehiculoAction(
     return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
   }
 
+  const { data: employee } = await supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  if (!employee || employee.activo !== true || !canManageInventory(employee.rol)) {
+    return { error: "No tenés permisos para guardar vehículos." };
+  }
+
   const data = collectVehicleData(formData);
   const validationError = validateVehicleData(data);
 
@@ -310,6 +321,16 @@ export async function updateVehiculoAction(
 
   if (!user) {
     return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
+  }
+
+  const { data: employee } = await supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  if (!employee || employee.activo !== true || !canManageInventory(employee.rol)) {
+    return { error: "No tenés permisos para guardar vehículos." };
   }
 
   const id = toOptionalString(formData.get("id"));

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isDemoMode } from "./lib/demo-mode";
+import { canAccessRoute } from "./lib/auth/permissions";
 import { updateSession } from "./lib/supabase/middleware";
 
 const protectedRoutes = [
@@ -9,7 +10,7 @@ const protectedRoutes = [
   "/caja",
   "/comisiones",
   "/gestoria",
-  "/catalogo",
+  "/dashboard/catalogo",
   "/crm",
   "/whatsapp",
   "/empleados",
@@ -46,7 +47,35 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const { response, user, syncCookies } = await updateSession(request);
+  const { response, user, supabase, syncCookies } = await updateSession(request);
+
+  if (!user) {
+    if (isProtectedPath(pathname)) {
+      return syncCookies(
+        response,
+        NextResponse.redirect(new URL("/login", request.url))
+      );
+    }
+
+    return response;
+  }
+
+  const { data: employee } = await supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  if (!employee || employee.activo !== true) {
+    if (isProtectedPath(pathname)) {
+      return syncCookies(
+        response,
+        NextResponse.redirect(new URL("/login?error=inactive", request.url))
+      );
+    }
+
+    return response;
+  }
 
   if (pathname === "/login" && user) {
     return syncCookies(
@@ -55,10 +84,10 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  if (isProtectedPath(pathname) && !user) {
+  if (pathname !== "/login" && !canAccessRoute(employee.rol, pathname)) {
     return syncCookies(
       response,
-      NextResponse.redirect(new URL("/login", request.url))
+      NextResponse.redirect(new URL("/dashboard", request.url))
     );
   }
 
@@ -73,7 +102,7 @@ export const config = {
     "/caja/:path*",
     "/comisiones/:path*",
     "/gestoria/:path*",
-    "/catalogo/:path*",
+    "/dashboard/catalogo/:path*",
     "/crm/:path*",
     "/whatsapp/:path*",
     "/empleados/:path*",

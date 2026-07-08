@@ -10,6 +10,7 @@ import {
   BadgeDollarSign,
   ChevronLeft,
   ChevronRight,
+  Bell,
   FileText,
   Grid2X2,
   LayoutDashboard,
@@ -19,6 +20,7 @@ import {
   ShoppingCart,
   Users,
 } from "lucide-react";
+import { canAccessRoute } from "@/lib/auth/permissions";
 import { UserMenu } from "./user-menu";
 
 type Employee = {
@@ -35,7 +37,8 @@ const navigation = [
   { label: "Caja", href: "/caja", icon: Banknote },
   { label: "Comisiones", href: "/comisiones", icon: BadgePercent },
   { label: "Gestoría", href: "/gestoria", icon: FileText },
-  { label: "Catálogo", href: "/catalogo", icon: Grid2X2 },
+  { label: "Recordatorios", href: "/recordatorios", icon: Bell },
+  { label: "Catálogo", href: "/dashboard/catalogo", icon: Grid2X2 },
   { label: "CRM", href: "/crm", icon: Users },
   { label: "WhatsApp", href: "/whatsapp", icon: MessageCircle },
   { label: "Empleados", href: "/empleados", icon: Users },
@@ -63,6 +66,8 @@ export function Sidebar({ employee }: { employee: Employee }) {
     );
     window.localStorage.setItem(STORAGE_KEY, String(collapsed));
   }, [collapsed]);
+
+  const visibleNavigation = navigation.filter((item) => canAccessRoute(employee.rol, item.href));
 
   return (
     <aside
@@ -105,7 +110,7 @@ export function Sidebar({ employee }: { employee: Employee }) {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
-        {navigation.map((item) => {
+        {visibleNavigation.map((item) => {
           const Icon = item.icon;
           const active =
             pathname === item.href || pathname.startsWith(`${item.href}/`);

@@ -130,7 +130,7 @@ export function CatalogoSettingsForm({ config }: { config: CatalogoConfig }) {
       <div className="border-b border-[#E5E7EB] px-5 py-4">
         <h2 className="text-base font-semibold text-[#111827]">Configuración global</h2>
         <p className="mt-1 text-sm text-[#6B7280]">
-          El switch global controla si el catálogo completo queda visible online.
+          Estos datos se usan en el catálogo público. El switch global controla si el catálogo completo queda visible online.
         </p>
       </div>
 

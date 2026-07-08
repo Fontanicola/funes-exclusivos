@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LogOut } from "lucide-react";
 import { logout } from "@/app/(dashboard)/actions";
+import { getRoleLabel } from "@/lib/auth/permissions";
 
 type Employee = {
   email: string;
@@ -76,7 +77,7 @@ export function UserMenu({
                   {employee.nombre ?? employee.email}
                 </p>
                 <p className="truncate text-xs text-[#6B7280]">
-                  {employee.rol ?? "Empleado"}
+                  {getRoleLabel(employee.rol)}
                 </p>
               </div>
               <ChevronDown
@@ -103,7 +104,7 @@ export function UserMenu({
               {employee.nombre ?? employee.email}
             </p>
             <p className="text-xs text-[#6B7280]">{employee.email}</p>
-            <p className="text-xs text-[#6B7280]">{employee.rol ?? "Empleado"}</p>
+            <p className="text-xs text-[#6B7280]">{getRoleLabel(employee.rol)}</p>
           </div>
 
           <form action={logout} className="pt-3">
