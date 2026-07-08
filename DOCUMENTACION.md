@@ -1140,3 +1140,220 @@
 - La QA se validó sobre un build limpio para evitar artefactos `.next` obsoletos.
 - Se mantuvo la separación entre catálogo público (`/catalogo`) y catálogo administrativo (`/dashboard/catalogo`).
 - No se agregaron dependencias ni se hicieron cambios de esquema para esta etapa de estabilización.
+
+## Optimización de performance
+
+### Qué se optimizó
+
+- Se acotaron queries en las rutas principales para evitar traer históricos completos cuando no son necesarios.
+- Se limitaron los resultados iniciales en listados grandes y se agregó un aviso de “Mostrando los primeros 200 resultados” en tablas con filtros client-side.
+- Se redujo trabajo innecesario en el dashboard quitando consultas que no se usaban y limitando el tamaño de cada bloque de datos.
+- Se mejoró la percepción de carga agregando `loading.tsx` con skeletons livianos en las rutas más usadas.
+- Se paralelizaron fetches donde había dependencias evitables y se simplificaron algunas consultas Supabase con columnas más acotadas.
+
+### Paths modificados
+
+- `app/(dashboard)/dashboard/page.tsx`
+- `app/(dashboard)/dashboard/catalogo/page.tsx`
+- `app/(dashboard)/dashboard/loading.tsx`
+- `app/(dashboard)/inventario/page.tsx`
+- `app/(dashboard)/inventario/loading.tsx`
+- `app/(dashboard)/compras/page.tsx`
+- `app/(dashboard)/compras/loading.tsx`
+- `app/(dashboard)/ventas/page.tsx`
+- `app/(dashboard)/ventas/loading.tsx`
+- `app/(dashboard)/ventas/renta/page.tsx`
+- `app/(dashboard)/ventas/renta/loading.tsx`
+- `app/(dashboard)/ventas/pendientes-entrega/page.tsx`
+- `app/(dashboard)/ventas/pendientes-entrega/loading.tsx`
+- `app/(dashboard)/caja/page.tsx`
+- `app/(dashboard)/caja/loading.tsx`
+- `app/(dashboard)/crm/page.tsx`
+- `app/(dashboard)/crm/loading.tsx`
+- `app/(dashboard)/whatsapp/page.tsx`
+- `app/(dashboard)/whatsapp/conexiones/page.tsx`
+- `app/(dashboard)/whatsapp/loading.tsx`
+- `app/(dashboard)/gestoria/page.tsx`
+- `app/(dashboard)/gestoria/loading.tsx`
+- `app/(dashboard)/comisiones/page.tsx`
+- `app/(dashboard)/comisiones/loading.tsx`
+- `app/(dashboard)/recordatorios/page.tsx`
+- `app/(dashboard)/recordatorios/loading.tsx`
+- `app/catalogo/page.tsx`
+- `app/catalogo/loading.tsx`
+- `app/catalogo/[id]/loading.tsx`
+- `components/shared/page-loading-skeleton.tsx`
+- `components/inventario/inventario-table.tsx`
+- `components/compras/compras-table.tsx`
+- `components/ventas/ventas-table.tsx`
+- `components/ventas/renta-table.tsx`
+- `components/ventas/pendientes-entrega-table.tsx`
+- `components/caja/caja-movimientos-table.tsx`
+- `components/crm/leads-table.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+- `components/gestoria/gestoria-table.tsx`
+- `components/gestoria/presupuestos-table.tsx`
+- `components/inventario/vehiculo-documentos-table.tsx`
+- `components/recordatorios/recordatorios-table.tsx`
+
+### Tablas de Supabase involucradas
+
+- `public.vehiculos`
+- `public.compras_vehiculos`
+- `public.ventas`
+- `public.ventas_pagos`
+- `public.ventas_entregas`
+- `public.vehiculo_gastos`
+- `public.caja_movimientos`
+- `public.leads`
+- `public.gestoria_tramites`
+- `public.gestoria_presupuestos`
+- `public.comisiones`
+- `public.comision_liquidaciones`
+- `public.whatsapp_instancias`
+- `public.conversaciones`
+- `public.recordatorios`
+- `public.vehiculo_documentos`
+
+### Decisiones técnicas tomadas
+
+- Se priorizó bajar el volumen de datos antes que introducir caching agresivo para no alterar la lógica de negocio.
+- Los listados client-side siguen siendo filtrables, pero ahora renderizan como máximo 200 filas visibles por pantalla.
+- Los loading states se implementaron con un componente compartido para evitar duplicación y mantener consistencia visual.
+- Se mantuvo el modo demo sin tocar la capa de datos reales.
+- No se agregaron dependencias ni se hicieron cambios de schema.
+
+### Pendientes de performance
+
+- Si en producción siguen apareciendo rutas lentas con volúmenes grandes, el siguiente paso debería ser paginación real o virtualización en las tablas más densas.
+- También convendría evaluar invalidación selectiva por módulo cuando haya más actividad concurrente, para reducir revalidaciones innecesarias.
+
+## UX/UI Polish
+
+### Qué se mejoró
+
+- Se unificó la navegación lateral con agrupación visual por área funcional y estados activos más claros.
+- Se mejoró el menú de usuario con un panel más limpio, badge de rol y una jerarquía visual más premium.
+- Se refinó la tarjeta de KPI para que tenga mejor presencia, contraste y una acentuación más consistente por estado.
+- Se sumó una capa global de estilo en `app/globals.css` para suavizar scrollbars, selección de texto, antialiasing y foco visible.
+- Se estandarizó la cabecera de varias pantallas clave con el componente compartido `PageHeader`.
+- Se ajustaron los encabezados de `Dashboard`, `Inventario`, `Ventas` y `WhatsApp` para que el CTA principal se vea más consistente.
+
+### Paths modificados
+
+- `components/dashboard/sidebar.tsx`
+- `components/dashboard/user-menu.tsx`
+- `components/dashboard/kpi-card.tsx`
+- `components/shared/page-header.tsx`
+- `components/shared/empty-state-card.tsx`
+- `app/globals.css`
+- `app/(dashboard)/dashboard/page.tsx`
+- `app/(dashboard)/inventario/page.tsx`
+- `app/(dashboard)/ventas/page.tsx`
+- `app/(dashboard)/whatsapp/page.tsx`
+
+### Decisiones visuales tomadas
+
+- Se mantuvo light mode únicamente, con blancos limpios y bordes suaves.
+- Se evitó introducir animaciones pesadas o nuevos paquetes de UI.
+- Se priorizó consistencia de shell, navegación y encabezados antes que un rediseño total de cada módulo.
+- Se conservaron las acciones y permisos existentes sin tocar la lógica de negocio.
+
+### Pendientes
+
+- Todavía quedan pantallas secundarias con headers manuales que podrían migrarse gradualmente al componente compartido.
+- Si el equipo quiere unificar aún más la experiencia, el siguiente paso natural es aplicar el mismo patrón de `PageHeader` y `EmptyStateCard` al resto de rutas del dashboard.
+
+## Corrección WhatsApp
+
+### Qué se corrigió
+
+- Se corrigió la persistencia real de mensajes del webhook de Evolution.
+- Antes se actualizaba `conversaciones.mensajes_count` y `last_message_preview`, pero no se estaba garantizando la inserción de filas reales en `conversacion_mensajes`.
+- Se reemplazó el flujo dependiente de `upsert` por un insert controlado con verificación explícita de duplicados.
+- Se alineó la vista de detalle de WhatsApp con las columnas reales de `conversacion_mensajes`.
+
+### Paths modificados
+
+- `app/api/evolution/webhook/route.ts`
+- `lib/evolution/payload-normalizer.ts`
+- `lib/whatsapp/conversations.ts`
+- `app/(dashboard)/whatsapp/[id]/page.tsx`
+- `components/whatsapp/conversacion-messages.tsx`
+- `app/(dashboard)/whatsapp/actions.ts`
+
+### Tablas de Supabase involucradas
+
+- `public.whatsapp_instancias`
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+- `public.leads`
+
+### Resultado esperado del test WhatsApp
+
+- Al recibir un nuevo mensaje entrante real de Evolution:
+  - se crea o reutiliza la conversación,
+  - se inserta una fila nueva en `conversacion_mensajes`,
+  - se incrementa `mensajes_count`,
+  - se actualiza `last_message_preview`,
+  - y el detalle `/whatsapp/[id]` muestra el mensaje en orden cronológico.
+
+### Errores pendientes
+
+- Si Evolution manda mensajes sin `external_message_id`, se usa un identificador fallback estable para mantener idempotencia.
+- Si Supabase devuelve error de inserción por RLS o schema, el webhook ahora lo loguea y responde 500 para que se detecte rápido en Vercel.
+
+## Corrección UX/UI auditoría externa
+
+### Qué se corrigió
+
+- Se renombró la vista de `/ventas/renta` a `Rentabilidad` en títulos, textos visibles y CTA relacionados, manteniendo la ruta existente.
+- Se corrigió el layout de filtros en `Rentabilidad` y `Recordatorios` para que el encabezado ocupe el ancho completo y los controles hagan wrap sin desbordes.
+- Se eliminó texto técnico visible en WhatsApp: `instance_name` dejó de mostrarse al usuario final en la lista, el detalle y las tarjetas de instancia.
+- Se reemplazó el copy técnico de WhatsApp en español, incluyendo el estado de no leídos.
+- Se corrigió el superpuesto del botón de IA en el detalle de conversación con ajustes de `flex-wrap` y `shrink-0`.
+- Se arregló el formatter de moneda del CRM para evitar duplicación de prefijos como `USUS$`.
+- Se reemplazó el copy técnico de Empleados por una descripción de negocio.
+- Se quitó el texto duplicado de Configuración y se dejó la automatización de catálogo marcada como `Próximamente`.
+- Se agregó el acceso visible a `Liquidaciones` en el módulo de Comisiones.
+- Se ajustó el label de la acción de ventas a `Rentabilidad` para alinear la nomenclatura visible.
+
+### Paths modificados
+
+- `app/(dashboard)/ventas/renta/page.tsx`
+- `components/ventas/renta-table.tsx`
+- `components/ventas/ventas-table.tsx`
+- `components/recordatorios/recordatorios-table.tsx`
+- `components/whatsapp/conversacion-detail.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+- `components/whatsapp/whatsapp-instance-card.tsx`
+- `components/whatsapp/ai-summary-card.tsx`
+- `app/(dashboard)/whatsapp/[id]/page.tsx`
+- `app/(dashboard)/crm/page.tsx`
+- `app/(dashboard)/empleados/page.tsx`
+- `app/(dashboard)/configuracion/page.tsx`
+- `components/configuracion/configuracion-general-form.tsx`
+- `app/(dashboard)/comisiones/page.tsx`
+- `app/(dashboard)/ventas/page.tsx`
+
+### Tablas de Supabase involucradas
+
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+- `public.comisiones`
+- `public.empleados`
+- `public.configuracion_general`
+- `public.recordatorios`
+- `public.ventas`
+
+### Decisiones técnicas tomadas
+
+- Se mantuvo la lógica de negocio intacta y se limitaron los cambios a copy, labels y wrappers de layout.
+- Se evitó rediseñar la experiencia completa de WhatsApp y se corrigieron solo los puntos que rompían percepción de calidad.
+- Se priorizó un patrón de encabezado con flex-wrap para evitar que los filtros se compriman en pantallas medias.
+- Se mantuvieron los permisos y las rutas existentes sin modificar navegación estructural.
+
+### Validación
+
+- `npm run build` ejecutado al cierre de la corrección de UX/UI.
+- No quedaron errores de build al momento de generar esta documentación.

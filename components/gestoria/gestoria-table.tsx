@@ -104,6 +104,7 @@ export function GestoriaTable({ tramites }: { tramites: GestoriaTramite[] }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
   const [typeFilter, setTypeFilter] = useState<(typeof types)[number]>("");
+  const MAX_VISIBLE_ROWS = 200;
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -131,6 +132,9 @@ export function GestoriaTable({ tramites }: { tramites: GestoriaTramite[] }) {
       return searchable.includes(normalizedQuery);
     });
   }, [query, statusFilter, tramites, typeFilter]);
+
+  const visibleTramites = filtered.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
@@ -210,8 +214,8 @@ export function GestoriaTable({ tramites }: { tramites: GestoriaTramite[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filtered.length ? (
-              filtered.map((tramite) => {
+            {visibleTramites.length ? (
+              visibleTramites.map((tramite) => {
                 const relation = getVehicleOrSale(tramite);
                 const documents = parseDocuments(tramite.documentos);
                 const overdue = isOverdue(tramite);
@@ -279,6 +283,12 @@ export function GestoriaTable({ tramites }: { tramites: GestoriaTramite[] }) {
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -97,6 +97,14 @@ function getSellerName(conversation: Conversation) {
   return conversation.vendedor?.nombre ?? conversation.vendedor?.email ?? "—";
 }
 
+function getInstanceLabel(conversation: Conversation) {
+  return (
+    conversation.instancia?.telefono_conectado ??
+    conversation.vendedor?.nombre ??
+    "Sin conexión"
+  );
+}
+
 function getAiInterest(conversation: Conversation) {
   return conversation.ia_interes_compra ?? conversation.interes_compra;
 }
@@ -144,6 +152,7 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
   const [interestFilter, setInterestFilter] = useState<(typeof interests)[number]>("");
   const [aiFilter, setAiFilter] = useState<(typeof aiFilters)[number]>("");
   const [onlyAttention, setOnlyAttention] = useState(false);
+  const MAX_VISIBLE_ROWS = 200;
 
   const instanceOptions = useMemo(() => {
     const options = new Map<string, string>();
@@ -151,7 +160,7 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
     for (const conversation of conversaciones) {
       const id = conversation.instancia?.id ?? conversation.whatsapp_instancia_id;
       if (!id) continue;
-      options.set(id, conversation.instancia?.instance_name ?? "Sin instancia");
+      options.set(id, getInstanceLabel(conversation));
     }
 
     return Array.from(options.entries());
@@ -186,6 +195,9 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
       return getSearchableText(conversation).includes(normalizedQuery);
     });
   }, [aiFilter, conversaciones, interestFilter, instanceFilter, onlyAttention, query, sellerFilter, statusFilter]);
+
+  const visibleConversations = filtered.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
@@ -315,8 +327,8 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filtered.length ? (
-              filtered.map((conversation) => (
+            {visibleConversations.length ? (
+              visibleConversations.map((conversation) => (
                 <tr key={conversation.id} className="transition hover:bg-[#F9FAFB]">
                   <td className="px-4 py-3 align-middle">
                     <div className="space-y-1">
@@ -356,7 +368,11 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
                     </div>
                   </td>
                   <td className="px-4 py-3 align-middle text-sm text-[#111827]">
-                    {conversation.unread_count && conversation.unread_count > 0 ? conversation.unread_count : "—"}
+                    {conversation.unread_count && conversation.unread_count > 0
+                      ? conversation.unread_count === 1
+                        ? "1 no leído"
+                        : `${conversation.unread_count} no leídos`
+                      : "Sin leer"}
                   </td>
                   <td className="px-4 py-3 align-middle">
                     <ConversacionInterestBadge interest={conversation.interes_compra} />
@@ -397,6 +413,12 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

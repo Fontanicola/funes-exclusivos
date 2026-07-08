@@ -248,6 +248,7 @@ export function RecordatoriosTable({
   const [typeFilter, setTypeFilter] = useState("");
   const [assigneeFilter, setAssigneeFilter] = useState("");
   const [dueFilter, setDueFilter] = useState<(typeof dueFilters)[number]>("all");
+  const MAX_VISIBLE_ROWS = 200;
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -268,9 +269,12 @@ export function RecordatoriosTable({
     });
   }, [assigneeFilter, dueFilter, priorityFilter, query, recordatorios, statusFilter, typeFilter]);
 
+  const visibleRecordatorios = filtered.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
+
   return (
     <section className="rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-[#E5E7EB] p-5 xl:flex-row xl:items-end xl:justify-between">
+      <div className="space-y-4 border-b border-[#E5E7EB] p-5">
         <div className="space-y-2">
           <h2 className="text-base font-semibold text-[#111827]">Listado de recordatorios</h2>
           <p className="max-w-2xl text-sm leading-6 text-[#6B7280]">
@@ -278,8 +282,8 @@ export function RecordatoriosTable({
           </p>
         </div>
 
-        <div className="grid gap-2 xl:grid-cols-[minmax(0,280px)_180px_180px_180px_160px]">
-          <div className="relative">
+        <div className="flex flex-wrap gap-2">
+          <div className="relative min-w-[260px] flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
@@ -299,71 +303,81 @@ export function RecordatoriosTable({
             ) : null}
           </div>
 
-          <select
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as (typeof statusOptions)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-            title={getStatusFilterLabel(statusFilter)}
-          >
-            <option value="">Todos los estados</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="pospuesto">Pospuesto</option>
-            <option value="completado">Completado</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
+          <div className="min-w-[180px] flex-1 sm:flex-none">
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as (typeof statusOptions)[number])}
+              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
+              title={getStatusFilterLabel(statusFilter)}
+            >
+              <option value="">Todos los estados</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="pospuesto">Pospuesto</option>
+              <option value="completado">Completado</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
 
-          <select
-            value={priorityFilter}
-            onChange={(event) => setPriorityFilter(event.target.value as (typeof priorityOptions)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-            title={getPriorityFilterLabel(priorityFilter)}
-          >
-            <option value="">Todas las prioridades</option>
-            <option value="baja">Baja</option>
-            <option value="media">Media</option>
-            <option value="alta">Alta</option>
-            <option value="critica">Crítica</option>
-          </select>
+          <div className="min-w-[180px] flex-1 sm:flex-none">
+            <select
+              value={priorityFilter}
+              onChange={(event) => setPriorityFilter(event.target.value as (typeof priorityOptions)[number])}
+              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
+              title={getPriorityFilterLabel(priorityFilter)}
+            >
+              <option value="">Todas las prioridades</option>
+              <option value="baja">Baja</option>
+              <option value="media">Media</option>
+              <option value="alta">Alta</option>
+              <option value="critica">Crítica</option>
+            </select>
+          </div>
 
-          <select
-            value={typeFilter}
-            onChange={(event) => setTypeFilter(event.target.value)}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Todos los tipos</option>
-            <option value="seguimiento_crm">Seguimiento CRM</option>
-            <option value="gestoria">Gestoría</option>
-            <option value="entrega">Entrega</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="caja">Caja</option>
-            <option value="comision">Comisión</option>
-            <option value="inventario">Inventario</option>
-            <option value="otro">Otro</option>
-          </select>
+          <div className="min-w-[180px] flex-1 sm:flex-none">
+            <select
+              value={typeFilter}
+              onChange={(event) => setTypeFilter(event.target.value)}
+              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
+            >
+              <option value="">Todos los tipos</option>
+              <option value="seguimiento_crm">Seguimiento CRM</option>
+              <option value="gestoria">Gestoría</option>
+              <option value="entrega">Entrega</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="caja">Caja</option>
+              <option value="comision">Comisión</option>
+              <option value="inventario">Inventario</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
 
-          <select
-            value={assigneeFilter}
-            onChange={(event) => setAssigneeFilter(event.target.value)}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Todos los asignados</option>
-            {employees.map((employee) => (
-              <option key={employee.id} value={employee.id}>
-                {employee.nombre ?? employee.email ?? employee.id}
-              </option>
-            ))}
-          </select>
+          <div className="min-w-[180px] flex-1 sm:flex-none">
+            <select
+              value={assigneeFilter}
+              onChange={(event) => setAssigneeFilter(event.target.value)}
+              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
+            >
+              <option value="">Todos los asignados</option>
+              {employees.map((employee) => (
+                <option key={employee.id} value={employee.id}>
+                  {employee.nombre ?? employee.email ?? employee.id}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            value={dueFilter}
-            onChange={(event) => setDueFilter(event.target.value as (typeof dueFilters)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="all">Todas las fechas</option>
-            <option value="today">Hoy</option>
-            <option value="overdue">Vencidos</option>
-            <option value="soon">Próximos 7 días</option>
-          </select>
+          <div className="min-w-[180px] flex-1 sm:flex-none">
+            <select
+              value={dueFilter}
+              onChange={(event) => setDueFilter(event.target.value as (typeof dueFilters)[number])}
+              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
+            >
+              <option value="all">Todas las fechas</option>
+              <option value="today">Hoy</option>
+              <option value="overdue">Vencidos</option>
+              <option value="soon">Próximos 7 días</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -382,8 +396,8 @@ export function RecordatoriosTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filtered.length ? (
-              filtered.map((recordatorio) => {
+            {visibleRecordatorios.length ? (
+              visibleRecordatorios.map((recordatorio) => {
                 const overdue = isOverdue(recordatorio);
                 const dueToday = isDueToday(recordatorio);
                 const link = getLinkLabel(recordatorio);
@@ -516,6 +530,12 @@ export function RecordatoriosTable({
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

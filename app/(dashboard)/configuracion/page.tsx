@@ -74,10 +74,6 @@ export default async function ConfiguracionPage() {
         </p>
       </header>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-        Estos parámetros afectan valores por defecto y alertas operativas del sistema.
-      </div>
-
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <ConfiguracionGeneralForm config={config} />
         <ConfiguracionSummary config={config} />

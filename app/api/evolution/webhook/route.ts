@@ -8,6 +8,7 @@ import {
   normalizePhone,
   normalizeQrPayload,
 } from "@/lib/evolution/payload-normalizer";
+import { persistConversationMessage } from "@/lib/whatsapp/conversations";
 import type { EvolutionWebhookPayload } from "@/lib/evolution/types";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +37,22 @@ function previewMessage(body: string | null) {
   const trimmed = body.trim();
   if (trimmed.length <= 140) return trimmed;
   return `${trimmed.slice(0, 137).trimEnd()}...`;
+}
+
+function safeMessageError(error: unknown) {
+  if (error instanceof Error) {
+    return { message: error.message, details: (error as Error & { details?: unknown }).details ?? null };
+  }
+
+  if (error && typeof error === "object") {
+    const record = error as Record<string, unknown>;
+    return {
+      message: typeof record.message === "string" ? record.message : "Unknown error",
+      details: record.details ?? null,
+    };
+  }
+
+  return { message: String(error ?? "Unknown error"), details: null };
 }
 
 async function findLeadByPhone(
@@ -167,7 +184,6 @@ export async function POST(request: NextRequest) {
     if (
       !normalized.instanceName ||
       !normalized.externalChatId ||
-      !normalized.externalMessageId ||
       normalized.isGroup
     ) {
       return NextResponse.json({ ignored: true });
@@ -266,19 +282,6 @@ export async function POST(request: NextRequest) {
         .eq("id", conversationId);
     }
 
-    const externalMessageId =
-      normalized.externalMessageId ?? `${conversationId}:${normalized.sentAt ?? Date.now()}`;
-
-    const { data: existingMessage } = await supabase
-      .from("conversacion_mensajes")
-      .select("id")
-      .eq("external_message_id", externalMessageId)
-      .maybeSingle<{ id: string }>();
-
-    if (existingMessage) {
-      return NextResponse.json({ ok: true, ignored: "duplicate_message" });
-    }
-
     const { data: currentConversation } = await supabase
       .from("conversaciones")
       .select("mensajes_count,unread_count")
@@ -288,25 +291,39 @@ export async function POST(request: NextRequest) {
     const currentMessages = currentConversation?.mensajes_count ?? 0;
     const currentUnread = currentConversation?.unread_count ?? 0;
 
-    await supabase.from("conversacion_mensajes").upsert(
-      {
-        conversacion_id: conversationId,
-        whatsapp_instancia_id: instance.id,
-        external_message_id: externalMessageId,
-        direccion: normalized.direction,
-        from_number: normalized.fromNumber,
-        to_number: normalized.toNumber,
-        body: normalized.body,
-        message_type: normalized.messageType,
-        sent_at: normalized.sentAt ?? new Date().toISOString(),
-        raw_payload: payload,
-      },
-      { onConflict: "external_message_id" }
-    );
+    const messageResult = await persistConversationMessage(supabase, {
+      conversationId,
+      whatsappInstanceId: instance.id,
+      externalMessageId: normalized.externalMessageId,
+      direction: normalized.direction === "outbound" ? "saliente" : "entrante",
+      fromNumber: normalized.fromNumber,
+      toNumber: normalized.toNumber,
+      body: normalized.body,
+      messageType: normalized.messageType,
+      sentAt: normalized.sentAt ?? new Date().toISOString(),
+      rawPayload: payload,
+    });
+
+    if (messageResult.error) {
+      const safeError = safeMessageError(messageResult.error);
+      console.error("[Evolution webhook] failed to persist message", {
+        instanceName,
+        externalChatId: normalized.externalChatId,
+        conversationId,
+        externalMessageId: messageResult.externalMessageId,
+        message: safeError.message,
+        details: safeError.details,
+      });
+      return NextResponse.json({ ok: false, error: "No pudimos guardar el mensaje recibido." }, { status: 500 });
+    }
 
     const conversationUpdates: Record<string, unknown> = {
-      mensajes_count: currentMessages + 1,
-      unread_count: isInboundMessage(normalized.direction) ? currentUnread + 1 : currentUnread,
+      mensajes_count: messageResult.duplicate ? currentMessages : currentMessages + 1,
+      unread_count: messageResult.duplicate
+        ? currentUnread
+        : isInboundMessage(normalized.direction)
+          ? currentUnread + 1
+          : currentUnread,
       ultimo_mensaje_at: normalized.sentAt ?? new Date().toISOString(),
       last_message_preview: previewMessage(normalized.body),
       updated_by: instance.empleado_id,
@@ -318,7 +335,15 @@ export async function POST(request: NextRequest) {
 
     await supabase.from("conversaciones").update(conversationUpdates).eq("id", conversationId);
 
-    console.info("[Evolution webhook]", { event, instanceName, ok: true });
+    console.info("[Evolution webhook]", {
+      event,
+      instanceName,
+      externalChatId: normalized.externalChatId,
+      conversationId,
+      externalMessageId: messageResult.externalMessageId,
+      duplicate: messageResult.duplicate,
+      ok: true,
+    });
     return NextResponse.json({ ok: true });
   }
 

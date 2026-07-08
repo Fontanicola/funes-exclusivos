@@ -217,7 +217,7 @@ async function loadData() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [currentEmployeeResult, employeesResult, recordatoriosResult] = await Promise.all([
+    const [currentEmployeeResult, employeesResult, recordatoriosResult] = await Promise.all([
     supabase
       .from("empleados")
       .select("id,nombre,email,rol,activo")
@@ -228,14 +228,15 @@ async function loadData() {
       .select("id,nombre,email,rol,activo")
       .eq("activo", true)
       .order("nombre", { ascending: true }),
-    supabase
-      .from("recordatorios")
-      .select(
-        "id,tipo,estado,prioridad,titulo,descripcion,fecha_vencimiento,fecha_completado,fecha_pospuesto,asignado_a,lead_id,conversacion_id,venta_id,entrega_id,tramite_id,vehiculo_id,comision_liquidacion_id,origen_automatico,created_at,updated_at,asignado:empleados!recordatorios_asignado_a_fkey(id,nombre,email,rol),lead:leads!recordatorios_lead_id_fkey(id,nombre,telefono,estado),conversacion:conversaciones!recordatorios_conversacion_id_fkey(id,contacto_nombre,contacto_telefono,ultimo_mensaje_at),venta:ventas!recordatorios_venta_id_fkey(id,cliente_nombre,fecha_venta),entrega:ventas_entregas!recordatorios_entrega_id_fkey(id,estado,fecha_entrega),tramite:gestoria_tramites!recordatorios_tramite_id_fkey(id,titulo,tipo,estado,fecha_vencimiento),vehiculo:vehiculos!recordatorios_vehiculo_id_fkey(id,marca,modelo,dominio)"
+      supabase
+        .from("recordatorios")
+        .select(
+          "id,tipo,estado,prioridad,titulo,descripcion,fecha_vencimiento,fecha_completado,fecha_pospuesto,asignado_a,lead_id,conversacion_id,venta_id,entrega_id,tramite_id,vehiculo_id,comision_liquidacion_id,origen_automatico,created_at,updated_at,asignado:empleados!recordatorios_asignado_a_fkey(id,nombre,email,rol),lead:leads!recordatorios_lead_id_fkey(id,nombre,telefono,estado),conversacion:conversaciones!recordatorios_conversacion_id_fkey(id,contacto_nombre,contacto_telefono,ultimo_mensaje_at),venta:ventas!recordatorios_venta_id_fkey(id,cliente_nombre,fecha_venta),entrega:ventas_entregas!recordatorios_entrega_id_fkey(id,estado,fecha_entrega),tramite:gestoria_tramites!recordatorios_tramite_id_fkey(id,titulo,tipo,estado,fecha_vencimiento),vehiculo:vehiculos!recordatorios_vehiculo_id_fkey(id,marca,modelo,dominio)"
       )
       .order("fecha_vencimiento", { ascending: true, nullsFirst: false })
-      .order("created_at", { ascending: false }),
-  ]);
+      .order("created_at", { ascending: false })
+      .limit(200),
+    ]);
 
   const recordatorios = ((recordatoriosResult.data ?? []) as RawRecordatorio[]).map((item) => ({
     ...item,

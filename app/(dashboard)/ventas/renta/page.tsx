@@ -21,7 +21,7 @@ import { RentaKpis } from "@/components/ventas/renta-kpis";
 import { RentaTable } from "@/components/ventas/renta-table";
 
 export const metadata: Metadata = {
-  title: "Renta | Funes Exclusivos",
+  title: "Rentabilidad | Funes Exclusivos",
 };
 
 export const dynamic = "force-dynamic";
@@ -80,21 +80,25 @@ export default async function VentaRentaPage() {
         ].join(",")
       )
       .order("fecha_venta", { ascending: false })
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(150);
 
     const gastosQuery = supabase
       .from("vehiculo_gastos")
       .select("id,vehiculo_id,tipo,monto,moneda,fecha,detalle")
-      .order("fecha", { ascending: true });
+      .order("fecha", { ascending: true })
+      .limit(150);
 
     const pagosQuery = supabase
       .from("ventas_pagos")
       .select("id,venta_id,tipo,fecha,importe,moneda,medio,detalle")
-      .order("fecha", { ascending: true });
+      .order("fecha", { ascending: true })
+      .limit(150);
 
     const entregasQuery = supabase
       .from("ventas_entregas")
-      .select("id,venta_id,estado,fecha_entrega");
+      .select("id,venta_id,estado,fecha_entrega")
+      .limit(150);
 
     const [ventasResult, gastosResult, pagosResult, entregasResult] = await Promise.all([
       ventasQuery,
@@ -129,9 +133,9 @@ export default async function VentaRentaPage() {
               <ArrowLeft className="h-4 w-4" />
               Volver a Ventas
             </Link>
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Renta</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Rentabilidad</h1>
             <p className="text-sm leading-6 text-[#6B7280]">
-              Margen, rotación y resultado por operación
+              Análisis de margen, pagos, gastos y resultado por operación.
             </p>
           </div>
         </div>

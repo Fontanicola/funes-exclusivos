@@ -688,7 +688,7 @@ export async function generateConversationAiSummaryAction(
 
   const { data: messages } = await auth.supabase
     .from("conversacion_mensajes")
-    .select("id,tipo,body,from_me,direction,sent_at,created_at")
+    .select("id,conversacion_id,external_message_id,direccion,from_number,to_number,body,message_type,sent_at,created_at,raw_payload")
     .eq("conversacion_id", conversationId)
     .order("sent_at", { ascending: false, nullsFirst: false })
     .limit(40);

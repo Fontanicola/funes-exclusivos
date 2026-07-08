@@ -69,19 +69,17 @@ function formatMoney(value: number, currency: string | null) {
   const isoCurrency = (currency ?? "").toLowerCase() === "usd" ? "USD" : "ARS";
   const symbol = isoCurrency === "USD" ? "US$" : "$";
   const formatted = new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: isoCurrency,
     maximumFractionDigits: 0,
   }).format(value);
 
-  return formatted.replace("US$", symbol).replace("$", symbol);
+  return `${symbol} ${formatted}`;
 }
 
 function formatCurrencyBreakdown(groups: { currency: string; total: number }[]) {
   if (!groups.length) return "—";
 
   return groups
-    .map((group) => `${group.currency} ${formatMoney(group.total, group.currency)}`)
+    .map((group) => formatMoney(group.total, group.currency))
     .join(" · ");
 }
 
@@ -141,7 +139,8 @@ export default async function CrmPage() {
         .select(
           "id,nombre,telefono,email,origen,estado,presupuesto_min,presupuesto_max,presupuesto_moneda,nivel_interes,proximo_contacto,created_at,vehiculo:vehiculos!leads_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio),vendedor:empleados!leads_vendedor_id_fkey(id,nombre,email,rol)"
         )
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .limit(200),
     ]);
 
     pipelineEstados = (pipelineResult.data ?? []) as PipelineEstado[];

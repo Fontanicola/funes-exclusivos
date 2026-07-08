@@ -87,6 +87,7 @@ export function ComprasTable({ compras }: { compras: Compra[] }) {
   const [query, setQuery] = useState("");
   const [currencyFilter, setCurrencyFilter] = useState<(typeof currencyFilters)[number]>("");
   const [withDebt, setWithDebt] = useState(false);
+  const MAX_VISIBLE_ROWS = 200;
 
   const filteredCompras = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -113,6 +114,9 @@ export function ComprasTable({ compras }: { compras: Compra[] }) {
       return searchable.includes(normalizedQuery);
     });
   }, [compras, currencyFilter, query, withDebt]);
+
+  const visibleCompras = filteredCompras.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filteredCompras.length > MAX_VISIBLE_ROWS;
 
   return (
     <section className="rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm">
@@ -189,8 +193,8 @@ export function ComprasTable({ compras }: { compras: Compra[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filteredCompras.length ? (
-              filteredCompras.map((compra) => {
+            {visibleCompras.length ? (
+              visibleCompras.map((compra) => {
                 const vehicle = getVehicleSummary(compra);
                 const provider = getProviderSummary(compra);
                 const hasDebt = (compra.deuda_pendiente ?? 0) > 0;
@@ -253,6 +257,12 @@ export function ComprasTable({ compras }: { compras: Compra[] }) {
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

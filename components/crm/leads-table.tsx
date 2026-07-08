@@ -85,6 +85,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
   const [originFilter, setOriginFilter] = useState<(typeof origins)[number]>("");
+  const MAX_VISIBLE_ROWS = 200;
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -113,6 +114,9 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
       return searchable.includes(normalizedQuery);
     });
   }, [leads, originFilter, query, statusFilter]);
+
+  const visibleLeads = filtered.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
@@ -192,8 +196,8 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filtered.length ? (
-              filtered.map((lead) => {
+            {visibleLeads.length ? (
+              visibleLeads.map((lead) => {
                 const vehicle = getVehicleSummary(lead);
 
                 return (
@@ -255,6 +259,12 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -68,24 +68,30 @@ function CheckboxField({
   label,
   defaultChecked,
   helpText,
+  disabled = false,
 }: {
   id: string;
   name: string;
   label: string;
   defaultChecked?: boolean;
   helpText?: string;
+  disabled?: boolean;
 }) {
   return (
     <label
       htmlFor={id}
-      className="flex items-start gap-3 rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-3 py-3"
+      className={[
+        "flex items-start gap-3 rounded-xl border border-[#E5E7EB] px-3 py-3",
+        disabled ? "bg-[#F9FAFB] opacity-80" : "bg-[#FAFAFA]",
+      ].join(" ")}
     >
       <input
         id={id}
         name={name}
         type="checkbox"
         defaultChecked={defaultChecked}
-        className="mt-1 h-4 w-4 rounded border-[#D1D5DB] text-[#18181B] focus:ring-[#D1D5DB]"
+        disabled={disabled}
+        className="mt-1 h-4 w-4 rounded border-[#D1D5DB] text-[#18181B] focus:ring-[#D1D5DB] disabled:cursor-not-allowed"
       />
       <span className="space-y-1">
         <span className="block text-sm font-medium text-[#111827]">{label}</span>
@@ -290,9 +296,10 @@ export function ConfiguracionGeneralForm({ config }: { config: ConfiguracionGene
             <CheckboxField
               id="catalogo_auto_publicar_stock"
               name="catalogo_auto_publicar_stock"
-              label="Auto-publicar stock en catálogo"
+              label="Auto-publicar stock en catálogo (Próximamente)"
               defaultChecked={Boolean(config.catalogo_auto_publicar_stock)}
-              helpText="Preparado para automatizar publicaciones del inventario."
+              helpText="Disponible próximamente."
+              disabled
             />
           </div>
         </section>

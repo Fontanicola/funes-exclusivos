@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ConversacionesTable } from "@/components/whatsapp/conversaciones-table";
 import { WhatsappConnectionAlert } from "@/components/whatsapp/whatsapp-connection-alert";
 import { WhatsappInstancesGrid } from "@/components/whatsapp/whatsapp-instances-grid";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
   title: "WhatsApp | Funes Exclusivos",
@@ -177,32 +178,36 @@ export default async function WhatsappPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { data: currentEmployee } = user
-      ? await supabase
+    const currentEmployeeQuery = user
+      ? supabase
           .from("empleados")
           .select("id,nombre,email,rol,activo")
           .eq("id", user.id)
           .maybeSingle<{ id: string; nombre: string | null; email: string | null; rol: string | null; activo: boolean | null }>()
-      : { data: null };
+      : Promise.resolve({ data: null });
 
-    canManageAll = currentEmployee?.rol === "admin" && currentEmployee?.activo === true;
-
-    const [instancesResult, conversationsResult] = await Promise.all([
+    const [currentEmployeeResult, instancesResult, conversationsResult] = await Promise.all([
+      currentEmployeeQuery,
       supabase
         .from("whatsapp_instancias")
         .select(
           "id,empleado_id,provider,instance_name,estado,telefono_conectado,nombre_perfil,qr_code,qr_base64,qr_expires_at,last_connection_at,last_disconnection_at,last_sync_at,last_error,activo,created_at,empleado:empleados!whatsapp_instancias_empleado_id_fkey(id,nombre,email,rol)"
         )
         .eq("activo", true)
-        .order("created_at", { ascending: true }),
+        .order("created_at", { ascending: true })
+        .limit(100),
       supabase
         .from("conversaciones")
         .select(
           "id,whatsapp_instancia_id,lead_id,vendedor_id,vehiculo_interes_id,canal,estado,contacto_nombre,contacto_telefono,contacto_numero_normalizado,contacto_email,ultimo_mensaje_at,last_message_preview,mensajes_count,unread_count,resumen_ia,interes_compra,ia_estado,ia_resumen,ia_interes_compra,ia_score,ia_intencion,ia_proximo_paso,ia_procesado_at,ia_modelo,ia_error,intencion_detectada,proxima_accion_sugerida,requiere_atencion,created_at,instancia:whatsapp_instancias!conversaciones_whatsapp_instancia_id_fkey(id,instance_name,estado,telefono_conectado),lead:leads!conversaciones_lead_id_fkey(id,nombre,telefono,email,estado,origen),vendedor:empleados!conversaciones_vendedor_id_fkey(id,nombre,email,rol),vehiculo:vehiculos!conversaciones_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio)"
         )
       .order("ultimo_mensaje_at", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .limit(100),
     ]);
+
+    const currentEmployee = currentEmployeeResult.data;
+    canManageAll = currentEmployee?.rol === "admin" && currentEmployee?.activo === true;
 
     instancias = ((instancesResult.data ?? []) as unknown as RawInstance[]).map((instance) => ({
       ...instance,
@@ -229,17 +234,11 @@ export default async function WhatsappPage() {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
-              WhatsApp
-            </h1>
-            <p className="text-sm leading-6 text-[#6B7280]">
-              Instancias conectadas, conversaciones y seguimiento comercial
-            </p>
-          </div>
-
+      <PageHeader
+        eyebrow="Canal comercial"
+        title="WhatsApp"
+        description="Instancias conectadas, conversaciones y seguimiento comercial."
+        action={
           <Link
             href="/whatsapp/conexiones"
             className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
@@ -247,13 +246,13 @@ export default async function WhatsappPage() {
             <Plus className="h-4 w-4" />
             Conexiones
           </Link>
+        }
+      />
+      {isDemoMode ? (
+        <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+          Modo demo: la bandeja de WhatsApp es mock y no se consultará Evolution API.
         </div>
-        {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: la bandeja de WhatsApp es mock y no se consultará Evolution API.
-          </div>
-        ) : null}
-      </header>
+      ) : null}
 
       <WhatsappConnectionAlert instancias={problematicInstances} />
 

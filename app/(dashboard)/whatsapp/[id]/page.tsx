@@ -73,11 +73,18 @@ type Conversation = {
 type Message = {
   id: string;
   conversacion_id: string | null;
-  tipo: string | null;
+  whatsapp_instancia_id?: string | null;
+  external_message_id?: string | null;
+  direccion?: string | null;
+  from_number?: string | null;
+  to_number?: string | null;
   body: string | null;
-  from_me: boolean | null;
-  direction: string | null;
+  message_type?: string | null;
+  tipo?: string | null;
+  direction?: string | null;
+  from_me?: boolean | null;
   sent_at: string | null;
+  raw_payload?: unknown | null;
   created_at: string | null;
   created_by: {
     id: string;
@@ -109,7 +116,7 @@ export async function generateMetadata({
   params: { id: string };
 }): Promise<Metadata> {
   return {
-    title: `WhatsApp ${params.id} | Funes Exclusivos`,
+    title: "Conversación WhatsApp | Funes Exclusivos",
   };
 }
 
@@ -137,7 +144,7 @@ export default async function WhatsappConversationPage({
         .maybeSingle(),
       supabase
         .from("conversacion_mensajes")
-        .select("id,conversacion_id,tipo,body,from_me,direction,sent_at,created_at,created_by:empleados!conversacion_mensajes_created_by_fkey(id,nombre,email,rol)")
+        .select("id,conversacion_id,whatsapp_instancia_id,external_message_id,direccion,from_number,to_number,body,message_type,sent_at,raw_payload,created_at,created_by:empleados!conversacion_mensajes_created_by_fkey(id,nombre,email,rol)")
         .eq("conversacion_id", params.id)
         .order("sent_at", { ascending: true }),
     ]);
@@ -156,7 +163,7 @@ export default async function WhatsappConversationPage({
     messages = ((messagesResult.data ?? []) as unknown as RawMessage[]).map((message) => ({
       ...message,
       created_by: normalizeSingleRelation(message.created_by),
-    }));
+    })) as Message[];
   }
 
   if (!conversation) {

@@ -96,19 +96,23 @@ export default async function PendientesEntregaPage() {
     })) as Entrega[];
   } else {
     const supabase = createSupabaseServerClient();
-    const [entregasResult, pagosResult] = await Promise.all([
-      supabase
-        .from("ventas_entregas")
-        .select(
-          "id,venta_id,estado,fecha_entrega,status_informe_vu,usado_credito,usado_informe_dominio,usado_multas,usado_patentes,usado_observaciones,observaciones,created_at,updated_at,venta:ventas!ventas_entregas_venta_id_fkey(id,fecha_venta,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,precio_venta,moneda,metodo_pago,monto_permuta,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio),vehiculo_recibido:vehiculos!ventas_vehiculo_recibido_id_fkey(id,marca,modelo,version,anio,dominio),vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email))"
-        )
-        .order("fecha_entrega", { ascending: true, nullsFirst: false })
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("ventas_pagos")
-        .select("id,venta_id,tipo,fecha,importe,moneda,medio,detalle")
-        .order("fecha", { ascending: true }),
-    ]);
+    const entregasResult = await supabase
+      .from("ventas_entregas")
+      .select(
+        "id,venta_id,estado,fecha_entrega,status_informe_vu,usado_credito,usado_informe_dominio,usado_multas,usado_patentes,usado_observaciones,observaciones,created_at,updated_at,venta:ventas!ventas_entregas_venta_id_fkey(id,fecha_venta,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,precio_venta,moneda,metodo_pago,monto_permuta,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio),vehiculo_recibido:vehiculos!ventas_vehiculo_recibido_id_fkey(id,marca,modelo,version,anio,dominio),vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email))"
+      )
+      .order("fecha_entrega", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(150);
+
+    const saleIds = ((entregasResult.data ?? []) as Array<{ venta_id: string | null }>).map((item) => item.venta_id).filter(Boolean) as string[];
+    const pagosResult = saleIds.length
+      ? await supabase
+          .from("ventas_pagos")
+          .select("id,venta_id,tipo,fecha,importe,moneda,medio,detalle")
+          .in("venta_id", saleIds)
+          .order("fecha", { ascending: true })
+      : { data: [] };
 
     const pagosPorVenta = new Map<string, Array<Record<string, any>>>();
     for (const pago of (pagosResult.data ?? []) as Array<Record<string, any>>) {

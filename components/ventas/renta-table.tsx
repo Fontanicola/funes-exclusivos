@@ -185,6 +185,7 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
   const [paymentFilter, setPaymentFilter] = useState<(typeof paymentMethods)[number]>("");
   const [deliveryFilter, setDeliveryFilter] = useState<(typeof deliveryFilters)[number]>("");
   const [resultFilter, setResultFilter] = useState<(typeof resultFilters)[number]>("");
+  const MAX_VISIBLE_ROWS = 200;
 
   const sellerOptions = useMemo(() => {
     const options = new Map<string, string>();
@@ -225,18 +226,21 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
     });
   }, [deliveryFilter, paymentFilter, query, resultFilter, rows, sellerFilter]);
 
+  const visibleRows = filteredRows.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filteredRows.length > MAX_VISIBLE_ROWS;
+
   return (
     <section className="rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-[#E5E7EB] p-4 xl:flex-row xl:items-end xl:justify-between">
+      <div className="space-y-4 border-b border-[#E5E7EB] p-4">
         <div className="space-y-2">
-          <h2 className="text-base font-semibold text-[#111827]">Operaciones de renta</h2>
+          <h2 className="text-base font-semibold text-[#111827]">Operaciones de rentabilidad</h2>
           <p className="text-sm leading-6 text-[#6B7280]">
-            Análisis por vehículo, pagos, gastos, margen y entrega.
+            Análisis de margen, pagos, gastos y resultado por operación.
           </p>
         </div>
 
-        <div className="grid gap-2 xl:grid-cols-[300px_180px_170px_170px_170px]">
-          <div className="relative">
+        <div className="flex flex-wrap gap-2">
+          <div className="relative min-w-[260px] flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
@@ -256,11 +260,11 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
             ) : null}
           </div>
 
-          <div className="relative">
+          <div className="relative min-w-[180px] flex-1 sm:flex-none">
             <select
               value={sellerFilter}
               onChange={(event) => setSellerFilter(event.target.value)}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
             >
               <option value="">Todos los vendedores</option>
               {sellerOptions.map(([id, label]) => (
@@ -271,11 +275,11 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
             </select>
           </div>
 
-          <div className="relative">
+          <div className="relative min-w-[170px] flex-1 sm:flex-none">
             <select
               value={paymentFilter}
               onChange={(event) => setPaymentFilter(event.target.value as (typeof paymentMethods)[number])}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
             >
               <option value="">Todos los pagos</option>
               <option value="transferencia">Transferencia</option>
@@ -286,11 +290,11 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
             </select>
           </div>
 
-          <div className="relative">
+          <div className="relative min-w-[170px] flex-1 sm:flex-none">
             <select
               value={deliveryFilter}
               onChange={(event) => setDeliveryFilter(event.target.value as (typeof deliveryFilters)[number])}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
             >
               <option value="">Todas las entregas</option>
               <option value="pendiente">Pendiente</option>
@@ -300,11 +304,11 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
             </select>
           </div>
 
-          <div className="relative">
+          <div className="relative min-w-[170px] flex-1 sm:flex-none">
             <select
               value={resultFilter}
               onChange={(event) => setResultFilter(event.target.value as (typeof resultFilters)[number])}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
             >
               <option value="">Todos los resultados</option>
               <option value="positive">Positivo</option>
@@ -332,8 +336,8 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filteredRows.length ? (
-              filteredRows.map((row) => {
+            {visibleRows.length ? (
+              visibleRows.map((row) => {
                 const vehicle = getVehicleSummary(row);
 
                 return (
@@ -431,6 +435,12 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

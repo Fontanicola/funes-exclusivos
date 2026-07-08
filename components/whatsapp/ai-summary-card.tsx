@@ -87,7 +87,7 @@ export function AiSummaryCard({ conversation }: { conversation: Conversation }) 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-[#FBFBFC] p-5 shadow-sm">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-white px-2.5 py-1 text-xs font-medium text-[#111827]">
               {getStatusLabel(conversation.ia_estado)}
@@ -107,7 +107,7 @@ export function AiSummaryCard({ conversation }: { conversation: Conversation }) 
           </p>
         </div>
 
-        <form ref={formRef} action={formAction}>
+        <form ref={formRef} action={formAction} className="w-full md:w-auto md:flex-none md:shrink-0 md:self-start">
           <input type="hidden" name="conversation_id" value={conversation.id} />
           <SubmitButton hasSummary={hasSummary} />
         </form>

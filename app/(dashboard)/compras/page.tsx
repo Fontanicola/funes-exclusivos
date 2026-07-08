@@ -70,7 +70,8 @@ export default async function ComprasPage() {
         "id,vehiculo_id,proveedor_id,fecha,nro_operacion,precio_compra,precio_boleto,moneda,diferencia_b,deuda_pendiente,observaciones,created_at,vehiculo:vehiculos!compras_vehiculos_vehiculo_id_fkey(id,marca,modelo,version,anio,color,km,dominio,estado,costo_adquisicion,costo_moneda,fecha_compra,nro_operacion),proveedor:proveedores!compras_vehiculos_proveedor_id_fkey(id,nombre,categoria,telefono)"
       )
       .order("fecha", { ascending: false })
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(150);
 
     compras = ((data ?? []) as RawCompra[]).map((compra) => ({
       ...compra,

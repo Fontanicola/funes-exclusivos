@@ -139,6 +139,7 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
   const [query, setQuery] = useState("");
   const [methodFilter, setMethodFilter] = useState<(typeof paymentMethods)[number]>("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
+  const MAX_VISIBLE_ROWS = 200;
 
   const filteredVentas = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -170,6 +171,9 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
       return searchable.includes(normalizedQuery);
     });
   }, [methodFilter, query, statusFilter, ventas]);
+
+  const visibleVentas = filteredVentas.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filteredVentas.length > MAX_VISIBLE_ROWS;
 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
@@ -247,8 +251,8 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filteredVentas.length ? (
-              filteredVentas.map((venta) => {
+            {visibleVentas.length ? (
+              visibleVentas.map((venta) => {
                 const vehicle = getVehicleSummary(venta);
 
                 return (
@@ -304,8 +308,8 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
                         {venta.resultado_operativo != null || venta.rotacion_dias != null ? (
                           <p className="text-xs text-[#9CA3AF]">
                             {venta.resultado_operativo != null
-                              ? `Renta ${formatMoney(venta.resultado_operativo, venta.moneda)}`
-                              : "Renta sin dato"}
+                              ? `Rentabilidad ${formatMoney(venta.resultado_operativo, venta.moneda)}`
+                              : "Rentabilidad sin dato"}
                             {venta.rotacion_dias != null ? ` · ${venta.rotacion_dias} días` : ""}
                           </p>
                         ) : null}
@@ -353,6 +357,12 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

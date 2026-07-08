@@ -220,23 +220,26 @@ export default async function CajaPage() {
     const [movimientosResult, proveedoresResult, activosResult] = await Promise.all([
       supabase
         .from("caja_movimientos")
-        .select("*,proveedor:proveedores(id,nombre,categoria),activo:activos(id,tipo,nombre),compra:compras_vehiculos!caja_movimientos_compra_id_fkey(id,nro_operacion,fecha,vehiculo:vehiculos!compras_vehiculos_vehiculo_id_fkey(id,marca,modelo,dominio),proveedor:proveedores!compras_vehiculos_proveedor_id_fkey(id,nombre)),venta:ventas!caja_movimientos_venta_id_fkey(id,cliente_nombre,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio)),liquidacion:comision_liquidaciones!caja_movimientos_comision_liquidacion_id_fkey(id,periodo,neto_a_cobrar,vendedor:empleados!comision_liquidaciones_vendedor_id_fkey(id,nombre,email))")
+        .select("id,tipo,origen,compra_id,venta_id,venta_pago_id,comision_liquidacion_id,monto,importe,moneda,fecha,medio,concepto,detalle_1,detalle_2,detalle_3,periodo,cuenta,observaciones,created_at,proveedor:proveedores(id,nombre,categoria),activo:activos(id,tipo,nombre),compra:compras_vehiculos!caja_movimientos_compra_id_fkey(id,nro_operacion,fecha,vehiculo:vehiculos!compras_vehiculos_vehiculo_id_fkey(id,marca,modelo,dominio),proveedor:proveedores!compras_vehiculos_proveedor_id_fkey(id,nombre)),venta:ventas!caja_movimientos_venta_id_fkey(id,cliente_nombre,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio)),liquidacion:comision_liquidaciones!caja_movimientos_comision_liquidacion_id_fkey(id,periodo,neto_a_cobrar,vendedor:empleados!comision_liquidaciones_vendedor_id_fkey(id,nombre,email))")
         .order("fecha", { ascending: false })
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .limit(150),
       supabase
         .from("proveedores")
         .select("id,nombre,categoria")
         .eq("activo", true)
-        .order("nombre"),
+        .order("nombre")
+        .limit(100),
       supabase
         .from("activos")
         .select("id,tipo,nombre")
         .eq("activo", true)
         .order("tipo")
-        .order("nombre"),
+        .order("nombre")
+        .limit(100),
     ]);
 
-    movimientos = ((movimientosResult.data ?? []) as RawMovimiento[]).map((movimiento) => ({
+    movimientos = ((movimientosResult.data ?? []) as unknown as RawMovimiento[]).map((movimiento) => ({
       ...movimiento,
       proveedor: normalizeSingleRelation(movimiento.proveedor),
       activo: normalizeSingleRelation(movimiento.activo),

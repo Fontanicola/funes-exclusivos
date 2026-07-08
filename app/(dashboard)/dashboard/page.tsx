@@ -15,7 +15,6 @@ import {
   mockVehiculos,
   mockVentas,
   mockVentasEntregas,
-  mockVentasPagos,
   mockWhatsappInstancias,
   mockComprasVehiculos,
 } from "@/lib/mock-data";
@@ -28,6 +27,7 @@ import { CommercialSummary } from "@/components/dashboard/commercial-summary";
 import { OperationsSummary } from "@/components/dashboard/operations-summary";
 import { DashboardAlerts } from "@/components/dashboard/dashboard-alerts";
 import { VendorActivitySummary } from "@/components/dashboard/vendor-activity-summary";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +41,9 @@ type QueryResult<T> = {
 };
 
 type RawRelation<T> = T | T[] | null;
+
+const DASHBOARD_LIMIT = 200;
+const DASHBOARD_COMPACT_LIMIT = 100;
 
 function normalizeSingleRelation<T>(value: RawRelation<T>) {
   if (Array.isArray(value)) return value[0] ?? null;
@@ -66,13 +69,12 @@ async function safeSelect<T>(
 
 async function loadDashboardData() {
   if (isDemoMode) {
-    return {
-      vehiculos: mockVehiculos,
-      ventas: mockVentas,
-      ventasPagos: mockVentasPagos,
-      ventasEntregas: mockVentasEntregas,
-      vehiculoGastos: mockVehiculoGastos,
-      vehiculoDocumentos: mockVehiculoDocumentos,
+      return {
+        vehiculos: mockVehiculos,
+        ventas: mockVentas,
+        ventasEntregas: mockVentasEntregas,
+        vehiculoGastos: mockVehiculoGastos,
+        vehiculoDocumentos: mockVehiculoDocumentos,
       comprasVehiculos: mockComprasVehiculos,
       cajaMovimientos: mockCajaMovimientos,
       comisiones: mockComisiones,
@@ -92,7 +94,6 @@ async function loadDashboardData() {
   const [
     vehiculosResult,
     ventasResult,
-    ventasPagosResult,
     ventasEntregasResult,
     vehiculoGastosResult,
     vehiculoDocumentosResult,
@@ -115,6 +116,7 @@ async function loadDashboardData() {
           "id,estado,precio_venta,precio_contado,precio_permuta,precio_moneda,costo_adquisicion,costo_reposicion,costo_moneda,catalogo_publicado,catalogo_destacado,estado_preparacion,precio_infoauto_actual,fotos,created_at"
         )
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
     safeSelect(
       supabase
@@ -123,19 +125,21 @@ async function loadDashboardData() {
           "id,vehiculo_id,lead_id,vendedor_id,fecha_venta,precio_venta,moneda,estado,monto_permuta,costo_historico,costo_reposicion,precio_infoauto,info_historica_compra,margen_reposicion,margen_historico,rotacion_dias,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,created_at,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,costo_adquisicion,costo_moneda,costo_reposicion,precio_venta,precio_moneda),lead:leads!ventas_lead_id_fkey(id,nombre,origen,estado)"
         )
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
     safeSelect(
       supabase
-        .from("ventas_pagos")
-        .select("id,venta_id,tipo,fecha,importe,moneda,medio,detalle,created_at")
+        .from("ventas_entregas")
+        .select("id,venta_id,estado,fecha_entrega,created_at")
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
-    safeSelect(supabase.from("ventas_entregas").select("*").order("created_at", { ascending: false })),
     safeSelect(
       supabase
         .from("vehiculo_gastos")
         .select("id,vehiculo_id,tipo,monto,moneda,fecha,detalle,created_at")
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
     safeSelect(
       supabase
@@ -144,60 +148,70 @@ async function loadDashboardData() {
           "id,vehiculo_id,tipo,estado,titulo,descripcion,archivo_path,archivo_nombre,archivo_mime_type,archivo_size_bytes,fecha_emision,fecha_vencimiento,observaciones,created_at,vehiculo:vehiculos!vehiculo_documentos_vehiculo_id_fkey(id,marca,modelo,dominio,estado,estado_preparacion,fotos)"
         )
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
     safeSelect(
       supabase
         .from("compras_vehiculos")
         .select("id,vehiculo_id,proveedor_id,fecha,nro_operacion,precio_compra,precio_boleto,moneda,diferencia_b,deuda_pendiente,observaciones,created_at")
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
     safeSelect(
       supabase
         .from("caja_movimientos")
         .select("id,tipo,origen,compra_id,venta_id,venta_pago_id,comision_liquidacion_id,monto,importe,moneda,fecha,medio,cuenta,concepto,created_at")
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
     safeSelect(
       supabase
         .from("comisiones")
         .select("id,venta_id,vendedor_id,monto_comision,moneda,estado,fecha_generada,fecha_pago,created_at")
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_COMPACT_LIMIT)
     ),
     safeSelect(
       supabase
         .from("comision_liquidaciones")
         .select("id,vendedor_id,periodo,estado,moneda,neto_a_cobrar,fecha_pago,fecha_cierre,created_at")
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_COMPACT_LIMIT)
     ),
     safeSelect(
       supabase
         .from("leads")
         .select("id,estado,origen,vendedor_id,proximo_contacto,created_at")
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
     safeSelect(
       supabase
         .from("empleados")
         .select("id,nombre,email,rol,activo")
         .order("nombre", { ascending: true })
+        .limit(DASHBOARD_COMPACT_LIMIT)
     ),
     safeSelect(
       supabase
         .from("gestoria_tramites")
         .select("id,estado,fecha_vencimiento,created_at")
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
     safeSelect(
       supabase
         .from("gestoria_presupuestos")
         .select("id,estado,fecha,total,moneda,created_at")
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_COMPACT_LIMIT)
     ),
     safeSelect(
       supabase
         .from("whatsapp_instancias")
         .select("id,estado,last_sync_at,created_at,empleado:empleados!whatsapp_instancias_empleado_id_fkey(id,nombre,email,rol)")
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_COMPACT_LIMIT)
     ),
     safeSelect(
       supabase
@@ -206,6 +220,7 @@ async function loadDashboardData() {
           "id,estado,interes_compra,ia_interes_compra,ia_estado,ia_resumen,ia_score,ia_proximo_paso,ia_procesado_at,requiere_atencion,unread_count,created_at,vendedor_id"
         )
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
     safeSelect(
       supabase
@@ -213,6 +228,7 @@ async function loadDashboardData() {
         .select("id,tipo,estado,prioridad,titulo,descripcion,fecha_vencimiento,fecha_completado,fecha_pospuesto,asignado_a,lead_id,conversacion_id,venta_id,entrega_id,tramite_id,vehiculo_id,comision_liquidacion_id,origen_automatico,created_at,updated_at")
         .order("fecha_vencimiento", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false })
+        .limit(DASHBOARD_LIMIT)
     ),
   ]);
 
@@ -223,7 +239,6 @@ async function loadDashboardData() {
       vehiculo: normalizeSingleRelation((sale as { vehiculo?: unknown }).vehiculo as RawRelation<any>),
       lead: normalizeSingleRelation((sale as { lead?: unknown }).lead as RawRelation<any>),
     })),
-    ventasPagos: ventasPagosResult.data,
     ventasEntregas: ventasEntregasResult.data,
     vehiculoGastos: vehiculoGastosResult.data,
     vehiculoDocumentos: vehiculoDocumentosResult.data,
@@ -250,20 +265,11 @@ export default async function DashboardPage() {
 
   return (
     <section className="space-y-8">
-      <header className="flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <span className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
-            Executive view
-          </span>
-          <span className="text-sm text-[#6B7280]">P&amp;L en tiempo real</span>
-        </div>
-        <div className="max-w-3xl space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Dashboard</h1>
-          <p className="text-sm leading-6 text-[#6B7280]">
-            P&amp;L, operación comercial, inventario y estado general del negocio.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Executive view"
+        title="Dashboard"
+        description="P&L, operación comercial, inventario y estado general del negocio."
+      />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {metrics.topKpis.map((kpi, index) => (

@@ -73,7 +73,8 @@ async function loadCatalogoPublico() {
       .eq("catalogo_publicado", true)
       .order("catalogo_destacado", { ascending: false, nullsFirst: false })
       .order("catalogo_orden", { ascending: true, nullsFirst: false })
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .limit(200),
   ]);
 
   return {

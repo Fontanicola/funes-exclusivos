@@ -199,7 +199,7 @@ export function WhatsappInstanceCard({
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-sm font-semibold text-[#111827]">{getEmployeeName(instance)}</p>
-          <p className="text-xs text-[#6B7280]">{instance.instance_name ?? "Sin instancia"}</p>
+          <p className="text-xs text-[#6B7280]">Cuenta de WhatsApp</p>
         </div>
         <WhatsappInstanceStatusBadge status={instance.estado} />
       </div>

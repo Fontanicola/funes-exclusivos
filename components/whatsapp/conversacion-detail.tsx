@@ -167,6 +167,12 @@ function getVehicleSubtitle(vehicle: Conversation["vehiculo"]) {
     .join(" · ");
 }
 
+function formatUnreadCount(value: number | null) {
+  if (!value || value <= 0) return "Sin leer";
+  if (value === 1) return "1 no leído";
+  return `${value} no leídos`;
+}
+
 function MarkReadButton({ conversationId }: { conversationId: string }) {
   const [state, formAction] = useFormState(markConversationAsReadAction, initialState);
 
@@ -232,9 +238,9 @@ export function ConversacionDetail({ conversation }: { conversation: Conversatio
                 </p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Instancia / vendedor</p>
+                <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Cuenta / vendedor</p>
                 <p className="mt-1 text-sm text-[#111827]">
-                  {conversation.instancia?.instance_name ?? "Sin instancia"}
+                  {conversation.instancia?.telefono_conectado ?? "Cuenta vinculada"}
                 </p>
                 <p className="text-sm text-[#6B7280]">
                   {conversation.vendedor?.nombre ?? conversation.vendedor?.email ?? "—"}
@@ -278,7 +284,7 @@ export function ConversacionDetail({ conversation }: { conversation: Conversatio
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <MarkReadButton conversationId={conversation.id} />
               <div className="text-xs text-[#6B7280]">
-                Unread: {conversation.unread_count ?? 0}
+                {formatUnreadCount(conversation.unread_count)}
               </div>
             </div>
           </section>

@@ -146,6 +146,7 @@ export function CajaMovimientosTable({ movimientos }: { movimientos: Movimiento[
   const [tipoFilter, setTipoFilter] = useState("");
   const [origenFilter, setOrigenFilter] = useState("");
   const [monedaFilter, setMonedaFilter] = useState("");
+  const MAX_VISIBLE_ROWS = 200;
 
   const filtered = useMemo(() => {
     const normalizedQuery = sameSearch(query.trim());
@@ -192,6 +193,9 @@ export function CajaMovimientosTable({ movimientos }: { movimientos: Movimiento[
       return matchesQuery && matchesTipo && matchesOrigen && matchesMoneda;
     });
   }, [movimientos, monedaFilter, origenFilter, query, tipoFilter]);
+
+  const visibleMovimientos = filtered.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
@@ -261,8 +265,8 @@ export function CajaMovimientosTable({ movimientos }: { movimientos: Movimiento[
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filtered.length ? (
-              filtered.map((movimiento) => (
+            {visibleMovimientos.length ? (
+              visibleMovimientos.map((movimiento) => (
                 <tr key={movimiento.id} className="transition hover:bg-[#F9FAFB]">
                   <td className="whitespace-nowrap px-4 py-3 text-[#111827]">
                     {formatDate(movimiento.fecha)}
@@ -358,6 +362,12 @@ export function CajaMovimientosTable({ movimientos }: { movimientos: Movimiento[
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

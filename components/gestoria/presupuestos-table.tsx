@@ -90,6 +90,7 @@ export function PresupuestosTable({ presupuestos }: { presupuestos: Presupuesto[
   const [query, setQuery] = useState("");
   const [stateFilter, setStateFilter] = useState<(typeof states)[number]>("");
   const [currencyFilter, setCurrencyFilter] = useState<(typeof currencies)[number]>("");
+  const MAX_VISIBLE_ROWS = 200;
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -116,6 +117,9 @@ export function PresupuestosTable({ presupuestos }: { presupuestos: Presupuesto[
       return searchable.includes(normalizedQuery);
     });
   }, [currencyFilter, presupuestos, query, stateFilter]);
+
+  const visiblePresupuestos = filtered.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
     <section className="rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
@@ -188,8 +192,8 @@ export function PresupuestosTable({ presupuestos }: { presupuestos: Presupuesto[
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filtered.length ? (
-              filtered.map((presupuesto) => (
+            {visiblePresupuestos.length ? (
+              visiblePresupuestos.map((presupuesto) => (
                 <tr key={presupuesto.id} className="transition hover:bg-[#F9FAFB]">
                   <td className="px-4 py-3 align-top text-sm text-[#111827]">{formatDate(presupuesto.fecha)}</td>
                   <td className="px-4 py-3 align-top">
@@ -245,6 +249,12 @@ export function PresupuestosTable({ presupuestos }: { presupuestos: Presupuesto[
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

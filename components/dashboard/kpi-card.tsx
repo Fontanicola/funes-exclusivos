@@ -22,7 +22,7 @@ type KpiCardProps = {
 
 const toneClasses: Record<KpiTone, { shell: string; title: string; accent: string; badge: string }> = {
   neutral: {
-    shell: "border-[#E5E7EB] bg-white",
+    shell: "border-[#E5E7EB] bg-white/95",
     title: "text-[#111827]",
     accent: "bg-[#111827]",
     badge: "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]",
@@ -34,25 +34,25 @@ const toneClasses: Record<KpiTone, { shell: string; title: string; accent: strin
     badge: "border-white/15 bg-white/10 text-white/80",
   },
   success: {
-    shell: "border-emerald-200 bg-emerald-50/80",
+    shell: "border-emerald-200 bg-emerald-50/70",
     title: "text-emerald-950",
     accent: "bg-emerald-500",
     badge: "border-emerald-200 bg-white text-emerald-700",
   },
   warning: {
-    shell: "border-amber-200 bg-amber-50/80",
+    shell: "border-amber-200 bg-amber-50/70",
     title: "text-amber-950",
     accent: "bg-amber-500",
     badge: "border-amber-200 bg-white text-amber-700",
   },
   critical: {
-    shell: "border-rose-200 bg-rose-50/80",
+    shell: "border-rose-200 bg-rose-50/70",
     title: "text-rose-950",
     accent: "bg-rose-500",
     badge: "border-rose-200 bg-white text-rose-700",
   },
   info: {
-    shell: "border-slate-200 bg-slate-50/80",
+    shell: "border-slate-200 bg-slate-50/70",
     title: "text-slate-950",
     accent: "bg-slate-500",
     badge: "border-slate-200 bg-white text-slate-700",
@@ -130,13 +130,21 @@ export function KpiCard({
   const content = (
     <article
       className={[
-        "group relative h-full overflow-hidden rounded-[28px] border shadow-sm transition",
+        "group relative h-full overflow-hidden rounded-[28px] border shadow-[0_10px_30px_rgba(15,23,42,0.04)] transition",
         classes.shell,
         featured ? "p-6" : "p-5",
-        resolvedTone === "highlight" ? "shadow-lg shadow-black/10" : "hover:-translate-y-0.5 hover:shadow-md",
+        resolvedTone === "highlight"
+          ? "shadow-[0_16px_40px_rgba(15,23,42,0.12)]"
+          : "hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgba(15,23,42,0.08)]",
         className,
       ].join(" ")}
     >
+      <span
+        className={[
+          "absolute left-5 top-0 h-1.5 w-16 rounded-b-full",
+          classes.accent,
+        ].join(" ")}
+      />
       <div className="relative z-10 flex h-full flex-col justify-between gap-6">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-3">

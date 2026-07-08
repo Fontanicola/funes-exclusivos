@@ -83,6 +83,7 @@ export function ComisionesTable({ comisiones }: { comisiones: Comision[] }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
   const [currencyFilter, setCurrencyFilter] = useState<(typeof currencies)[number]>("");
+  const MAX_VISIBLE_ROWS = 200;
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -107,6 +108,9 @@ export function ComisionesTable({ comisiones }: { comisiones: Comision[] }) {
       return searchable.includes(normalizedQuery);
     });
   }, [comisiones, currencyFilter, query, statusFilter]);
+
+  const visibleComisiones = filtered.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
@@ -178,8 +182,8 @@ export function ComisionesTable({ comisiones }: { comisiones: Comision[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filtered.length ? (
-              filtered.map((comision) => {
+            {visibleComisiones.length ? (
+              visibleComisiones.map((comision) => {
                 const vehicle = getVehicleSummary(comision);
 
                 return (
@@ -235,6 +239,12 @@ export function ComisionesTable({ comisiones }: { comisiones: Comision[] }) {
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Plus } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleado, mockProveedores, mockVehiculos } from "@/lib/mock-data";
 import { canManageInventory } from "@/lib/auth/permissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { InventarioTable } from "@/components/inventario/inventario-table";
+import { PageHeader, PrimaryPageAction } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
   title: "Inventario | Funes Exclusivos",
@@ -86,12 +86,14 @@ export default async function InventarioPage() {
         .select(
           "id,marca,modelo,version,anio,color,km,dominio,motor,ubicacion,nro_operacion,proveedor_id,fecha_compra,costo_adquisicion,costo_moneda,precio_venta,precio_moneda,precio_infoauto_compra,precio_infoauto_actual,precio_infoauto_anterior,precio_permuta,precio_contado,costo_reposicion,estado,estado_preparacion,chapero,preparacion_comentarios,publicado_mercadolibre,publicado_rodados_google,fotos,fecha_ingreso,created_at"
         )
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .limit(200),
       supabase
         .from("proveedores")
         .select("id,nombre,categoria")
         .eq("activo", true)
-        .order("nombre"),
+        .order("nombre")
+        .limit(100),
       supabase.auth.getUser(),
     ]);
 
@@ -114,37 +116,30 @@ export default async function InventarioPage() {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
-              Inventario
-            </h1>
-            <p className="text-sm leading-6 text-[#6B7280]">
-              Stock y lista de precios unificada
-            </p>
-          </div>
-
-          {canEditInventory ? (
-            <Link
-              href="/inventario/nuevo"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
-            >
-              <Plus className="h-4 w-4" />
-              Nuevo vehículo
-            </Link>
+      <PageHeader
+        eyebrow="Operación"
+        title="Inventario"
+        description="Stock y lista de precios unificada."
+        action={
+          canEditInventory ? (
+            <PrimaryPageAction href="/inventario/nuevo">
+              <span className="inline-flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Nuevo vehículo
+              </span>
+            </PrimaryPageAction>
           ) : (
             <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
               Solo lectura para tu rol.
             </div>
-          )}
+          )
+        }
+      />
+      {isDemoMode ? (
+        <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+          Modo demo: los datos son mock y no se guardará nada en Supabase.
         </div>
-        {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: los datos son mock y no se guardará nada en Supabase.
-          </div>
-        ) : null}
-      </header>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">

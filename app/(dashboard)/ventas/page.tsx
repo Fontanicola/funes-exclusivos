@@ -6,6 +6,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleado, mockVentas } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VentasTable } from "@/components/ventas/ventas-table";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
   title: "Ventas | Funes Exclusivos",
@@ -198,7 +199,8 @@ export default async function VentasPage() {
           "id,fecha_venta,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,precio_venta,moneda,metodo_pago,estado,monto_permuta,precio_infoauto,info_historica_compra,costo_reposicion,costo_historico,margen_reposicion,margen_historico,rotacion_dias,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,created_at,vehiculo_id,lead_id,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio,fotos),vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email,rol),lead:leads!ventas_lead_id_fkey(id,nombre,telefono,origen,estado)"
         )
         .order("fecha_venta", { ascending: false })
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .limit(150),
       supabase.auth.getUser(),
     ]);
 
@@ -260,17 +262,11 @@ export default async function VentasPage() {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
-              Ventas
-            </h1>
-            <p className="text-sm leading-6 text-[#6B7280]">
-              Registro de operaciones y renta por vehículo
-            </p>
-          </div>
-
+      <PageHeader
+        eyebrow="Operación comercial"
+        title="Ventas"
+        description="Registro de operaciones y rentabilidad por vehículo."
+        action={
           <div className="flex flex-wrap gap-2">
             <Link
               href="/ventas/pendientes-entrega"
@@ -283,29 +279,29 @@ export default async function VentasPage() {
               className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
             >
               <BarChart3 className="h-4 w-4" />
-              Renta
+              Rentabilidad
             </Link>
-          {canCreateSale ? (
-            <Link
-              href="/ventas/nueva"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
-            >
-              <Plus className="h-4 w-4" />
-              Nueva venta
-            </Link>
-          ) : (
-            <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-              Solo lectura para tu rol.
-            </div>
-          )}
-        </div>
-        </div>
-        {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: los datos son mock y no se guardará nada en Supabase.
+            {canCreateSale ? (
+              <Link
+                href="/ventas/nueva"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
+              >
+                <Plus className="h-4 w-4" />
+                Nueva venta
+              </Link>
+            ) : (
+              <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+                Solo lectura para tu rol.
+              </div>
+            )}
           </div>
-        ) : null}
-      </header>
+        }
+      />
+      {isDemoMode ? (
+        <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+          Modo demo: los datos son mock y no se guardará nada en Supabase.
+        </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">

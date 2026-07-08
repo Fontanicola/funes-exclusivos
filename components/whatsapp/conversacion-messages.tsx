@@ -1,10 +1,15 @@
 type Message = {
   id: string;
   conversacion_id: string | null;
-  tipo: string | null;
+  external_message_id?: string | null;
+  direccion?: string | null;
+  from_number?: string | null;
+  to_number?: string | null;
   body: string | null;
-  from_me: boolean | null;
-  direction: string | null;
+  message_type?: string | null;
+  tipo?: string | null;
+  direction?: string | null;
+  from_me?: boolean | null;
   sent_at: string | null;
   created_at: string | null;
   created_by: {
@@ -27,6 +32,26 @@ function formatDateTime(value: string | null) {
     minute: "2-digit",
     timeZone: "America/Argentina/Buenos_Aires",
   }).format(date);
+}
+
+function getMessageDirection(message: Message) {
+  const direction = (message.direccion ?? message.direction ?? "").toLowerCase();
+  if (!direction && typeof message.from_me === "boolean") {
+    return message.from_me ? "saliente" : "entrante";
+  }
+  if (direction === "saliente" || direction === "outbound") return "saliente";
+  if (direction === "entrante" || direction === "inbound") return "entrante";
+  return "entrante";
+}
+
+function getMessageTypeLabel(messageType: string | null) {
+  const value = (messageType ?? "").toLowerCase();
+  if (!value || value === "texto" || value === "text") return "Texto";
+  if (value === "image" || value === "imagen") return "Imagen";
+  if (value === "audio") return "Audio";
+  if (value === "document" || value === "documento") return "Documento";
+  if (value === "sticker") return "Sticker";
+  return messageType ?? "Mensaje";
 }
 
 function getAuthorName(message: Message) {
@@ -53,7 +78,8 @@ export function ConversacionMessages({ messages }: { messages: Message[] }) {
 
       <div className="mt-4 space-y-4">
         {messages.map((message) => {
-          const isOutgoing = Boolean(message.from_me);
+          const isOutgoing = getMessageDirection(message) === "saliente";
+          const fallbackBody = message.body?.trim() || getMessageTypeLabel(message.message_type ?? message.tipo ?? null);
 
           return (
             <article
@@ -73,11 +99,11 @@ export function ConversacionMessages({ messages }: { messages: Message[] }) {
               >
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-xs font-medium uppercase tracking-[0.12em] text-[#6B7280]">
-                    {message.tipo && message.tipo !== "texto" ? message.tipo : "Texto"}
+                    {getMessageTypeLabel(message.message_type ?? message.tipo ?? null)}
                   </p>
                   <p className="text-xs text-[#6B7280]">{formatDateTime(message.sent_at ?? message.created_at)}</p>
                 </div>
-                <p className="mt-2 text-sm leading-6 text-[#111827]">{message.body ?? "—"}</p>
+                <p className="mt-2 text-sm leading-6 text-[#111827]">{fallbackBody}</p>
                 {message.created_by ? (
                   <p className="mt-2 text-xs text-[#6B7280]">{getAuthorName(message)}</p>
                 ) : null}

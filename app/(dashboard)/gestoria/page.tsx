@@ -116,7 +116,8 @@ export default async function GestoriaPage() {
         "id,tipo,estado,titulo,descripcion,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,fecha_inicio,fecha_vencimiento,fecha_finalizacion,documentos,observaciones,created_at,vehiculo:vehiculos!gestoria_tramites_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio),venta:ventas!gestoria_tramites_venta_id_fkey(id,fecha_venta,cliente_nombre),responsable:empleados!gestoria_tramites_responsable_id_fkey(id,nombre,email,rol)"
       )
       .order("fecha_vencimiento", { ascending: true, nullsFirst: false })
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(150);
 
     tramites = ((data ?? []) as RawGestoriaTramite[]).map((tramite) => ({
       ...tramite,

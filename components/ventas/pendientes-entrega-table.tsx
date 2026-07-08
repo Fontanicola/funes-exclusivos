@@ -164,6 +164,7 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
   const [withUsedFilter, setWithUsedFilter] = useState(false);
   const [withPendingBalanceFilter, setWithPendingBalanceFilter] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
+  const MAX_VISIBLE_ROWS = 200;
 
   const filteredEntregas = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -201,6 +202,9 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
       return searchable.includes(normalizedQuery);
     });
   }, [query, statusFilter, withPendingBalanceFilter, withUsedFilter, entregas]);
+
+  const visibleEntregas = filteredEntregas.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filteredEntregas.length > MAX_VISIBLE_ROWS;
 
   return (
     <section className="rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm">
@@ -295,8 +299,8 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filteredEntregas.length ? (
-              filteredEntregas.map((entrega) => {
+            {visibleEntregas.length ? (
+              visibleEntregas.map((entrega) => {
                 const operationDate = formatDate(entrega.venta?.fecha_venta ?? null);
                 const seller = getSellerName(entrega);
                 const vehicle = getVehicleSummary(entrega);
@@ -433,6 +437,12 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }

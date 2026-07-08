@@ -104,13 +104,15 @@ export default async function WhatsappConnectionsPage() {
           "id,empleado_id,provider,instance_name,estado,telefono_conectado,nombre_perfil,qr_code,qr_base64,qr_expires_at,last_connection_at,last_disconnection_at,last_sync_at,last_error,activo,created_at,empleado:empleados!whatsapp_instancias_empleado_id_fkey(id,nombre,email,rol)"
         )
         .eq("activo", true)
-        .order("created_at", { ascending: true }),
+        .order("created_at", { ascending: true })
+        .limit(100),
       supabase
         .from("empleados")
         .select("id,nombre,email,rol")
         .eq("activo", true)
         .in("rol", ["vendedor", "admin"])
-        .order("nombre"),
+        .order("nombre")
+        .limit(100),
     ]);
 
     instancias = ((instancesResult.data ?? []) as unknown as RawInstance[]).map((instance) => ({

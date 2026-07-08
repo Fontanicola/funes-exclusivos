@@ -9,14 +9,18 @@
 }
 
 html {
-  background: var(--background);
+  background: #f9fafb;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--background);
+  background: linear-gradient(180deg, #f9fafb 0%, #ffffff 18%);
   color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 * {
@@ -33,4 +37,37 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+::selection {
+  background: rgba(17, 24, 39, 0.12);
+  color: #111827;
+}
+
+:focus-visible {
+  outline: none;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f9fafb;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border: 3px solid #f9fafb;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }

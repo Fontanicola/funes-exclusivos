@@ -220,6 +220,27 @@ function extractMessageBody(source: Record<string, unknown> | null) {
   );
 }
 
+function normalizeMessageType(rawType: string | null, message: Record<string, unknown> | null) {
+  const normalized = (rawType ?? "").toLowerCase();
+  if (["text", "texto", "conversation", "extendedtextmessage"].includes(normalized)) return "text";
+  if (["image", "imagen", "imagemessage"].includes(normalized)) return "image";
+  if (["audio", "audiomessage", "ptt"].includes(normalized)) return "audio";
+  if (["document", "documento", "documentmessage"].includes(normalized)) return "document";
+  if (["sticker", "stickermessage"].includes(normalized)) return "sticker";
+  if (["video", "videomessage"].includes(normalized)) return "video";
+
+  if (message) {
+    if ("extendedTextMessage" in message || "conversation" in message) return "text";
+    if ("imageMessage" in message) return "image";
+    if ("audioMessage" in message) return "audio";
+    if ("documentMessage" in message) return "document";
+    if ("stickerMessage" in message) return "sticker";
+    if ("videoMessage" in message) return "video";
+  }
+
+  return normalized || "unknown";
+}
+
 function extractTimestamp(value: unknown) {
   if (typeof value === "number" && Number.isFinite(value)) {
     return new Date(value * 1000).toISOString();
@@ -312,7 +333,7 @@ export function normalizeMessagePayload(payload: EvolutionWebhookPayload): Norma
     contactPhone: senderNumber,
     contactName,
     body: body ?? null,
-    messageType,
+    messageType: normalizeMessageType(messageType, message),
     sentAt,
     rawPayload: payload,
     isGroup,

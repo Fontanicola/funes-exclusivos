@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockComisiones } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -71,19 +72,17 @@ function formatMoney(value: number, currency: string | null) {
   const isoCurrency = (currency ?? "").toLowerCase() === "usd" ? "USD" : "ARS";
   const symbol = isoCurrency === "USD" ? "US$" : "$";
   const formatted = new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: isoCurrency,
     maximumFractionDigits: 0,
   }).format(value);
 
-  return formatted.replace("US$", symbol).replace("$", symbol);
+  return `${symbol} ${formatted}`;
 }
 
 function formatBreakdown(groups: CurrencyTotal[]) {
   if (!groups.length) return "—";
 
   return groups
-    .map((group) => `${group.currency} ${formatMoney(group.total, group.currency)}`)
+    .map((group) => formatMoney(group.total, group.currency))
     .join(" · ");
 }
 
@@ -140,7 +139,8 @@ export default async function ComisionesPage() {
         "id,venta_id,vendedor_id,base_comision,porcentaje,monto_comision,moneda,estado,fecha_generada,fecha_pago,observaciones,created_at,vendedor:empleados!comisiones_vendedor_id_fkey(id,nombre,email,rol),venta:ventas!comisiones_venta_id_fkey(id,fecha_venta,cliente_nombre,precio_venta,moneda,metodo_pago,estado,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio))"
       )
       .order("fecha_generada", { ascending: false })
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(150);
 
     comisiones = ((data ?? []) as unknown as RawComision[]).map((comision) => ({
       ...comision,
@@ -159,13 +159,22 @@ export default async function ComisionesPage() {
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <div className="space-y-2">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
             Comisiones
           </h1>
           <p className="text-sm leading-6 text-[#6B7280]">
             KPIs y comparativa comercial por vendedor
           </p>
+          </div>
+
+          <Link
+            href="/comisiones/liquidaciones"
+            className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+          >
+            Liquidaciones
+          </Link>
         </div>
         {isDemoMode ? (
           <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">

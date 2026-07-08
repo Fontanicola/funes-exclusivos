@@ -119,6 +119,7 @@ export function InventarioTable({
 }) {
   const [query, setQuery] = useState("");
   const [onlyStock, setOnlyStock] = useState(false);
+  const MAX_VISIBLE_ROWS = 200;
 
   const filteredVehiculos = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -144,6 +145,9 @@ export function InventarioTable({
       return searchable.includes(normalizedQuery);
     });
   }, [onlyStock, query, vehiculos]);
+
+  const visibleVehiculos = filteredVehiculos.slice(0, MAX_VISIBLE_ROWS);
+  const hasMoreRows = filteredVehiculos.length > MAX_VISIBLE_ROWS;
 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
@@ -209,8 +213,8 @@ export function InventarioTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filteredVehiculos.length ? (
-              filteredVehiculos.map((vehiculo) => {
+            {visibleVehiculos.length ? (
+              visibleVehiculos.map((vehiculo) => {
                 const photoUrl = getPhotoUrl(vehiculo.fotos);
                 const initials = getInitials(vehiculo.marca, vehiculo.modelo);
                 const publishedMl = Boolean(vehiculo.publicado_mercadolibre);
@@ -366,6 +370,12 @@ export function InventarioTable({
           </tbody>
         </table>
       </div>
+
+      {hasMoreRows ? (
+        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
+          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
+        </div>
+      ) : null}
     </section>
   );
 }
