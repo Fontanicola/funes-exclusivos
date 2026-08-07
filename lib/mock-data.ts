@@ -1156,6 +1156,26 @@ export const mockGestoriaTramites = [
     fecha_inicio: "2026-07-01",
     fecha_vencimiento: "2026-07-10",
     fecha_finalizacion: null,
+    etapa: "presupuesto",
+    gestion_tipo: "interna",
+    fecha_envio: "2026-07-02",
+    fecha_firma: "2026-07-08",
+    costo_final_transferencia: 1180000,
+    costo_final_moneda: "ARS",
+    presupuesto_confirmado: false,
+    cat_estado: "pendiente",
+    cat_fecha: null,
+    documentacion_fisica_estado: "observado",
+    documentacion_fisica_fecha: null,
+    escribania_estado: "pendiente",
+    escribania_fecha_retiro: null,
+    transferencia_registral_estado: "pendiente",
+    transferencia_registral_fecha: null,
+    retiro_documentacion_cliente_estado: "pendiente",
+    retiro_documentacion_cliente_fecha: null,
+    transferencia_municipal_estado: "no_aplica",
+    transferencia_municipal_fecha: null,
+    seguimiento_comentarios: "Falta documentación física del comprador para avanzar con firma.",
     documentos: ["doc_1.pdf", "doc_2.jpg"],
     observaciones: "Esperando documentación completa del comprador.",
     created_at: "2026-07-01T10:20:00.000Z",
@@ -1187,6 +1207,26 @@ export const mockGestoriaTramites = [
     fecha_inicio: "2026-06-25",
     fecha_vencimiento: "2026-07-08",
     fecha_finalizacion: null,
+    etapa: "escribania",
+    gestion_tipo: "cliente",
+    fecha_envio: "2026-06-26",
+    fecha_firma: "2026-07-08",
+    costo_final_transferencia: 760000,
+    costo_final_moneda: "ARS",
+    presupuesto_confirmado: true,
+    cat_estado: "no_aplica",
+    cat_fecha: null,
+    documentacion_fisica_estado: "completado",
+    documentacion_fisica_fecha: "2026-07-02",
+    escribania_estado: "en_proceso",
+    escribania_fecha_retiro: null,
+    transferencia_registral_estado: "pendiente",
+    transferencia_registral_fecha: null,
+    retiro_documentacion_cliente_estado: "pendiente",
+    retiro_documentacion_cliente_fecha: null,
+    transferencia_municipal_estado: "no_aplica",
+    transferencia_municipal_fecha: null,
+    seguimiento_comentarios: "Cliente coordina retiro de escribanía. Confirmar retiro antes de pasar a gestoría.",
     documentos: ["doc_3.pdf"],
     observaciones: "A la espera de firma digital.",
     created_at: "2026-06-25T12:00:00.000Z",
@@ -1214,6 +1254,26 @@ export const mockGestoriaTramites = [
     fecha_inicio: "2026-06-20",
     fecha_vencimiento: "2026-07-04",
     fecha_finalizacion: null,
+    etapa: "gestoria",
+    gestion_tipo: "mixta",
+    fecha_envio: "2026-06-21",
+    fecha_firma: "2026-06-28",
+    costo_final_transferencia: 980000,
+    costo_final_moneda: "ARS",
+    presupuesto_confirmado: true,
+    cat_estado: "completado",
+    cat_fecha: "2026-06-29",
+    documentacion_fisica_estado: "observado",
+    documentacion_fisica_fecha: null,
+    escribania_estado: "completado",
+    escribania_fecha_retiro: "2026-06-30",
+    transferencia_registral_estado: "observado",
+    transferencia_registral_fecha: null,
+    retiro_documentacion_cliente_estado: "pendiente",
+    retiro_documentacion_cliente_fecha: null,
+    transferencia_municipal_estado: "pendiente",
+    transferencia_municipal_fecha: null,
+    seguimiento_comentarios: "Registro observó libre deuda. Falta certificado actualizado.",
     documentos: ["doc_4.png", "doc_5.pdf", "doc_6.pdf"],
     observaciones: "Observado por documentación incompleta.",
     created_at: "2026-06-20T09:45:00.000Z",
@@ -1241,6 +1301,26 @@ export const mockGestoriaTramites = [
     fecha_inicio: "2026-06-10",
     fecha_vencimiento: "2026-06-18",
     fecha_finalizacion: "2026-06-16",
+    etapa: "terminado",
+    gestion_tipo: "interna",
+    fecha_envio: "2026-06-11",
+    fecha_firma: "2026-06-13",
+    costo_final_transferencia: 420000,
+    costo_final_moneda: "ARS",
+    presupuesto_confirmado: true,
+    cat_estado: "no_aplica",
+    cat_fecha: null,
+    documentacion_fisica_estado: "completado",
+    documentacion_fisica_fecha: "2026-06-14",
+    escribania_estado: "completado",
+    escribania_fecha_retiro: "2026-06-15",
+    transferencia_registral_estado: "completado",
+    transferencia_registral_fecha: "2026-06-16",
+    retiro_documentacion_cliente_estado: "completado",
+    retiro_documentacion_cliente_fecha: "2026-06-17",
+    transferencia_municipal_estado: "no_aplica",
+    transferencia_municipal_fecha: null,
+    seguimiento_comentarios: "Trámite cerrado y documentación archivada.",
     documentos: ["doc_7.pdf"],
     observaciones: "Cerrado sin observaciones.",
     created_at: "2026-06-10T08:20:00.000Z",
@@ -1272,6 +1352,26 @@ export const mockGestoriaTramites = [
     fecha_inicio: "2026-05-30",
     fecha_vencimiento: "2026-06-07",
     fecha_finalizacion: "2026-06-02",
+    etapa: "terminado",
+    gestion_tipo: "cliente",
+    fecha_envio: "2026-05-31",
+    fecha_firma: null,
+    costo_final_transferencia: null,
+    costo_final_moneda: "ARS",
+    presupuesto_confirmado: false,
+    cat_estado: "no_aplica",
+    cat_fecha: null,
+    documentacion_fisica_estado: "no_aplica",
+    documentacion_fisica_fecha: null,
+    escribania_estado: "no_aplica",
+    escribania_fecha_retiro: null,
+    transferencia_registral_estado: "no_aplica",
+    transferencia_registral_fecha: null,
+    retiro_documentacion_cliente_estado: "no_aplica",
+    retiro_documentacion_cliente_fecha: null,
+    transferencia_municipal_estado: "no_aplica",
+    transferencia_municipal_fecha: null,
+    seguimiento_comentarios: "Operación cancelada antes de iniciar circuito registral.",
     documentos: ["doc_8.pdf", "doc_9.jpg"],
     observaciones: "Se archivó sin continuar.",
     created_at: "2026-05-30T16:30:00.000Z",
@@ -1299,6 +1399,26 @@ export const mockGestoriaTramites = [
     fecha_inicio: "2026-07-06",
     fecha_vencimiento: "2026-07-12",
     fecha_finalizacion: null,
+    etapa: "presupuesto",
+    gestion_tipo: "interna",
+    fecha_envio: null,
+    fecha_firma: null,
+    costo_final_transferencia: null,
+    costo_final_moneda: "ARS",
+    presupuesto_confirmado: false,
+    cat_estado: "no_aplica",
+    cat_fecha: null,
+    documentacion_fisica_estado: "pendiente",
+    documentacion_fisica_fecha: null,
+    escribania_estado: "no_aplica",
+    escribania_fecha_retiro: null,
+    transferencia_registral_estado: "pendiente",
+    transferencia_registral_fecha: null,
+    retiro_documentacion_cliente_estado: "pendiente",
+    retiro_documentacion_cliente_fecha: null,
+    transferencia_municipal_estado: "no_aplica",
+    transferencia_municipal_fecha: null,
+    seguimiento_comentarios: "Pendiente de cotización y documentación del cliente.",
     documentos: [],
     observaciones: "Pendiente de cotización de aseguradora.",
     created_at: "2026-07-06T12:10:00.000Z",
@@ -1955,6 +2075,37 @@ const mockMediosCaja = [
   "otro",
 ];
 
+function createMockCatalogPhoto(title: string, accent: string) {
+  const safeTitle = title.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="960" viewBox="0 0 1280 960" fill="none">
+      <defs>
+        <linearGradient id="bg" x1="90" y1="120" x2="1190" y2="860" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#FFFFFF"/>
+          <stop offset="0.55" stop-color="#F9FAFB"/>
+          <stop offset="1" stop-color="#E5E7EB"/>
+        </linearGradient>
+        <linearGradient id="accent" x1="180" y1="180" x2="1100" y2="780" gradientUnits="userSpaceOnUse">
+          <stop stop-color="${accent}" stop-opacity="0.95"/>
+          <stop offset="1" stop-color="#111827" stop-opacity="0.88"/>
+        </linearGradient>
+      </defs>
+      <rect width="1280" height="960" rx="48" fill="url(#bg)"/>
+      <circle cx="1020" cy="160" r="180" fill="${accent}" fill-opacity="0.08"/>
+      <circle cx="220" cy="760" r="220" fill="#111827" fill-opacity="0.04"/>
+      <rect x="120" y="140" width="1040" height="680" rx="42" fill="#FFFFFF" stroke="#E5E7EB"/>
+      <rect x="180" y="190" width="920" height="360" rx="34" fill="url(#accent)"/>
+      <path d="M240 554 C420 460, 610 420, 840 442 C960 454, 1030 492, 1080 530 L1080 610 L240 610 Z" fill="#111827" fill-opacity="0.1"/>
+      <text x="180" y="680" fill="#111827" font-size="54" font-weight="700" font-family="Arial, sans-serif">${safeTitle}</text>
+      <text x="180" y="732" fill="#6B7280" font-size="24" font-weight="500" font-family="Arial, sans-serif">Funes Exclusivos · Vidriera premium</text>
+      <rect x="180" y="780" width="190" height="54" rx="27" fill="#111827"/>
+      <text x="215" y="815" fill="#FFFFFF" font-size="22" font-weight="600" font-family="Arial, sans-serif">Consultar</text>
+    </svg>
+  `;
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
 mockVehiculos.forEach((vehiculo, index) => {
   const provider = mockProveedores[index % mockProveedores.length];
   Object.assign(vehiculo, {
@@ -1974,6 +2125,18 @@ mockVehiculos.forEach((vehiculo, index) => {
     preparacion_comentarios: index % 2 === 0 ? "Control de entrega y estética" : "Repaso final de interior y exterior",
     publicado_mercadolibre: index % 2 === 0,
     publicado_rodados_google: index % 3 !== 0,
+    fotos:
+      index === 0
+        ? [createMockCatalogPhoto("Porsche Macan S", "#111827")]
+        : index === 1
+          ? [createMockCatalogPhoto("BMW X3 xDrive30i", "#3F3F46")]
+          : index === 3
+            ? [createMockCatalogPhoto("Range Rover Evoque", "#6B7280")]
+            : index === 6
+              ? [createMockCatalogPhoto("Volvo XC60 B5", "#4B5563")]
+              : index === 7
+                ? [createMockCatalogPhoto("Toyota SW4 SRX", "#111827")]
+                : vehiculo.fotos,
   });
 });
 

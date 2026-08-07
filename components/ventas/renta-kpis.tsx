@@ -48,14 +48,14 @@ function BigMetric({
   values: RentaKpisData["resultadoOperativo"];
 }) {
   return (
-    <article className="rounded-3xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
+    <article className="rounded-md border border-[#E5E7EB] bg-white p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <p className="text-sm font-medium text-[#6B7280]">{title}</p>
           <p className="text-3xl font-semibold tracking-tight text-[#111827]">{value}</p>
           <p className="max-w-xl text-sm leading-6 text-[#6B7280]">{description}</p>
         </div>
-        <div className="min-w-36 flex-1 max-w-48 rounded-2xl border border-[#F3F4F6] bg-[#FAFAFA] p-3">
+        <div className="min-w-36 flex-1 max-w-48 rounded-md border border-[#F3F4F6] bg-[#FAFAFA] p-3">
           <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#9CA3AF]">
             Distribución
           </p>
@@ -77,7 +77,7 @@ function SmallMetric({
   description: string;
 }) {
   return (
-    <article className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4 shadow-sm">
+    <article className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
       <p className="text-sm font-medium text-[#6B7280]">{title}</p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-[#111827]">{value}</p>
       <p className="mt-2 text-xs leading-5 text-[#6B7280]">{description}</p>
@@ -85,7 +85,13 @@ function SmallMetric({
   );
 }
 
-export function RentaKpis({ metrics }: { metrics: RentaKpisData }) {
+export function RentaKpis({
+  metrics,
+  canViewFinancials = true,
+}: {
+  metrics: RentaKpisData;
+  canViewFinancials?: boolean;
+}) {
   const operationsLabel = new Intl.NumberFormat("es-AR").format(metrics.operacionesRegistradas);
   const incompleteLabel = new Intl.NumberFormat("es-AR").format(metrics.operacionesIncompletas);
   const rotationLabel =
@@ -93,20 +99,32 @@ export function RentaKpis({ metrics }: { metrics: RentaKpisData }) {
 
   return (
     <section className="space-y-4">
-      <div className="grid gap-4 xl:grid-cols-[1.35fr_1fr]">
-        <BigMetric
-          title="Resultado operativo estimado"
-          value={formatCurrencyByCurrency(metrics.resultadoOperativo)}
-          description="Suma consolidada de las operaciones comparables, sin conversión entre monedas."
-          values={metrics.resultadoOperativo}
-        />
-        <BigMetric
-          title="Margen promedio"
-          value={formatCurrencyByCurrency(metrics.margenPromedio)}
-          description="Promedio por operación comparable, útil para leer el negocio con foco en rentabilidad."
-          values={metrics.margenPromedio}
-        />
-      </div>
+      {canViewFinancials ? (
+        <div className="space-y-4">
+          <BigMetric
+            title="Resultado operativo estimado"
+            value={formatCurrencyByCurrency(metrics.resultadoOperativo)}
+            description="Suma consolidada de las operaciones comparables, sin conversión entre monedas."
+            values={metrics.resultadoOperativo}
+          />
+          <BigMetric
+            title="Margen promedio"
+            value={formatCurrencyByCurrency(metrics.margenPromedio)}
+            description="Promedio por operación comparable, útil para leer el negocio con foco en rentabilidad."
+            values={metrics.margenPromedio}
+          />
+        </div>
+      ) : (
+        <article className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-5">
+          <p className="text-sm font-medium text-[#6B7280]">Rentabilidad</p>
+          <p className="mt-2 text-2xl font-semibold tracking-tight text-[#111827]">
+            Datos financieros reservados
+          </p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6B7280]">
+            La lectura de márgenes, resultados y costos queda visible solo para administración.
+          </p>
+        </article>
+      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         <SmallMetric
@@ -128,4 +146,3 @@ export function RentaKpis({ metrics }: { metrics: RentaKpisData }) {
     </section>
   );
 }
-

@@ -88,7 +88,7 @@ export function CatalogoVehicleDetail({
   return (
     <section className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
       <div className="space-y-4">
-        <div className="overflow-hidden rounded-[2rem] border border-[#E5E7EB] bg-white shadow-sm">
+        <div className="overflow-hidden rounded-md border border-[#E5E7EB] bg-white">
           <div className="aspect-[16/11] bg-[#F9FAFB]">
             {currentPhoto ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -108,8 +108,8 @@ export function CatalogoVehicleDetail({
                   type="button"
                   onClick={() => setCurrentPhoto(photo)}
                   className={[
-                    "h-20 w-28 flex-none overflow-hidden rounded-2xl border transition",
-                    currentPhoto === photo ? "border-[#18181B]" : "border-[#E5E7EB]",
+                    "h-20 w-28 flex-none overflow-hidden rounded-md border transition",
+                    currentPhoto === photo ? "border-[#8A1538]" : "border-[#E5E7EB]",
                   ].join(" ")}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -120,9 +120,16 @@ export function CatalogoVehicleDetail({
           ) : null}
         </div>
 
-        <div className="rounded-[2rem] border border-[#E5E7EB] bg-white p-6 shadow-sm">
-          <p className="text-xs uppercase tracking-[0.24em] text-[#6B7280]">Ficha técnica</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">{title}</h1>
+        <div className="rounded-md border border-[#E5E7EB] bg-white p-6">
+          <div className="flex flex-wrap items-center gap-3">
+            {vehicle.catalogo_destacado ? (
+              <span className="rounded-full bg-[#8A1538] px-3 py-1 text-xs font-medium text-white">Destacado</span>
+            ) : (
+              <span className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-3 py-1 text-xs font-medium text-[#6B7280]">Stock publicado</span>
+            )}
+            <span className="text-xs uppercase tracking-[0.24em] text-[#6B7280]">Ficha comercial</span>
+          </div>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[#111827]">{title}</h1>
           <p className="mt-2 text-sm leading-6 text-[#6B7280]">{subtitle || "Ficha técnica disponible"}</p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -138,12 +145,7 @@ export function CatalogoVehicleDetail({
       </div>
 
       <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
-        <div className="rounded-[2rem] border border-[#E5E7EB] bg-white p-6 shadow-sm">
-          {vehicle.catalogo_destacado ? (
-            <span className="inline-flex rounded-full bg-[#18181B] px-3 py-1 text-xs font-medium text-white">
-              Destacado
-            </span>
-          ) : null}
+        <div className="rounded-md border border-[#E5E7EB] bg-white p-6">
           {config.mostrar_precios ? (
             <div className="mt-4 space-y-3">
               {mainPrice ? <p className="text-3xl font-semibold tracking-tight text-[#111827]">{mainPrice}</p> : null}
@@ -153,13 +155,18 @@ export function CatalogoVehicleDetail({
             <p className="mt-4 text-lg font-medium text-[#111827]">Consultá precio por WhatsApp</p>
           )}
 
+          <div className="mt-5 flex flex-wrap gap-2 text-xs text-[#6B7280]">
+            <span className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1">Atención personalizada</span>
+            <span className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1">Stock actualizado</span>
+          </div>
+
           <div className="mt-5 space-y-3">
             {whatsappHref ? (
               <Link
                 href={whatsappHref}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#18181B] px-5 text-sm font-medium text-white transition hover:bg-[#27272A]"
+                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#8A1538] px-5 text-sm font-medium text-white transition hover:bg-[#6F102D]"
               >
                 Consultar por WhatsApp
               </Link>
@@ -173,11 +180,15 @@ export function CatalogoVehicleDetail({
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-[#E5E7EB] bg-white p-6 shadow-sm">
+        <div className="rounded-md border border-[#E5E7EB] bg-white p-6">
           <p className="text-xs uppercase tracking-[0.24em] text-[#6B7280]">Descripción</p>
-          <p className="mt-3 text-sm leading-6 text-[#111827]">
-            {vehicle.catalogo_descripcion ?? vehicle.descripcion ?? "Sin descripción disponible."}
-          </p>
+          {vehicle.catalogo_descripcion || vehicle.descripcion ? (
+            <p className="mt-3 text-sm leading-6 text-[#111827]">
+              {vehicle.catalogo_descripcion ?? vehicle.descripcion}
+            </p>
+          ) : (
+            <p className="mt-3 text-sm leading-6 text-[#6B7280]">Sin descripción disponible.</p>
+          )}
         </div>
       </aside>
     </section>
@@ -186,7 +197,7 @@ export function CatalogoVehicleDetail({
 
 function InfoItem({ label, value }: { label: string; value: string | null }) {
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
+    <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
       <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">{label}</p>
       <p className="mt-1 text-sm font-medium text-[#111827]">{value ?? "—"}</p>
     </div>

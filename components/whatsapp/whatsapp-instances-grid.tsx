@@ -11,8 +11,8 @@ export function WhatsappInstancesGrid({
 }) {
   if (!instancias.length) {
     return (
-      <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]">
+      <section className="rounded-md border border-[#E5E7EB] bg-white p-4">
+        <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]">
           No hay instancias de WhatsApp para mostrar.
         </div>
       </section>

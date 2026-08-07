@@ -43,7 +43,7 @@ function Input({ className = "", ...props }: React.InputHTMLAttributes<HTMLInput
     <input
       {...props}
       className={[
-        "h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] disabled:cursor-not-allowed disabled:bg-[#F9FAFB]",
+        "h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] disabled:cursor-not-allowed disabled:bg-[#F9FAFB]",
         className,
       ].join(" ")}
     />
@@ -55,7 +55,7 @@ function Select({ className = "", ...props }: React.SelectHTMLAttributes<HTMLSel
     <select
       {...props}
       className={[
-        "h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] disabled:cursor-not-allowed disabled:bg-[#F9FAFB]",
+        "h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] disabled:cursor-not-allowed disabled:bg-[#F9FAFB]",
         className,
       ].join(" ")}
     />
@@ -81,7 +81,7 @@ function CheckboxField({
     <label
       htmlFor={id}
       className={[
-        "flex items-start gap-3 rounded-xl border border-[#E5E7EB] px-3 py-3",
+        "flex items-start gap-3 rounded-md border border-[#E5E7EB] px-3 py-3",
         disabled ? "bg-[#F9FAFB] opacity-80" : "bg-[#FAFAFA]",
       ].join(" ")}
     >
@@ -108,7 +108,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-11 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-11 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "Guardando..." : "Guardar configuración"}
     </button>
@@ -141,7 +141,7 @@ export function ConfiguracionGeneralForm({ config }: { config: ConfiguracionGene
           setLocalError("La moneda principal y secundaria no pueden ser iguales.");
         }
       }}
-      className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm"
+      className="rounded-md border border-[#E5E7EB] bg-white"
     >
       <div className="border-b border-[#E5E7EB] px-5 py-4">
         <h2 className="text-base font-semibold text-[#111827]">Configuración general</h2>
@@ -152,19 +152,19 @@ export function ConfiguracionGeneralForm({ config }: { config: ConfiguracionGene
 
       <div className="space-y-6 px-5 py-5">
         {state.error ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
+          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
             {state.error}
           </div>
         ) : null}
 
         {localError ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
+          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
             {localError}
           </div>
         ) : null}
 
         {state.success ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#111827]">
+          <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#111827]">
             Configuración guardada.
           </div>
         ) : null}

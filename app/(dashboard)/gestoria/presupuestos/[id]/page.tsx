@@ -132,7 +132,7 @@ export default async function PresupuestoDetailPage({ params }: { params: { id: 
             >
               Volver a Presupuestos
             </Link>
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
+            <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">
               Presupuesto de gestoría
             </h1>
             <p className="text-sm leading-6 text-[#6B7280]">
@@ -146,4 +146,3 @@ export default async function PresupuestoDetailPage({ params }: { params: { id: 
     </section>
   );
 }
-

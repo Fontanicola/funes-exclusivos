@@ -68,7 +68,7 @@ function Input({
     <input
       {...props}
       className={[
-        "h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     />
@@ -83,7 +83,7 @@ function Textarea({
     <textarea
       {...props}
       className={[
-        "min-h-[110px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "min-h-[110px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     />
@@ -99,7 +99,7 @@ function Select({
     <select
       {...props}
       className={[
-        "h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     >
@@ -115,7 +115,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-11 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-11 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "Convirtiendo..." : "Convertir en venta"}
     </button>
@@ -178,16 +178,16 @@ export function LeadConvertSaleForm({
   const showPermutaFields = selectedMethod === "permuta" || Number(usedAmount || 0) > 0;
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-5 rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+    <form ref={formRef} action={formAction} className="space-y-5 rounded-md border border-[#E5E7EB] bg-white p-4">
       <input type="hidden" name="lead_id" value={lead.id} />
 
       {state.error ? (
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
+        <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
           {state.error}
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+      <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
         <div className="flex flex-col gap-1">
           <h3 className="text-sm font-semibold text-[#111827]">Cliente</h3>
           <p className="text-xs text-[#6B7280]">Se precargan los datos del lead y podés ajustarlos antes de convertir.</p>
@@ -212,7 +212,7 @@ export function LeadConvertSaleForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white p-4">
         <div className="flex flex-col gap-1">
           <h3 className="text-sm font-semibold text-[#111827]">Operación</h3>
           <p className="text-xs text-[#6B7280]">La venta se registrará con las integraciones automáticas activas.</p>
@@ -313,7 +313,7 @@ export function LeadConvertSaleForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white p-4">
         <div className="flex flex-col gap-1">
           <h3 className="text-sm font-semibold text-[#111827]">Pagos iniciales</h3>
           <p className="text-xs text-[#6B7280]">
@@ -359,7 +359,7 @@ export function LeadConvertSaleForm({
       </div>
 
       {showPermutaFields ? (
-        <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <div className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <div className="flex flex-col gap-1">
             <h3 className="text-sm font-semibold text-[#111827]">Vehículo recibido</h3>
             <p className="text-xs text-[#6B7280]">
@@ -372,7 +372,7 @@ export function LeadConvertSaleForm({
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+      <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
         <div className="space-y-2">
           <FieldLabel htmlFor="observaciones">Observaciones</FieldLabel>
           <Textarea id="observaciones" name="observaciones" placeholder="Notas internas sobre la conversión..." />
@@ -382,7 +382,7 @@ export function LeadConvertSaleForm({
       <div className="flex flex-col-reverse gap-3 border-t border-[#E5E7EB] pt-2 sm:flex-row sm:items-center sm:justify-end">
         <Link
           href="/crm"
-          className="inline-flex h-11 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+          className="inline-flex h-11 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
         >
           Cancelar
         </Link>

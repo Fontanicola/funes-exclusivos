@@ -38,21 +38,21 @@ function FieldLabel({ htmlFor, children }: { htmlFor: string; children: ReactNod
 }
 
 function Input({ className = "", ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={["h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]", className].join(" ")} />;
+  return <input {...props} className={["h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]", className].join(" ")} />;
 }
 
 function Textarea({ className = "", ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={["min-h-[110px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]", className].join(" ")} />;
+  return <textarea {...props} className={["min-h-[110px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]", className].join(" ")} />;
 }
 
 function Select({ className = "", children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={["h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]", className].join(" ")}>{children}</select>;
+  return <select {...props} className={["h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]", className].join(" ")}>{children}</select>;
 }
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className="inline-flex h-11 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70">
+    <button type="submit" disabled={pending} className="inline-flex h-11 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70">
       {pending ? "Guardando..." : "Guardar compra"}
     </button>
   );
@@ -81,7 +81,7 @@ export function CompraForm({ proveedores }: { proveedores: Proveedor[] }) {
 
   return (
     <form action={formAction} className="space-y-6">
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Datos de compra</h2>
         </div>
@@ -108,7 +108,7 @@ export function CompraForm({ proveedores }: { proveedores: Proveedor[] }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Vehículo</h2>
         </div>
@@ -148,7 +148,7 @@ export function CompraForm({ proveedores }: { proveedores: Proveedor[] }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Valores</h2>
         </div>
@@ -198,12 +198,12 @@ export function CompraForm({ proveedores }: { proveedores: Proveedor[] }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Impacto en caja</h2>
         </div>
         <div className="grid gap-4 px-5 py-5 md:grid-cols-2">
-          <label className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 md:col-span-2">
+          <label className="flex items-center gap-3 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 md:col-span-2">
             <input
               type="checkbox"
               name="generar_movimiento_caja"
@@ -261,7 +261,7 @@ export function CompraForm({ proveedores }: { proveedores: Proveedor[] }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Stock inicial</h2>
         </div>
@@ -298,15 +298,12 @@ export function CompraForm({ proveedores }: { proveedores: Proveedor[] }) {
             <FieldLabel htmlFor="estado_preparacion">Estado preparación</FieldLabel>
             <Select id="estado_preparacion" name="estado_preparacion" defaultValue="sin_preparar">
               <option value="sin_preparar">Sin preparar</option>
-              <option value="pendiente">Pendiente</option>
-              <option value="en proceso">En proceso</option>
-              <option value="listo">Listo</option>
             </Select>
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Observaciones</h2>
         </div>
@@ -323,12 +320,12 @@ export function CompraForm({ proveedores }: { proveedores: Proveedor[] }) {
       </div>
 
       {state.error ? (
-        <div className="rounded-xl border border-[#FEE2E2] bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]">{state.error}</div>
+        <div className="rounded-md border border-[#FEE2E2] bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]">{state.error}</div>
       ) : null}
 
       <div className="flex flex-wrap items-center gap-2">
         <SubmitButton />
-        <Link href="/compras" className="inline-flex h-11 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]">
+        <Link href="/compras" className="inline-flex h-11 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]">
           Cancelar
         </Link>
       </div>

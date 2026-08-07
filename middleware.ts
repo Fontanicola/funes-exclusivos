@@ -6,6 +6,7 @@ import { updateSession } from "./lib/supabase/middleware";
 const protectedRoutes = [
   "/dashboard",
   "/inventario",
+  "/compras",
   "/ventas",
   "/caja",
   "/comisiones",
@@ -15,6 +16,7 @@ const protectedRoutes = [
   "/whatsapp",
   "/empleados",
   "/configuracion",
+  "/recordatorios",
 ];
 
 function isProtectedPath(pathname: string) {
@@ -25,13 +27,15 @@ function isProtectedPath(pathname: string) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
 
   if (isDemoMode) {
     if (pathname.startsWith("/login")) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   const hasSupabaseConfig = Boolean(
@@ -44,10 +48,10 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/login?error=config", request.url));
     }
 
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  const { response, user, supabase, syncCookies } = await updateSession(request);
+  const { response, user, supabase, syncCookies } = await updateSession(request, requestHeaders);
 
   if (!user) {
     if (isProtectedPath(pathname)) {
@@ -98,6 +102,7 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/inventario/:path*",
+    "/compras/:path*",
     "/ventas/:path*",
     "/caja/:path*",
     "/comisiones/:path*",
@@ -107,6 +112,7 @@ export const config = {
     "/whatsapp/:path*",
     "/empleados/:path*",
     "/configuracion/:path*",
+    "/recordatorios/:path*",
     "/login",
   ],
 };

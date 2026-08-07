@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 import { ConversacionInterestBadge } from "./conversacion-interest-badge";
 import { ConversacionStatusBadge } from "./conversacion-status-badge";
 
@@ -94,15 +96,7 @@ function getContactSubtitle(conversation: Conversation) {
 }
 
 function getSellerName(conversation: Conversation) {
-  return conversation.vendedor?.nombre ?? conversation.vendedor?.email ?? "—";
-}
-
-function getInstanceLabel(conversation: Conversation) {
-  return (
-    conversation.instancia?.telefono_conectado ??
-    conversation.vendedor?.nombre ??
-    "Sin conexión"
-  );
+  return conversation.vendedor?.nombre ?? "Sin asignar";
 }
 
 function getAiInterest(conversation: Conversation) {
@@ -144,7 +138,19 @@ function getSearchableText(conversation: Conversation) {
     .toLowerCase();
 }
 
-export function ConversacionesTable({ conversaciones }: { conversaciones: Conversation[] }) {
+function getLeadSubtitle(conversation: Conversation) {
+  if (!conversation.lead) return "—";
+  const parts = [conversation.lead.origen, conversation.lead.estado].filter(Boolean);
+  return parts.length ? parts.join(" · ") : "Sin origen";
+}
+
+export function ConversacionesTable({
+  conversaciones,
+  toolbarAction,
+}: {
+  conversaciones: Conversation[];
+  toolbarAction?: ReactNode;
+}) {
   const [query, setQuery] = useState("");
   const [instanceFilter, setInstanceFilter] = useState("");
   const [sellerFilter, setSellerFilter] = useState("");
@@ -157,11 +163,11 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
   const instanceOptions = useMemo(() => {
     const options = new Map<string, string>();
 
-    for (const conversation of conversaciones) {
-      const id = conversation.instancia?.id ?? conversation.whatsapp_instancia_id;
-      if (!id) continue;
-      options.set(id, getInstanceLabel(conversation));
-    }
+      for (const conversation of conversaciones) {
+        const id = conversation.instancia?.id ?? conversation.whatsapp_instancia_id;
+        if (!id) continue;
+        options.set(id, conversation.instancia?.telefono_conectado ?? conversation.vendedor?.nombre ?? "Sin conexión");
+      }
 
     return Array.from(options.entries());
   }, [conversaciones]);
@@ -200,39 +206,30 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
   const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-[#E5E7EB] p-4">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-[#111827]">Conversaciones</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">
-              Filtrá por contacto, vendedor, vehículo, estado o interés.
-            </p>
-          </div>
-
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-wrap gap-2">
+          {toolbarAction ? <div className="shrink-0">{toolbarAction}</div> : null}
           <button
             type="button"
             onClick={() => setOnlyAttention((current) => !current)}
             className={[
-              "inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium transition",
+              "inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium transition",
               onlyAttention
-                ? "border-[#E5E7EB] bg-[#18181B] text-white hover:bg-[#27272A]"
+                ? "border-[#E5E7EB] bg-[#8A1538] text-white hover:bg-[#6F102D]"
                 : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]",
             ].join(" ")}
           >
             <SlidersHorizontal className="h-4 w-4" />
             Requieren atención
           </button>
-        </div>
-
-        <div className="grid gap-2 lg:grid-cols-[320px_180px_180px_180px_180px]">
-          <div className="relative">
+          <div className="relative min-w-[260px] flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar conversación"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -247,22 +244,9 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
           </div>
 
           <select
-            value={instanceFilter}
-            onChange={(event) => setInstanceFilter(event.target.value)}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Todas las instancias</option>
-            {instanceOptions.map(([id, label]) => (
-              <option key={id} value={id}>
-                {label}
-              </option>
-            ))}
-          </select>
-
-          <select
             value={sellerFilter}
             onChange={(event) => setSellerFilter(event.target.value)}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
           >
             <option value="">Todos los vendedores</option>
             {sellerOptions.map(([id, label]) => (
@@ -275,7 +259,7 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
           >
             <option value="">Todos los estados</option>
             <option value="abierta">Abierta</option>
@@ -284,29 +268,48 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
             <option value="archivada">Archivada</option>
           </select>
 
-          <select
-            value={interestFilter}
-            onChange={(event) => setInterestFilter(event.target.value as (typeof interests)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Todos los intereses</option>
-            <option value="alto">Alto</option>
-            <option value="medio">Medio</option>
-            <option value="bajo">Bajo</option>
-            <option value="sin_interes">Sin interés</option>
-            <option value="no_detectado">No detectado</option>
-          </select>
+          <AdvancedFilters>
+            <select
+              value={instanceFilter}
+              onChange={(event) => setInstanceFilter(event.target.value)}
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
+            >
+              <option value="">Todas las conexiones</option>
+              {instanceOptions.map(([id, label]) => (
+                <option key={id} value={id}>
+                  {label}
+                </option>
+              ))}
+            </select>
 
-          <select
-            value={aiFilter}
-            onChange={(event) => setAiFilter(event.target.value as (typeof aiFilters)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Filtro IA</option>
-            <option value="alto">Interés alto</option>
-            <option value="requiere_atencion">Requiere atención</option>
-            <option value="sin_resumen">Sin resumen IA</option>
-          </select>
+            <select
+              value={interestFilter}
+              onChange={(event) => setInterestFilter(event.target.value as (typeof interests)[number])}
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
+            >
+              <option value="">Todos los intereses</option>
+              <option value="alto">Alto</option>
+              <option value="medio">Medio</option>
+              <option value="bajo">Bajo</option>
+              <option value="sin_interes">Sin interés</option>
+              <option value="no_detectado">No detectado</option>
+            </select>
+
+            <select
+              value={aiFilter}
+              onChange={(event) => setAiFilter(event.target.value as (typeof aiFilters)[number])}
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
+            >
+              <option value="">IA</option>
+              <option value="alto">Interés alto</option>
+              <option value="requiere_atencion">Requiere atención</option>
+              <option value="sin_resumen">Sin resumen IA</option>
+            </select>
+          </AdvancedFilters>
+
+          <span className="inline-flex h-10 items-center text-xs text-[#6B7280]">
+            {visibleConversations.length} de {filtered.length}
+          </span>
         </div>
       </div>
 
@@ -344,9 +347,7 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
                       <p className="text-sm font-medium text-[#111827]">
                         {conversation.lead?.nombre ?? "—"}
                       </p>
-                      <p className="text-sm text-[#6B7280]">
-                        {conversation.lead?.telefono ?? conversation.lead?.email ?? "—"}
-                      </p>
+                      <p className="text-sm text-[#6B7280]">{getLeadSubtitle(conversation)}</p>
                     </div>
                   </td>
                   <td className="px-4 py-3 align-middle">
@@ -380,13 +381,9 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
                   <td className="px-4 py-3 align-middle">
                     <div className="space-y-1">
                       <ConversacionInterestBadge interest={getAiInterest(conversation)} />
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#6B7280]">
-                        <span>{conversation.ia_score != null ? `Score ${conversation.ia_score}` : "Sin score"}</span>
-                        {conversation.requiere_atencion ? (
-                          <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#FEF3C7] px-2 py-0.5 text-[#92400E]">
-                            Atención
-                          </span>
-                        ) : null}
+                      <div className="text-xs text-[#6B7280]">
+                        {conversation.ia_score != null ? `Score ${conversation.ia_score}` : "Sin score"}
+                        {conversation.requiere_atencion ? " · Requiere atención" : ""}
                       </div>
                     </div>
                   </td>
@@ -396,7 +393,7 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
                   <td className="px-4 py-3 align-middle">
                     <Link
                       href={`/whatsapp/${conversation.id}`}
-                      className="inline-flex h-9 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+                      className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
                     >
                       Ver
                     </Link>
@@ -405,8 +402,17 @@ export function ConversacionesTable({ conversaciones }: { conversaciones: Conver
               ))
             ) : (
               <tr>
-                <td colSpan={10} className="px-4 py-14 text-center text-sm text-[#6B7280]">
-                  No hay conversaciones que coincidan con los filtros.
+                <td colSpan={10} className="px-4 py-14 text-center">
+                  <div className="mx-auto max-w-sm space-y-2">
+                    <p className="text-sm font-medium text-[#111827]">
+                      {conversaciones.length ? "No encontramos conversaciones con esos filtros" : "No hay conversaciones todavía"}
+                    </p>
+                    <p className="text-sm leading-6 text-[#6B7280]">
+                      {conversaciones.length
+                        ? "Probá limpiar la búsqueda o cambiar el vendedor."
+                        : "Conectá WhatsApp y enviá un mensaje de prueba para validar el flujo."}
+                    </p>
+                  </div>
                 </td>
               </tr>
             )}

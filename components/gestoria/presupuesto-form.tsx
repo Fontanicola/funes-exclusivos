@@ -104,21 +104,21 @@ function FieldLabel({ htmlFor, children }: { htmlFor: string; children: ReactNod
 }
 
 function Input({ className = "", ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={["h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]", className].join(" ")} />;
+  return <input {...props} className={["h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]", className].join(" ")} />;
 }
 
 function Textarea({ className = "", ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={["min-h-[110px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]", className].join(" ")} />;
+  return <textarea {...props} className={["min-h-[110px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]", className].join(" ")} />;
 }
 
 function Select({ className = "", children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={["h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]", className].join(" ")}>{children}</select>;
+  return <select {...props} className={["h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]", className].join(" ")}>{children}</select>;
 }
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className="inline-flex h-10 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70">
+    <button type="submit" disabled={pending} className="inline-flex h-10 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70">
       {pending ? "Guardando..." : "Guardar presupuesto"}
     </button>
   );
@@ -150,7 +150,7 @@ function formatMoney(value: number, currency: "ARS" | "USD") {
 
 function FormSection({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+    <div className="rounded-md border border-[#E5E7EB] bg-white">
       <div className="border-b border-[#E5E7EB] px-5 py-4">
         <h2 className="text-base font-semibold text-[#111827]">{title}</h2>
         <p className="mt-1 text-sm text-[#6B7280]">{subtitle}</p>
@@ -198,7 +198,7 @@ export function PresupuestoForm({
 
   return (
     <form ref={formRef} action={formAction} className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="space-y-6">
         <FormSection title="Vínculos" subtitle="Asociá el presupuesto a trámite, venta o vehículo.">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
@@ -274,7 +274,7 @@ export function PresupuestoForm({
         </FormSection>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="space-y-6">
         <FormSection title="Valores base" subtitle="Datos que suelen venir de la tabla y la consulta externa.">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
@@ -300,7 +300,7 @@ export function PresupuestoForm({
         </FormSection>
 
         <FormSection title="Total estimado" subtitle="Suma rápida de los ítems cargados antes de guardar.">
-          <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+          <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-4">
             <p className="text-sm font-medium text-[#6B7280]">Total estimado</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-[#111827]">
               {formatMoney(totalEstimado, "ARS")}
@@ -315,7 +315,7 @@ export function PresupuestoForm({
       <FormSection title="Ítems del presupuesto" subtitle="Cargá hasta 10 líneas antes de guardar.">
         <div className="space-y-3">
           {rows.map((row, index) => (
-            <div key={index} className="grid gap-3 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-3 xl:grid-cols-[180px_1fr_160px_110px]">
+            <div key={index} className="grid gap-3 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3 xl:grid-cols-[180px_1fr_160px_110px]">
               <div className="space-y-2">
                 <FieldLabel htmlFor={`item_tipo_${index}`}>Tipo</FieldLabel>
                 <Select
@@ -389,14 +389,14 @@ export function PresupuestoForm({
       </FormSection>
 
       {state.error ? (
-        <div className="rounded-xl border border-[#FEE2E2] bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]">
+        <div className="rounded-md border border-[#FEE2E2] bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]">
           {state.error}
         </div>
       ) : null}
 
       <div className="flex flex-wrap items-center gap-2">
         <SubmitButton />
-        <Link href="/gestoria/presupuestos" className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]">
+        <Link href="/gestoria/presupuestos" className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]">
           Cancelar
         </Link>
       </div>

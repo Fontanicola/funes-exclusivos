@@ -54,7 +54,7 @@ async function isAdmin(supabase: ReturnType<typeof createSupabaseServerClient>, 
 }
 
 function demoModeError() {
-  return { error: "Modo demo activo: conectá Supabase y Evolution API para ejecutar esta acción." };
+  return { error: "Modo demo activo: conectá el entorno real para ejecutar esta acción." };
 }
 
 async function getEmployee(
@@ -174,7 +174,7 @@ export async function createWhatsappInstanceAction(
 
   if (error) {
     return {
-      error: "No pudimos guardar la instancia en Supabase.",
+      error: "No pudimos guardar la conexión de WhatsApp.",
     };
   }
 
@@ -457,7 +457,7 @@ export async function deleteWhatsappInstanceAction(
     .eq("id", instance.id);
 
   if (error) {
-    return { error: "No pudimos desactivar la instancia en Supabase." };
+    return { error: "No pudimos desactivar la conexión de WhatsApp." };
   }
 
   revalidatePath("/whatsapp");
@@ -607,7 +607,7 @@ export async function generateConversationAiSummaryAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para generar resúmenes IA reales." };
+    return { error: "Modo demo activo: conectá el entorno real para generar resúmenes IA." };
   }
 
   const auth = await getAuthUser();

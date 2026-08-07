@@ -160,6 +160,7 @@ async function loadData(id: string) {
         proveedor: null,
       } as unknown as Vehiculo,
       documentos: sortDocuments(getDemoDocuments(id) as VehiculoDocumento[]),
+      role: mockEmpleado.rol,
       canManageDocuments: mockEmpleado.rol === "admin" || mockEmpleado.rol === "gestor",
       canDeleteDocuments: mockEmpleado.rol === "admin",
       canEditVehicle,
@@ -221,6 +222,7 @@ async function loadData(id: string) {
       proveedor: provider,
     },
     documentos,
+    role: employee.rol,
     canManageDocuments: (employee.rol ?? "").toLowerCase() === "admin" || (employee.rol ?? "").toLowerCase() === "gestor",
     canDeleteDocuments: (employee.rol ?? "").toLowerCase() === "admin",
     canEditVehicle: canManageInventory(employee?.rol ?? null) && employee?.activo === true,
@@ -254,7 +256,7 @@ export default async function VehiculoDetailPage({ params }: PageProps) {
 
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
+            <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">
               {subtitle || "Vehículo"}
             </h1>
             <p className="text-sm leading-6 text-[#6B7280]">
@@ -264,7 +266,7 @@ export default async function VehiculoDetailPage({ params }: PageProps) {
 
           <Link
             href={`/inventario/${data.vehiculo.id}/editar`}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
           >
             <PencilLine className="h-4 w-4" />
             Editar vehículo
@@ -272,14 +274,14 @@ export default async function VehiculoDetailPage({ params }: PageProps) {
         </div>
       </header>
 
-      <VehiculoDetail vehiculo={data.vehiculo} canEdit={data.canEditVehicle} />
+      <VehiculoDetail vehiculo={data.vehiculo} canEdit={data.canEditVehicle} role={data.role} />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+      <div className="space-y-6">
         {data.canManageDocuments ? (
           <VehiculoDocumentoForm vehiculoId={data.vehiculo.id} />
         ) : (
-          <section className="rounded-[32px] border border-[#E5E7EB] bg-white p-5 shadow-sm">
-            <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-5 text-sm text-[#6B7280]">
+          <section className="rounded-md border border-[#E5E7EB] bg-white p-5">
+            <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-5 text-sm text-[#6B7280]">
               Solo admin y gestor pueden cargar o modificar documentos.
             </div>
           </section>

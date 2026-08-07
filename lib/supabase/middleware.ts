@@ -11,15 +11,17 @@ function syncCookies(source: NextResponse, target: NextResponse) {
   return target;
 }
 
-export async function updateSession(request: NextRequest) {
+export async function updateSession(request: NextRequest, requestHeaders?: Headers) {
   let response = NextResponse.next({
-    request,
+    request: {
+      headers: requestHeaders ?? request.headers,
+    },
   });
 
   const env = getSupabaseEnv();
 
   if (!env) {
-    throw new Error("Falta configurar Supabase en .env.local.");
+    throw new Error("Falta configurar el entorno.");
   }
 
   const supabase = createServerClient(

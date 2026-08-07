@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 import {
   formatCurrencyByCurrency,
   type RentaRow,
@@ -53,7 +54,7 @@ function getVehicleSummary(row: RentaRow) {
 }
 
 function getSellerLabel(row: RentaRow) {
-  return row.vendedor?.nombre ?? row.vendedor?.email ?? "—";
+  return row.vendedor?.nombre ?? "Sin vendedor";
 }
 
 function getDeliveryLabel(value: string | null | undefined) {
@@ -123,7 +124,11 @@ function summarizePayments(row: RentaRow) {
   );
 }
 
-function summarizeCosts(row: RentaRow) {
+function summarizeCosts(row: RentaRow, canViewFinancials: boolean) {
+  if (!canViewFinancials) {
+    return <p className="text-xs text-[#6B7280]">Información interna reservada</p>;
+  }
+
   const lines = [
     row.costoHistorico != null ? `Histórico ${formatMoney(row.costoHistorico, row.moneda)}` : null,
     row.costoReposicion != null ? `Reposición ${formatMoney(row.costoReposicion, row.moneda)}` : null,
@@ -143,7 +148,16 @@ function summarizeCosts(row: RentaRow) {
   );
 }
 
-function summarizeMargin(row: RentaRow) {
+function summarizeMargin(row: RentaRow, canViewFinancials: boolean) {
+  if (!canViewFinancials) {
+    return (
+      <div className="space-y-1">
+        <RentaMarginBadge status="sin_datos" />
+        <p className="text-xs text-[#6B7280]">Disponible para administración</p>
+      </div>
+    );
+  }
+
   if (row.resultStatus === "mixed") {
     return (
       <div className="space-y-1">
@@ -179,7 +193,13 @@ function summarizeMargin(row: RentaRow) {
   );
 }
 
-export function RentaTable({ rows }: { rows: RentaRow[] }) {
+export function RentaTable({
+  rows,
+  canViewFinancials = true,
+}: {
+  rows: RentaRow[];
+  canViewFinancials?: boolean;
+}) {
   const [query, setQuery] = useState("");
   const [sellerFilter, setSellerFilter] = useState("");
   const [paymentFilter, setPaymentFilter] = useState<(typeof paymentMethods)[number]>("");
@@ -230,15 +250,9 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
   const hasMoreRows = filteredRows.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="space-y-4 border-b border-[#E5E7EB] p-4">
-        <div className="space-y-2">
-          <h2 className="text-base font-semibold text-[#111827]">Operaciones de rentabilidad</h2>
-          <p className="text-sm leading-6 text-[#6B7280]">
-            Análisis de margen, pagos, gastos y resultado por operación.
-          </p>
-        </div>
-
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-2">
           <div className="relative min-w-[260px] flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
@@ -246,7 +260,7 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar operación"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -264,7 +278,7 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
             <select
               value={sellerFilter}
               onChange={(event) => setSellerFilter(event.target.value)}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
+              className="h-10 w-full appearance-none rounded-md border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:w-auto"
             >
               <option value="">Todos los vendedores</option>
               {sellerOptions.map(([id, label]) => (
@@ -277,38 +291,9 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
 
           <div className="relative min-w-[170px] flex-1 sm:flex-none">
             <select
-              value={paymentFilter}
-              onChange={(event) => setPaymentFilter(event.target.value as (typeof paymentMethods)[number])}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
-            >
-              <option value="">Todos los pagos</option>
-              <option value="transferencia">Transferencia</option>
-              <option value="efectivo">Efectivo</option>
-              <option value="dolares">Dólares</option>
-              <option value="pesos">Pesos</option>
-              <option value="permuta">Permuta</option>
-            </select>
-          </div>
-
-          <div className="relative min-w-[170px] flex-1 sm:flex-none">
-            <select
-              value={deliveryFilter}
-              onChange={(event) => setDeliveryFilter(event.target.value as (typeof deliveryFilters)[number])}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
-            >
-              <option value="">Todas las entregas</option>
-              <option value="pendiente">Pendiente</option>
-              <option value="en_proceso">En proceso</option>
-              <option value="observada">Observada</option>
-              <option value="entregada">Entregada</option>
-            </select>
-          </div>
-
-          <div className="relative min-w-[170px] flex-1 sm:flex-none">
-            <select
               value={resultFilter}
               onChange={(event) => setResultFilter(event.target.value as (typeof resultFilters)[number])}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
+              className="h-10 w-full appearance-none rounded-md border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:w-auto"
             >
               <option value="">Todos los resultados</option>
               <option value="positive">Positivo</option>
@@ -318,6 +303,40 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
               <option value="sin_datos">Sin datos</option>
             </select>
           </div>
+          <AdvancedFilters>
+            <div className="relative min-w-[170px] flex-1 sm:flex-none">
+              <select
+                value={paymentFilter}
+                onChange={(event) => setPaymentFilter(event.target.value as (typeof paymentMethods)[number])}
+                className="h-10 w-full appearance-none rounded-md border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:w-auto"
+              >
+                <option value="">Todos los pagos</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="dolares">Dólares</option>
+                <option value="pesos">Pesos</option>
+                <option value="permuta">Permuta</option>
+              </select>
+            </div>
+
+            <div className="relative min-w-[170px] flex-1 sm:flex-none">
+              <select
+                value={deliveryFilter}
+                onChange={(event) => setDeliveryFilter(event.target.value as (typeof deliveryFilters)[number])}
+                className="h-10 w-full appearance-none rounded-md border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:w-auto"
+              >
+                <option value="">Todas las entregas</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="en_proceso">En proceso</option>
+                <option value="observada">Observada</option>
+                <option value="entregada">Entregada</option>
+              </select>
+            </div>
+          </AdvancedFilters>
+        </div>
+        <p className="text-xs text-[#6B7280]">
+          Mostrando {visibleRows.length} de {filteredRows.length}
+        </p>
         </div>
       </div>
 
@@ -368,7 +387,7 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
                           {formatMoney(row.precioVenta, row.moneda)}
                         </p>
                         <PaymentMethodBadge method={row.metodoPago} />
-                        {row.precioInfoauto != null ? (
+                        {canViewFinancials && row.precioInfoauto != null ? (
                           <p className="text-xs text-[#6B7280]">
                             Infoauto {formatMoney(row.precioInfoauto, row.moneda)}
                           </p>
@@ -376,7 +395,7 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
                       </div>
                     </td>
 
-                    <td className="px-4 py-3 align-top">{summarizeCosts(row)}</td>
+                    <td className="px-4 py-3 align-top">{summarizeCosts(row, canViewFinancials)}</td>
 
                     <td className="px-4 py-3 align-top">
                       <div className="space-y-2">
@@ -387,7 +406,7 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
                       </div>
                     </td>
 
-                    <td className="px-4 py-3 align-top">{summarizeMargin(row)}</td>
+                    <td className="px-4 py-3 align-top">{summarizeMargin(row, canViewFinancials)}</td>
 
                     <td className="px-4 py-3 align-top">
                       <p className="text-sm font-medium text-[#111827]">
@@ -424,9 +443,13 @@ export function RentaTable({ rows }: { rows: RentaRow[] }) {
               <tr>
                 <td colSpan={8} className="px-4 py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
-                    <p className="text-sm font-medium text-[#111827]">No hay resultados para mostrar</p>
+                    <p className="text-sm font-medium text-[#111827]">
+                      {rows.length ? "No encontramos operaciones con esos filtros" : "No hay operaciones cargadas"}
+                    </p>
                     <p className="text-sm leading-6 text-[#6B7280]">
-                      Probá ajustar los filtros o buscá otra operación.
+                      {rows.length
+                        ? "Probá limpiar la búsqueda o cambiar el vendedor."
+                        : "Cuando registres ventas, acá vas a ver la rentabilidad por operación."}
                     </p>
                   </div>
                 </td>

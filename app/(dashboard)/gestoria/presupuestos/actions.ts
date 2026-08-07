@@ -134,7 +134,7 @@ export async function createGestoriaPresupuestoAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar presupuestos reales." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar presupuestos." };
   }
 
   try {
@@ -236,7 +236,7 @@ export async function addGestoriaPresupuestoItemAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar presupuestos reales." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar presupuestos." };
   }
 
   const context = await getCurrentUserContext();
@@ -279,7 +279,7 @@ export async function deleteGestoriaPresupuestoItemAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar presupuestos reales." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar presupuestos." };
   }
 
   const context = await getCurrentUserContext();
@@ -307,7 +307,7 @@ export async function updateGestoriaPresupuestoEstadoAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar presupuestos reales." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar presupuestos." };
   }
 
   const context = await getCurrentUserContext();

@@ -126,13 +126,10 @@ export default async function PublicCatalogVehiclePage({
     <main className="min-h-screen bg-[linear-gradient(180deg,#FFFFFF_0%,#F9FAFB_100%)] px-4 py-8 text-[#111827] sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/catalogo" className="text-sm font-medium text-[#111827] underline-offset-4 hover:underline">
+          <Link href="/catalogo" className="text-sm font-medium text-[#8A1538] underline decoration-[#D8A1B2] underline-offset-4 hover:text-[#6F102D]">
             Volver al catálogo
           </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-          >
+          <Link href="/" className="text-sm font-medium text-[#6B7280] underline-offset-4 hover:underline">
             Funes Exclusivos
           </Link>
         </div>

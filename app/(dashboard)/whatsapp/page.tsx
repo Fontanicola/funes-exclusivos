@@ -7,7 +7,6 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ConversacionesTable } from "@/components/whatsapp/conversaciones-table";
 import { WhatsappConnectionAlert } from "@/components/whatsapp/whatsapp-connection-alert";
 import { WhatsappInstancesGrid } from "@/components/whatsapp/whatsapp-instances-grid";
-import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
   title: "WhatsApp | Funes Exclusivos",
@@ -140,7 +139,7 @@ function KpiCard({
   detail?: string;
 }) {
   return (
-    <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+    <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
       <p className="text-sm font-medium text-[#6B7280]">{label}</p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-[#111827]">{value}</p>
       {detail ? <p className="mt-2 text-xs text-[#6B7280]">{detail}</p> : null}
@@ -234,23 +233,9 @@ export default async function WhatsappPage() {
 
   return (
     <section className="space-y-6">
-      <PageHeader
-        eyebrow="Canal comercial"
-        title="WhatsApp"
-        description="Instancias conectadas, conversaciones y seguimiento comercial."
-        action={
-          <Link
-            href="/whatsapp/conexiones"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
-          >
-            <Plus className="h-4 w-4" />
-            Conexiones
-          </Link>
-        }
-      />
       {isDemoMode ? (
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-          Modo demo: la bandeja de WhatsApp es mock y no se consultará Evolution API.
+        <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+          Modo demo: la bandeja usa datos simulados y no consultará el servicio real.
         </div>
       ) : null}
 
@@ -264,7 +249,18 @@ export default async function WhatsappPage() {
       </div>
 
       <WhatsappInstancesGrid instancias={instancias} canManageAll={canManageAll} />
-      <ConversacionesTable conversaciones={conversaciones} />
+      <ConversacionesTable
+        conversaciones={conversaciones}
+        toolbarAction={
+          <Link
+            href="/whatsapp/conexiones"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
+          >
+            <Plus className="h-4 w-4" />
+            Conexiones
+          </Link>
+        }
+      />
     </section>
   );
 }

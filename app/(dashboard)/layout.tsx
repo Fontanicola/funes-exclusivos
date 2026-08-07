@@ -5,6 +5,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { canAccessRoute } from "@/lib/auth/permissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/dashboard/sidebar";
+import { BreadcrumbHeader } from "@/components/dashboard/breadcrumb-header";
 import { mockEmpleado } from "@/lib/mock-data";
 
 type Employee = {
@@ -39,12 +40,15 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   if (isDemoMode) {
+    const pathname = resolvePathname();
+
     return (
       <div className="min-h-screen bg-white text-[#111827]">
         <div className="flex min-h-screen">
           <Sidebar employee={mockEmpleado} />
           <main className="min-w-0 flex-1">
-            <div className="px-6 py-5">{children}</div>
+            <BreadcrumbHeader pathname={pathname} />
+            <div className="px-5 py-4">{children}</div>
           </main>
         </div>
       </div>
@@ -89,7 +93,8 @@ export default async function DashboardLayout({
       <div className="flex min-h-screen">
         <Sidebar employee={employee} />
         <main className="min-w-0 flex-1">
-        <div className="px-6 py-5">{children}</div>
+          <BreadcrumbHeader pathname={pathname} />
+          <div className="px-5 py-4">{children}</div>
         </main>
       </div>
     </div>

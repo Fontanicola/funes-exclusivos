@@ -68,7 +68,7 @@ function Input({
     <input
       {...props}
       className={[
-        "h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     />
@@ -83,7 +83,7 @@ function Textarea({
     <textarea
       {...props}
       className={[
-        "min-h-[100px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "min-h-[100px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     />
@@ -99,7 +99,7 @@ function Select({
     <select
       {...props}
       className={[
-        "h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     >
@@ -115,7 +115,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-11 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-11 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "Guardando..." : "Guardar trámite"}
     </button>
@@ -164,12 +164,12 @@ export function GestoriaForm({
   return (
     <form ref={formRef} action={formAction} className="space-y-6">
       {state.error ? (
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
+        <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
           {state.error}
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Datos del trámite</h2>
         </div>
@@ -198,6 +198,23 @@ export function GestoriaForm({
               <option value="cancelado">Cancelado</option>
             </Select>
           </div>
+          <div className="space-y-2">
+            <FieldLabel htmlFor="etapa">Etapa operativa *</FieldLabel>
+            <Select id="etapa" name="etapa" defaultValue="presupuesto" required>
+              <option value="presupuesto">Presupuesto</option>
+              <option value="escribania">Escribanía</option>
+              <option value="gestoria">Gestoría</option>
+              <option value="terminado">Terminado</option>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <FieldLabel htmlFor="gestion_tipo">Tipo de gestión *</FieldLabel>
+            <Select id="gestion_tipo" name="gestion_tipo" defaultValue="interna" required>
+              <option value="interna">Interna</option>
+              <option value="cliente">Cliente</option>
+              <option value="mixta">Mixta</option>
+            </Select>
+          </div>
           <div className="space-y-2 md:col-span-2">
             <FieldLabel htmlFor="titulo">Título *</FieldLabel>
             <Input id="titulo" name="titulo" placeholder="Ej. Transferencia BMW X3" required />
@@ -209,7 +226,7 @@ export function GestoriaForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Vínculos</h2>
         </div>
@@ -250,7 +267,7 @@ export function GestoriaForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Cliente</h2>
         </div>
@@ -274,9 +291,9 @@ export function GestoriaForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
-          <h2 className="text-base font-semibold text-[#111827]">Fechas</h2>
+          <h2 className="text-base font-semibold text-[#111827]">Fechas y costos</h2>
         </div>
         <div className="grid gap-4 px-5 py-5 md:grid-cols-2">
           <div className="space-y-2">
@@ -287,10 +304,33 @@ export function GestoriaForm({
             <FieldLabel htmlFor="fecha_vencimiento">Fecha de vencimiento</FieldLabel>
             <Input id="fecha_vencimiento" name="fecha_vencimiento" type="date" />
           </div>
+          <div className="space-y-2">
+            <FieldLabel htmlFor="fecha_envio">Fecha de envío</FieldLabel>
+            <Input id="fecha_envio" name="fecha_envio" type="date" />
+          </div>
+          <div className="space-y-2">
+            <FieldLabel htmlFor="fecha_firma">Fecha de firma</FieldLabel>
+            <Input id="fecha_firma" name="fecha_firma" type="date" />
+          </div>
+          <div className="space-y-2">
+            <FieldLabel htmlFor="costo_final_transferencia">Costo final transferencia</FieldLabel>
+            <Input id="costo_final_transferencia" name="costo_final_transferencia" type="number" min="0" step="0.01" placeholder="0" />
+          </div>
+          <div className="space-y-2">
+            <FieldLabel htmlFor="costo_final_moneda">Moneda costo final</FieldLabel>
+            <Select id="costo_final_moneda" name="costo_final_moneda" defaultValue="ARS">
+              <option value="ARS">ARS</option>
+              <option value="USD">USD</option>
+            </Select>
+          </div>
+          <label className="flex items-center gap-2 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-3 py-3 text-sm font-medium text-[#111827] md:col-span-2">
+            <input name="presupuesto_confirmado" type="checkbox" className="h-4 w-4 accent-[#8A1538]" />
+            Presupuesto confirmado
+          </label>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Documentos</h2>
         </div>
@@ -311,7 +351,7 @@ export function GestoriaForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Observaciones</h2>
         </div>
@@ -323,7 +363,7 @@ export function GestoriaForm({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Link
           href="/gestoria"
-          className="inline-flex h-11 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+          className="inline-flex h-11 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
         >
           Cancelar
         </Link>

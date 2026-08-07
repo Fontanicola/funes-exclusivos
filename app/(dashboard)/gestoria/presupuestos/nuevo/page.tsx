@@ -118,7 +118,7 @@ export default async function NuevoPresupuestoPage() {
             >
               Volver a Presupuestos
             </Link>
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
+            <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">
               Nuevo presupuesto
             </h1>
             <p className="text-sm leading-6 text-[#6B7280]">
@@ -127,8 +127,8 @@ export default async function NuevoPresupuestoPage() {
           </div>
         </div>
         {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: el formulario no guardará datos reales hasta conectar Supabase.
+          <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+            Modo demo: este formulario usa datos simulados y no guardará cambios reales.
           </div>
         ) : null}
       </header>

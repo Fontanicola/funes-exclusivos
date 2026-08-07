@@ -34,13 +34,13 @@ export function ConfiguracionSummary({ config }: { config: ConfiguracionGeneral 
   const alertasLeads = config.dias_alerta_leads ?? 0;
 
   return (
-    <aside className="space-y-4 rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
+    <aside className="space-y-4 rounded-md border border-[#E5E7EB] bg-white p-5">
       <div>
         <h2 className="text-base font-semibold text-[#111827]">Resumen operativo</h2>
         <p className="mt-1 text-sm text-[#6B7280]">Lectura rápida de la configuración vigente.</p>
       </div>
 
-      <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
+      <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
         <p className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Empresa</p>
         <p className="mt-1 text-lg font-semibold text-[#111827]">{empresa}</p>
         {config.empresa_razon_social ? (
@@ -63,7 +63,7 @@ export function ConfiguracionSummary({ config }: { config: ConfiguracionGeneral 
         />
       </div>
 
-      <div className="space-y-3 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-4 text-sm text-[#6B7280]">
+      <div className="space-y-3 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-4 text-sm text-[#6B7280]">
         <p>La comisión default se usará como sugerencia al generar comisiones.</p>
         <p>Los días de alerta se usarán para vencimientos y próximos contactos.</p>
         <p>La auto-publicación de catálogo queda preparada para una automatización posterior.</p>

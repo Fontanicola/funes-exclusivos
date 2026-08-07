@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { CalendarDays, Camera, Gauge, MapPin, ShieldCheck, Tag, Wrench } from "lucide-react";
+import { canViewCosts } from "@/lib/auth/permissions";
 import { VehiculoStatusBadge } from "./vehiculo-status-badge";
 
 type Vehiculo = {
@@ -79,11 +80,14 @@ function getVehicleTitle(vehiculo: Vehiculo) {
 export function VehiculoDetail({
   vehiculo,
   canEdit = true,
+  role = null,
 }: {
   vehiculo: Vehiculo;
   canEdit?: boolean;
+  role?: string | null;
 }) {
   const photoUrl = getPhotoUrl(vehiculo.fotos);
+  const showCosts = canViewCosts(role);
   const publicationItems = [
     {
       label: "MercadoLibre",
@@ -98,8 +102,8 @@ export function VehiculoDetail({
   ] as const;
 
   return (
-    <section className="overflow-hidden rounded-[32px] border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+    <section className="overflow-hidden rounded-md border border-[#E5E7EB] bg-white">
+      <div className="space-y-0">
         <div className="relative min-h-[320px] bg-[#FAFAFA]">
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -109,7 +113,7 @@ export function VehiculoDetail({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full min-h-[320px] items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(17,24,39,0.08),_transparent_36%),linear-gradient(180deg,#FAFAFA,#F9FAFB)]">
+            <div className="flex h-full min-h-[320px] items-center justify-center bg-[#FAFAFA]">
               <div className="text-center">
                 <Camera className="mx-auto h-10 w-10 text-[#9CA3AF]" />
                 <p className="mt-3 text-sm font-medium text-[#111827]">Sin foto principal</p>
@@ -147,20 +151,24 @@ export function VehiculoDetail({
                 value={vehiculo.km != null ? new Intl.NumberFormat("es-AR").format(vehiculo.km) : "—"}
               />
               <StatCard
-                icon={<CalendarDays className="h-4 w-4" />}
-                label="Fecha compra"
-                value={formatDate(vehiculo.fecha_compra)}
-              />
-              <StatCard
                 icon={<MapPin className="h-4 w-4" />}
                 label="Ubicación"
                 value={vehiculo.ubicacion ?? "—"}
               />
-              <StatCard
-                icon={<Wrench className="h-4 w-4" />}
-                label="Chapero"
-                value={vehiculo.chapero ?? "—"}
-              />
+              {showCosts ? (
+                <>
+                  <StatCard
+                    icon={<CalendarDays className="h-4 w-4" />}
+                    label="Fecha compra"
+                    value={formatDate(vehiculo.fecha_compra)}
+                  />
+                  <StatCard
+                    icon={<Wrench className="h-4 w-4" />}
+                    label="Chapero"
+                    value={vehiculo.chapero ?? "—"}
+                  />
+                </>
+              ) : null}
             </div>
           </div>
 
@@ -168,12 +176,14 @@ export function VehiculoDetail({
             <MetricCard label="Precio contado" value={formatCurrency(vehiculo.precio_contado, vehiculo.precio_moneda)} />
             <MetricCard label="Precio permuta" value={formatCurrency(vehiculo.precio_permuta, vehiculo.precio_moneda)} />
             <MetricCard label="Precio venta" value={formatCurrency(vehiculo.precio_venta, vehiculo.precio_moneda)} />
-            <MetricCard label="Infoauto actual" value={formatCurrency(vehiculo.precio_infoauto_actual, vehiculo.precio_moneda)} />
+            {showCosts ? (
+              <MetricCard label="Infoauto actual" value={formatCurrency(vehiculo.precio_infoauto_actual, vehiculo.precio_moneda)} />
+            ) : null}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             {publicationItems.map((item) => (
-              <div key={item.label} className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
+              <div key={item.label} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
                   {item.label}
                 </p>
@@ -184,22 +194,32 @@ export function VehiculoDetail({
             ))}
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <InfoCard
-              label="Proveedor"
-              value={vehiculo.proveedor?.nombre ?? vehiculo.proveedor_id ?? "Sin proveedor"}
-              detail={vehiculo.proveedor?.categoria ?? "Información operativa"}
-            />
-            <InfoCard
-              label="Operación"
-              value={vehiculo.nro_operacion ?? "Sin operación"}
-              detail={vehiculo.fecha_ingreso ? `Ingresado ${formatDate(vehiculo.fecha_ingreso)}` : "Sin fecha de ingreso"}
-            />
-          </div>
+          {showCosts ? (
+            <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-semibold text-[#111827]">Uso interno</p>
+                <span className="rounded-full border border-[#E5E7EB] bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
+                  Proveedor y operación
+                </span>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <InfoCard
+                  label="Proveedor"
+                  value={vehiculo.proveedor?.nombre ?? vehiculo.proveedor_id ?? "Sin proveedor"}
+                  detail={vehiculo.proveedor?.categoria ?? "Información operativa"}
+                />
+                <InfoCard
+                  label="Operación"
+                  value={vehiculo.nro_operacion ?? "Sin operación"}
+                  detail={vehiculo.fecha_ingreso ? `Ingresado ${formatDate(vehiculo.fecha_ingreso)}` : "Sin fecha de ingreso"}
+                />
+              </div>
+            </div>
+          ) : null}
 
-          {vehiculo.observaciones || vehiculo.descripcion ? (
-            <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Observaciones</p>
+          {showCosts && (vehiculo.observaciones || vehiculo.descripcion) ? (
+            <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Observaciones internas</p>
               <p className="mt-2 text-sm leading-6 text-[#111827]">
                 {vehiculo.descripcion ?? vehiculo.observaciones ?? "Sin observaciones."}
               </p>
@@ -207,32 +227,41 @@ export function VehiculoDetail({
           ) : null}
 
           <div className="flex flex-wrap gap-2 text-xs text-[#6B7280]">
-            <span className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Ficha interna operativa
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1">
-              <Tag className="h-3.5 w-3.5" />
-              {vehiculo.costo_moneda ?? "ARS"}
-            </span>
+            {showCosts ? (
+              <>
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  Ficha interna operativa
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1">
+                  <Tag className="h-3.5 w-3.5" />
+                  {vehiculo.costo_moneda ?? "ARS"}
+                </span>
+              </>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Ficha comercial
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-3">
             {canEdit ? (
               <Link
                 href={`/inventario/${vehiculo.id}/editar`}
-                className="inline-flex h-10 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
               >
                 Editar vehículo
               </Link>
             ) : (
-              <span className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 text-sm font-medium text-[#6B7280]">
+              <span className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 text-sm font-medium text-[#6B7280]">
                 Solo lectura
               </span>
             )}
             <Link
               href="/inventario"
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
             >
               Volver al inventario
             </Link>
@@ -253,7 +282,7 @@ function StatCard({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
+    <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[#6B7280]">
         {icon}
         {label}
@@ -265,7 +294,7 @@ function StatCard({
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
+    <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
         {label}
       </p>
@@ -284,7 +313,7 @@ function InfoCard({
   detail: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
+    <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
         {label}
       </p>

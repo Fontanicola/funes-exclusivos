@@ -42,7 +42,7 @@ function SubmitButton({ canSave }: { canSave: boolean }) {
     <button
       type="submit"
       disabled={pending || !canSave}
-      className="inline-flex h-10 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-10 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "Guardando..." : "Guardar cambios"}
     </button>
@@ -70,7 +70,7 @@ export function EmpleadoEditForm({
   }, [onCancel, state.success]);
 
   return (
-    <form ref={formRef} action={formAction} className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+    <form ref={formRef} action={formAction} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
       <input type="hidden" name="id" value={employee.id} />
       {isSelf ? <input type="hidden" name="rol" value={employee.rol ?? "vendedor"} /> : null}
       {isSelf ? <input type="hidden" name="activo" value={String(employee.activo === true)} /> : null}
@@ -86,12 +86,12 @@ export function EmpleadoEditForm({
       </div>
 
       {state.error ? (
-        <div className="mt-4 rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#111827]">
+        <div className="mt-4 rounded-md border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#111827]">
           {state.error}
         </div>
       ) : null}
       {state.success ? (
-        <div className="mt-4 rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#111827]">
+        <div className="mt-4 rounded-md border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#111827]">
           Cambios guardados.
         </div>
       ) : null}
@@ -103,7 +103,7 @@ export function EmpleadoEditForm({
             id="nombre"
             name="nombre"
             defaultValue={employee.nombre ?? ""}
-            className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           />
         </div>
         <div className="space-y-2 md:col-span-1">
@@ -112,7 +112,7 @@ export function EmpleadoEditForm({
             id="telefono"
             name="telefono"
             defaultValue={employee.telefono ?? ""}
-            className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           />
         </div>
         <div className="space-y-2">
@@ -122,7 +122,7 @@ export function EmpleadoEditForm({
             name="rol"
             defaultValue={employee.rol ?? "vendedor"}
             disabled={isSelf}
-            className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           >
             <option value="admin">Admin</option>
             <option value="vendedor">Vendedor</option>
@@ -136,7 +136,7 @@ export function EmpleadoEditForm({
             name="activo"
             defaultValue={employee.activo === false ? "false" : "true"}
             disabled={isSelf}
-            className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] disabled:cursor-not-allowed disabled:bg-[#F9FAFB]"
+            className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] disabled:cursor-not-allowed disabled:bg-[#F9FAFB]"
           >
             <option value="true">Activo</option>
             <option value="false">Inactivo</option>
@@ -151,7 +151,7 @@ export function EmpleadoEditForm({
             id="cargo"
             name="cargo"
             defaultValue={employee.cargo ?? ""}
-            className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           />
         </div>
         <div className="space-y-2">
@@ -161,7 +161,7 @@ export function EmpleadoEditForm({
             name="fecha_ingreso"
             type="date"
             defaultValue={employee.fecha_ingreso ?? ""}
-            className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           />
         </div>
         <div className="space-y-2">
@@ -173,7 +173,7 @@ export function EmpleadoEditForm({
             min="0"
             step="0.01"
             defaultValue={employee.comision_default_porcentaje ?? 0}
-            className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           />
         </div>
         <div className="space-y-2 md:col-span-2">
@@ -183,7 +183,7 @@ export function EmpleadoEditForm({
             name="notas"
             defaultValue={employee.notas ?? ""}
             rows={4}
-            className="min-h-[96px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="min-h-[96px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           />
         </div>
       </div>
@@ -192,7 +192,7 @@ export function EmpleadoEditForm({
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+          className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
         >
           Cancelar
         </button>

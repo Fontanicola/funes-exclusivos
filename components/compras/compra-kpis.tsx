@@ -26,23 +26,23 @@ export function CompraKpis({ compras }: { compras: Compra[] }) {
 
   return (
     <div className="grid gap-4 md:grid-cols-4">
-      <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+      <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
         <p className="text-sm font-medium text-[#6B7280]">Compras del mes</p>
         <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">{formatNumber(currentMonthPurchases.length)}</p>
       </article>
-      <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+      <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
         <p className="text-sm font-medium text-[#6B7280]">Monto comprado del mes</p>
         <p className="mt-3 text-2xl font-semibold tracking-tight text-[#111827]">
           {formatCurrencyByCurrency(purchasedAmount)}
         </p>
       </article>
-      <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+      <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
         <p className="text-sm font-medium text-[#6B7280]">Deuda pendiente</p>
         <p className="mt-3 text-2xl font-semibold tracking-tight text-[#111827]">
           {formatCurrencyByCurrency(debtAmount)}
         </p>
       </article>
-      <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+      <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
         <p className="text-sm font-medium text-[#6B7280]">Unidades ingresadas a stock</p>
         <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">{formatNumber(stockUnits)}</p>
       </article>

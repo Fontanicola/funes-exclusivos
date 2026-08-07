@@ -158,46 +158,26 @@ export default async function CrmPage() {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
-              CRM
-            </h1>
-            <p className="text-sm leading-6 text-[#6B7280]">
-              Leads, pipeline comercial e historial de seguimiento
-            </p>
-          </div>
-
-          <Link
-            href="/crm/nuevo"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
-          >
-            <Plus className="h-4 w-4" />
-            Nuevo lead
-          </Link>
+      {isDemoMode ? (
+        <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+          Modo demo: los leads usan datos simulados y no se guardarán cambios reales.
         </div>
-        {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: los leads son mock y no se guardará nada en Supabase.
-          </div>
-        ) : null}
-      </header>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">Leads activos</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
             {activeLeads.length}
           </p>
         </article>
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">En negociación</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
             {negotiationLeads.length}
           </p>
         </article>
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">Próximos contactos</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
             {upcomingLeads.length}
@@ -207,7 +187,18 @@ export default async function CrmPage() {
       </div>
 
       <CrmPipeline leads={leads} pipelineEstados={pipelineEstados} />
-      <LeadsTable leads={leads} />
+      <LeadsTable
+        leads={leads}
+        toolbarAction={
+          <Link
+            href="/crm/nuevo"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
+          >
+            <Plus className="h-4 w-4" />
+            Nuevo lead
+          </Link>
+        }
+      />
     </section>
   );
 }

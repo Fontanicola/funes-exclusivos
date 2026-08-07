@@ -10,11 +10,17 @@ const config: Config = {
     extend: {
       colors: {
         shell: {
-          background: "#FAFAFA",
+          background: "#FFFFFF",
           border: "#E5E7EB",
           foreground: "#111827",
           muted: "#6B7280",
           hover: "#F3F4F6",
+        },
+        brand: {
+          DEFAULT: "#8A1538",
+          hover: "#6F102D",
+          soft: "#FDF2F5",
+          border: "#D8A1B2",
         },
       },
     },

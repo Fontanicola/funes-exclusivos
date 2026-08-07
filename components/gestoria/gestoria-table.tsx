@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { GestoriaStatusBadge } from "./gestoria-status-badge";
@@ -97,10 +98,10 @@ function getClientContact(tramite: GestoriaTramite) {
 }
 
 function getResponsibleName(tramite: GestoriaTramite) {
-  return tramite.responsable?.nombre ?? tramite.responsable?.email ?? "—";
+  return tramite.responsable?.nombre ?? "Sin responsable";
 }
 
-export function GestoriaTable({ tramites }: { tramites: GestoriaTramite[] }) {
+export function GestoriaTable({ tramites, toolbarAction }: { tramites: GestoriaTramite[]; toolbarAction?: ReactNode }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
   const [typeFilter, setTypeFilter] = useState<(typeof types)[number]>("");
@@ -137,23 +138,18 @@ export function GestoriaTable({ tramites }: { tramites: GestoriaTramite[] }) {
   const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-[#E5E7EB] p-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-[#111827]">Trámites</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
-            Buscá por título, cliente, documento, dominio, vehículo o responsable.
-          </p>
-        </div>
-
-        <div className="grid gap-2 md:grid-cols-[320px_180px_180px]">
-          <div className="relative">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap gap-2">
+            {toolbarAction ? <div className="shrink-0">{toolbarAction}</div> : null}
+            <div className="relative min-w-[260px] flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar trámite"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -165,37 +161,41 @@ export function GestoriaTable({ tramites }: { tramites: GestoriaTramite[] }) {
                 <X className="h-3.5 w-3.5" />
               </button>
             ) : null}
+            </div>
+
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
+            >
+              <option value="">Todos los estados</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="en_proceso">En proceso</option>
+              <option value="observado">Observado</option>
+              <option value="completado">Completado</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+
+            <select
+              value={typeFilter}
+              onChange={(event) => setTypeFilter(event.target.value as (typeof types)[number])}
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
+            >
+              <option value="">Todos los tipos</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="cedula">Cédula</option>
+              <option value="titulo">Título</option>
+              <option value="verificacion_policial">Verificación policial</option>
+              <option value="informe_dominio">Informe dominio</option>
+              <option value="prenda">Prenda</option>
+              <option value="seguro">Seguro</option>
+              <option value="patente">Patente</option>
+              <option value="otro">Otro</option>
+            </select>
           </div>
-
-          <select
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Todos los estados</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="en_proceso">En proceso</option>
-            <option value="observado">Observado</option>
-            <option value="completado">Completado</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
-
-          <select
-            value={typeFilter}
-            onChange={(event) => setTypeFilter(event.target.value as (typeof types)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Todos los tipos</option>
-            <option value="transferencia">Transferencia</option>
-            <option value="cedula">Cédula</option>
-            <option value="titulo">Título</option>
-            <option value="verificacion_policial">Verificación policial</option>
-            <option value="informe_dominio">Informe dominio</option>
-            <option value="prenda">Prenda</option>
-            <option value="seguro">Seguro</option>
-            <option value="patente">Patente</option>
-            <option value="otro">Otro</option>
-          </select>
+          <p className="text-xs text-[#6B7280]">
+            Mostrando {visibleTramites.length} de {filtered.length}
+          </p>
         </div>
       </div>
 
@@ -275,8 +275,17 @@ export function GestoriaTable({ tramites }: { tramites: GestoriaTramite[] }) {
               })
             ) : (
               <tr>
-                <td colSpan={8} className="px-4 py-14 text-center text-sm text-[#6B7280]">
-                  No hay trámites que coincidan con los filtros.
+                <td colSpan={8} className="px-4 py-14 text-center">
+                  <div className="mx-auto max-w-sm space-y-2">
+                    <p className="text-sm font-medium text-[#111827]">
+                      {tramites.length ? "No encontramos trámites con esos filtros" : "Todavía no hay trámites cargados"}
+                    </p>
+                    <p className="text-sm leading-6 text-[#6B7280]">
+                      {tramites.length
+                        ? "Probá ajustar el estado o el tipo."
+                        : "Creá el primer trámite para empezar a seguir vencimientos y documentación."}
+                    </p>
+                  </div>
                 </td>
               </tr>
             )}

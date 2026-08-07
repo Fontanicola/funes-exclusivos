@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Plus } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleado, mockProveedores, mockVehiculos } from "@/lib/mock-data";
 import { canManageInventory } from "@/lib/auth/permissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { InventarioTable } from "@/components/inventario/inventario-table";
-import { PageHeader, PrimaryPageAction } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
   title: "Inventario | Funes Exclusivos",
@@ -71,6 +71,7 @@ export default async function InventarioPage() {
   let vehiculos: Vehiculo[] = mockVehiculos as unknown as Vehiculo[];
   let proveedores: Proveedor[] = mockProveedores as Proveedor[];
   let canEditInventory = canManageInventory(mockEmpleado.rol);
+  let currentRole: string | null = mockEmpleado.rol;
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
@@ -107,54 +108,49 @@ export default async function InventarioPage() {
         .eq("id", user.id)
         .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
 
-      canEditInventory = canManageInventory(employee?.rol ?? null) && employee?.activo === true;
+      currentRole = employee?.rol ?? null;
+      canEditInventory = canManageInventory(currentRole) && employee?.activo === true;
     }
   }
   const totalVehiculos = vehiculos.length;
   const enStock = vehiculos.filter((vehiculo) => vehiculo.estado === "en_stock").length;
   const valorPublicadoTotal = formatPublishedTotal(vehiculos);
+  const toolbarAction = canEditInventory ? (
+    <Link
+      href="/inventario/nuevo"
+      className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D8A1B2]"
+    >
+      <Plus className="h-4 w-4" />
+      Nuevo vehículo
+    </Link>
+  ) : (
+    <div className="inline-flex h-10 items-center rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm text-[#6B7280]">
+      Solo lectura
+    </div>
+  );
 
   return (
-    <section className="space-y-6">
-      <PageHeader
-        eyebrow="Operación"
-        title="Inventario"
-        description="Stock y lista de precios unificada."
-        action={
-          canEditInventory ? (
-            <PrimaryPageAction href="/inventario/nuevo">
-              <span className="inline-flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Nuevo vehículo
-              </span>
-            </PrimaryPageAction>
-          ) : (
-            <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-              Solo lectura para tu rol.
-            </div>
-          )
-        }
-      />
+    <section className="space-y-4">
       {isDemoMode ? (
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-          Modo demo: los datos son mock y no se guardará nada en Supabase.
+        <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+          Modo demo: los datos son simulados y no se guardarán cambios reales.
         </div>
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">Total vehículos</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
             {totalVehiculos}
           </p>
         </article>
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">En stock</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
             {enStock}
           </p>
         </article>
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">
             Valor publicado total
           </p>
@@ -168,6 +164,8 @@ export default async function InventarioPage() {
         vehiculos={vehiculos as Vehiculo[]}
         proveedores={proveedores}
         canEdit={canEditInventory}
+        role={currentRole}
+        toolbarAction={toolbarAction}
       />
     </section>
   );

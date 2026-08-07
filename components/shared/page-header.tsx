@@ -13,17 +13,17 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <header className="space-y-3">
+    <header className="border-b border-[#E5E7EB] pb-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="space-y-2">
+        <div className="space-y-1">
           {eyebrow ? (
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
               {eyebrow}
             </p>
           ) : null}
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">{title}</h1>
-            {description ? <p className="max-w-3xl text-sm leading-6 text-[#6B7280]">{description}</p> : null}
+            <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">{title}</h1>
+            {description ? <p className="max-w-3xl text-sm leading-6 text-[#64748B]">{description}</p> : null}
           </div>
         </div>
 
@@ -49,7 +49,7 @@ export function PrimaryPageAction({
       href={href}
       target={target}
       rel={rel}
-      className="inline-flex h-10 items-center justify-center rounded-xl bg-[#111827] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D1D5DB]"
+      className="inline-flex h-10 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D8A1B2]"
     >
       {children}
     </Link>

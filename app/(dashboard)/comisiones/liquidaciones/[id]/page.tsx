@@ -75,12 +75,12 @@ export default async function LiquidacionDetallePage({ params }: { params: { id:
   return (
     <section className="space-y-6">
       <header className="space-y-3">
-        <Link href="/comisiones/liquidaciones" className="inline-flex items-center gap-2 text-sm font-medium text-[#6B7280] transition hover:text-[#111827]">
+        <Link href="/comisiones/liquidaciones" className="inline-flex items-center gap-2 text-sm font-medium text-[#8A1538] underline decoration-[#D8A1B2] underline-offset-4 transition hover:text-[#6F102D]">
           <ArrowLeft className="h-4 w-4" />
           Volver a liquidaciones
         </Link>
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Liquidación de comisión</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">Liquidación de comisión</h1>
           <p className="text-sm leading-6 text-[#6B7280]">
             Seguimiento del cierre y pago automático en Caja.
           </p>

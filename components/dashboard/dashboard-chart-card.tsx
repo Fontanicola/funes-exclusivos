@@ -16,7 +16,7 @@ export function DashboardChartCard({
   children,
 }: DashboardChartCardProps) {
   return (
-    <section className={["rounded-[32px] border border-[#E5E7EB] bg-white shadow-sm", className].join(" ")}>
+    <section className={["rounded-md border border-[#E5E7EB] bg-white", className].join(" ")}>
       <div className="flex items-start justify-between gap-4 border-b border-[#E5E7EB] p-5">
         <div>
           <h2 className="text-base font-semibold text-[#111827]">{title}</h2>

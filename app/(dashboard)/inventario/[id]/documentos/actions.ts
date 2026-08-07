@@ -110,7 +110,7 @@ export async function createVehiculoDocumentoAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar documentos reales." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar documentos." };
   }
 
   const current = await getCurrentEmployee();
@@ -198,7 +198,7 @@ export async function updateVehiculoDocumentoEstadoAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para modificar documentos reales." };
+    return { error: "Modo demo activo: conectá el entorno real para modificar documentos." };
   }
 
   const current = await getCurrentEmployee();
@@ -235,7 +235,7 @@ export async function deleteVehiculoDocumentoAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para eliminar documentos reales." };
+    return { error: "Modo demo activo: conectá el entorno real para eliminar documentos." };
   }
 
   const current = await getCurrentEmployee();
@@ -285,7 +285,7 @@ export async function getVehiculoDocumentoSignedUrlAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para abrir documentos reales." };
+    return { error: "Modo demo activo: conectá el entorno real para abrir documentos." };
   }
 
   const current = await getCurrentEmployee();

@@ -99,22 +99,22 @@ export default async function LiquidacionesPage() {
   return (
     <section className="space-y-6">
       <header className="space-y-3">
-        <Link href="/comisiones" className="inline-flex items-center gap-2 text-sm font-medium text-[#6B7280] transition hover:text-[#111827]">
+        <Link href="/comisiones" className="inline-flex items-center gap-2 text-sm font-medium text-[#8A1538] underline decoration-[#D8A1B2] underline-offset-4 transition hover:text-[#6F102D]">
           <ArrowLeft className="h-4 w-4" />
           Volver a comisiones
         </Link>
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Liquidaciones de comisión</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">Liquidaciones de comisión</h1>
           <p className="text-sm leading-6 text-[#6B7280]">Cierres, pagos y seguimiento del neto a cobrar por vendedor.</p>
         </div>
         {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: las liquidaciones son mock y no se consultará Supabase.
+          <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+            Modo demo: las liquidaciones usan datos simulados y no consultarán datos reales.
           </div>
         ) : null}
       </header>
 
-      <div className="overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -144,7 +144,7 @@ export default async function LiquidacionesPage() {
                     <td className="px-5 py-4">
                       <div className="space-y-1">
                         <p className="font-medium text-[#111827]">{liquidacion.vendedor?.nombre ?? "—"}</p>
-                        <p className="text-xs text-[#6B7280]">{liquidacion.vendedor?.email ?? "—"}</p>
+                        <p className="text-xs text-[#6B7280]">{liquidacion.periodo ?? "Sin periodo"}</p>
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-5 py-4 font-medium text-[#111827]">{formatMoney(liquidacion.neto_a_cobrar, liquidacion.moneda)}</td>
@@ -158,7 +158,7 @@ export default async function LiquidacionesPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <Link href={`/comisiones/liquidaciones/${liquidacion.id}`} className="inline-flex items-center gap-1 text-sm font-medium text-[#111827] transition hover:text-[#6B7280]">
+                      <Link href={`/comisiones/liquidaciones/${liquidacion.id}`} className="inline-flex items-center gap-1 text-sm font-medium text-[#8A1538] underline decoration-[#D8A1B2] underline-offset-4 transition hover:text-[#6F102D]">
                         Ver
                         <ChevronRight className="h-4 w-4" />
                       </Link>

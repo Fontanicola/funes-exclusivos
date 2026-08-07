@@ -17,7 +17,7 @@ function SubmitButton() {
   return (
     <button
       type="submit"
-      className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#111827] px-4 text-sm font-medium text-white transition hover:bg-[#1F2937] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-11 w-full items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70"
       disabled={pending}
     >
       {pending ? "Ingresando..." : "Entrar"}
@@ -34,7 +34,7 @@ export function LoginForm({ initialErrorMessage }: { initialErrorMessage?: strin
   return (
     <form action={formAction} className="space-y-4">
       {state.error ? (
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
+        <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
           {state.error}
         </div>
       ) : null}
@@ -49,7 +49,7 @@ export function LoginForm({ initialErrorMessage }: { initialErrorMessage?: strin
           type="email"
           autoComplete="email"
           required
-          className="h-11 w-full rounded-xl border border-[#D1D5DB] bg-white px-4 text-sm text-[#111827] outline-none transition focus:border-[#9CA3AF] focus:ring-2 focus:ring-[#E5E7EB]"
+          className="h-11 w-full rounded-md border border-[#D1D5DB] bg-white px-4 text-sm text-[#111827] outline-none transition focus:border-[#9CA3AF] focus:ring-2 focus:ring-[#E5E7EB]"
           placeholder="tu@email.com"
         />
       </div>
@@ -64,7 +64,7 @@ export function LoginForm({ initialErrorMessage }: { initialErrorMessage?: strin
           type="password"
           autoComplete="current-password"
           required
-          className="h-11 w-full rounded-xl border border-[#D1D5DB] bg-white px-4 text-sm text-[#111827] outline-none transition focus:border-[#9CA3AF] focus:ring-2 focus:ring-[#E5E7EB]"
+          className="h-11 w-full rounded-md border border-[#D1D5DB] bg-white px-4 text-sm text-[#111827] outline-none transition focus:border-[#9CA3AF] focus:ring-2 focus:ring-[#E5E7EB]"
           placeholder="••••••••"
         />
       </div>

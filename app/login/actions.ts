@@ -14,11 +14,11 @@ function mapSupabaseAuthError(message?: string | null) {
   }
 
   if (isConfigError(message)) {
-    return "Falta configurar Supabase en .env.local.";
+    return "Falta configurar el entorno.";
   }
 
   if (message.includes("Email not confirmed")) {
-    return "El email todavía no está confirmado en Supabase Auth.";
+    return "El email todavía no está confirmado.";
   }
 
   if (message.includes("Invalid login credentials")) {
@@ -50,7 +50,7 @@ export async function login(_prevState: ActionState, formData: FormData): Promis
   }
 
   if (!hasSupabaseEnv()) {
-    return { error: "Falta configurar Supabase en .env.local." };
+    return { error: "Falta configurar el entorno." };
   }
 
   let supabase;
@@ -61,7 +61,7 @@ export async function login(_prevState: ActionState, formData: FormData): Promis
     const message = error instanceof Error ? error.message : null;
     return {
       error: isConfigError(message)
-        ? "Falta configurar Supabase en .env.local."
+        ? "Falta configurar el entorno."
         : message ?? "No pudimos iniciar sesión.",
     };
   }
@@ -106,7 +106,7 @@ export async function login(_prevState: ActionState, formData: FormData): Promis
 
     if (!employee) {
       await supabase.auth.signOut();
-      return { error: "El usuario existe en Auth pero no tiene perfil en empleados." };
+      return { error: "El usuario existe, pero no tiene perfil operativo cargado." };
     }
 
     if (employee.activo === false) {
@@ -119,7 +119,7 @@ export async function login(_prevState: ActionState, formData: FormData): Promis
 
     return {
       error: isConfigError(message)
-        ? "Falta configurar Supabase en .env.local."
+        ? "Falta configurar el entorno."
         : message ?? "No pudimos iniciar sesión.",
     };
   }

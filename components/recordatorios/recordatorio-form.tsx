@@ -40,7 +40,7 @@ const priorities = [
 ];
 
 function formatEmployeeLabel(employee: Employee) {
-  return employee.nombre ?? employee.email ?? employee.id;
+  return employee.nombre ?? employee.email ?? "Empleado";
 }
 
 export function RecordatorioForm({
@@ -65,7 +65,7 @@ export function RecordatorioForm({
     <form
       ref={formRef}
       action={formAction}
-      className="rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm"
+      className="rounded-md border border-[#E5E7EB] bg-white"
     >
       <div className="border-b border-[#E5E7EB] p-5">
         <h2 className="text-base font-semibold text-[#111827]">Nuevo recordatorio</h2>
@@ -76,13 +76,13 @@ export function RecordatorioForm({
 
       <div className="space-y-4 p-5">
         {state.error ? (
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+          <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
             {state.error}
           </div>
         ) : null}
 
         {state.success ? (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             Recordatorio creado correctamente.
           </div>
         ) : null}
@@ -93,7 +93,7 @@ export function RecordatorioForm({
               id="tipo"
               name="tipo"
               defaultValue="seguimiento_crm"
-              className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             >
               {types.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -108,7 +108,7 @@ export function RecordatorioForm({
               id="prioridad"
               name="prioridad"
               defaultValue="media"
-              className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             >
               {priorities.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -123,7 +123,7 @@ export function RecordatorioForm({
               id="titulo"
               name="titulo"
               placeholder="Ej.: Llamar por seguimiento de financiación"
-              className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
           </Field>
 
@@ -133,7 +133,7 @@ export function RecordatorioForm({
               name="descripcion"
               rows={4}
               placeholder="Notas breves, contexto o detalle de la alerta."
-              className="w-full rounded-xl border border-[#E5E7EB] bg-white px-3 py-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
           </Field>
 
@@ -143,7 +143,7 @@ export function RecordatorioForm({
                 id="fecha_vencimiento"
                 name="fecha_vencimiento"
                 type="date"
-                className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+                className="h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
               />
             </Field>
 
@@ -152,7 +152,7 @@ export function RecordatorioForm({
                 id="asignado_a"
                 name="asignado_a"
                 defaultValue={defaultAssigned}
-                className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+                className="h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
               >
                 {employees.length ? (
                   employees.map((employee) => (
@@ -171,7 +171,7 @@ export function RecordatorioForm({
         <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/dashboard"
-            className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
           >
             Volver
           </Link>
@@ -207,7 +207,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
       Crear recordatorio

@@ -26,7 +26,7 @@ export async function createLeadAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar cambios reales." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar cambios." };
   }
 
   const supabase = createSupabaseServerClient();
@@ -108,7 +108,7 @@ export async function createLeadInteractionAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar cambios reales." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar cambios." };
   }
 
   const supabase = createSupabaseServerClient();
@@ -160,7 +160,7 @@ export async function convertLeadToVentaAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para convertir leads reales." };
+    return { error: "Modo demo activo: conectá el entorno real para convertir leads." };
   }
 
   const supabase = createSupabaseServerClient();

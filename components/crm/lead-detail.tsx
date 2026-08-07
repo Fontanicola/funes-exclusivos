@@ -101,7 +101,7 @@ export function LeadDetail({
   const hasSale = Boolean(sale);
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
+    <section className="rounded-md border border-[#E5E7EB] bg-white p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -122,7 +122,7 @@ export function LeadDetail({
             </p>
           </div>
           {warning ? (
-            <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
+            <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
               {warning}
             </div>
           ) : null}
@@ -132,7 +132,7 @@ export function LeadDetail({
           {hasSale ? (
             <Link
               href="/ventas"
-              className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
             >
               Ver ventas
               <ArrowRight className="h-4 w-4" />
@@ -141,7 +141,7 @@ export function LeadDetail({
             <button
               type="button"
               onClick={() => setShowConversionForm((value) => !value)}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
+              className="inline-flex h-10 items-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
             >
               {showConversionForm ? (
                 <>
@@ -160,7 +160,7 @@ export function LeadDetail({
       </div>
 
       {hasSale ? (
-        <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
+        <div className="mt-5 rounded-md border border-emerald-200 bg-emerald-50/70 p-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-1">
               <p className="text-sm font-semibold text-emerald-900">Lead convertido en venta</p>
@@ -178,7 +178,7 @@ export function LeadDetail({
             </div>
             <Link
               href="/ventas"
-              className="inline-flex h-10 items-center gap-2 rounded-xl border border-emerald-200 bg-white px-4 text-sm font-medium text-emerald-900 transition hover:bg-emerald-50"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-emerald-200 bg-white px-4 text-sm font-medium text-emerald-900 transition hover:bg-emerald-50"
             >
               Ir a ventas
               <ArrowRight className="h-4 w-4" />
@@ -190,7 +190,7 @@ export function LeadDetail({
           <LeadConvertSaleForm lead={lead} vehicles={vehicles} sellers={sellers} />
         </div>
       ) : (
-        <div className="mt-5 rounded-2xl border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]">
+        <div className="mt-5 rounded-md border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]">
           Tocá “Convertir en venta” para cargar la operación y disparar automáticamente Caja, Comisión y Entrega.
         </div>
       )}

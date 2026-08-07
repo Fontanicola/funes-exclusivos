@@ -40,7 +40,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-11 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-11 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "Creando..." : "Crear instancia"}
     </button>
@@ -61,7 +61,7 @@ export function WhatsappInstanceCreateForm({ employees }: { employees: Employee[
     <form
       ref={formRef}
       action={formAction}
-      className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm"
+      className="rounded-md border border-[#E5E7EB] bg-white p-4"
     >
       <div className="space-y-1">
         <h2 className="text-base font-semibold text-[#111827]">Crear instancia</h2>
@@ -71,7 +71,7 @@ export function WhatsappInstanceCreateForm({ employees }: { employees: Employee[
       </div>
 
       {state.error ? (
-        <div className="mt-4 rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
+        <div className="mt-4 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
           {state.error}
         </div>
       ) : null}
@@ -82,7 +82,7 @@ export function WhatsappInstanceCreateForm({ employees }: { employees: Employee[
           <select
             id="empleado_id"
             name="empleado_id"
-            className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             defaultValue=""
             required
           >
@@ -95,7 +95,7 @@ export function WhatsappInstanceCreateForm({ employees }: { employees: Employee[
           </select>
         </div>
 
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-xs leading-5 text-[#6B7280]">
+        <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-xs leading-5 text-[#6B7280]">
           El nombre interno se genera como <span className="font-medium text-[#111827]">funes_emp_XXXXXXXX</span>.
         </div>
 

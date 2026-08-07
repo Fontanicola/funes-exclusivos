@@ -70,7 +70,7 @@ function summarizeCurrencyMap(groups: Map<string, number>) {
 }
 
 function getSellerName(comision: Comision) {
-  return comision.vendedor?.nombre ?? comision.vendedor?.email ?? "Sin vendedor";
+  return comision.vendedor?.nombre ?? "Sin vendedor";
 }
 
 export function ComisionesComparativa({ comisiones }: { comisiones: Comision[] }) {
@@ -125,8 +125,8 @@ export function ComisionesComparativa({ comisiones }: { comisiones: Comision[] }
 
   if (!summaries.length) {
     return (
-      <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]">
+      <section className="rounded-md border border-[#E5E7EB] bg-white p-4">
+        <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]">
           No hay comisiones para comparar todavía.
         </div>
       </section>
@@ -134,7 +134,7 @@ export function ComisionesComparativa({ comisiones }: { comisiones: Comision[] }
   }
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+    <section className="rounded-md border border-[#E5E7EB] bg-white p-4">
       <div className="space-y-1 border-b border-[#E5E7EB] pb-4">
         <h2 className="text-base font-semibold text-[#111827]">Comparativa comercial</h2>
         <p className="text-sm text-[#6B7280]">
@@ -147,7 +147,7 @@ export function ComisionesComparativa({ comisiones }: { comisiones: Comision[] }
           const barWidth = maxCommission > 0 ? Math.max((summary.totalCommissionNominal / maxCommission) * 100, 6) : 0;
 
           return (
-            <article key={summary.id} className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+            <article key={summary.id} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="space-y-2">
                   <div>
@@ -188,7 +188,7 @@ export function ComisionesComparativa({ comisiones }: { comisiones: Comision[] }
                   </div>
                   <div className="mt-2 h-3 overflow-hidden rounded-full bg-[#E5E7EB]">
                     <div
-                      className="h-full rounded-full bg-[#18181B] transition-all"
+                      className="h-full rounded-full bg-[#8A1538] transition-all"
                       style={{ width: `${barWidth}%` }}
                     />
                   </div>

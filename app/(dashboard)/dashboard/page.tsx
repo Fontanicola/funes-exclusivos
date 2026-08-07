@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { canViewCosts } from "@/lib/auth/permissions";
 import { isDemoMode } from "@/lib/demo-mode";
 import {
   mockCajaMovimientos,
   mockComisionLiquidaciones,
   mockComisiones,
   mockConversaciones,
+  mockEmpleado,
   mockEmpleados,
   mockGestoriaPresupuestos,
   mockGestoriaTramites,
@@ -27,7 +29,6 @@ import { CommercialSummary } from "@/components/dashboard/commercial-summary";
 import { OperationsSummary } from "@/components/dashboard/operations-summary";
 import { DashboardAlerts } from "@/components/dashboard/dashboard-alerts";
 import { VendorActivitySummary } from "@/components/dashboard/vendor-activity-summary";
-import { PageHeader } from "@/components/shared/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -160,7 +161,7 @@ async function loadDashboardData() {
     safeSelect(
       supabase
         .from("caja_movimientos")
-        .select("id,tipo,origen,compra_id,venta_id,venta_pago_id,comision_liquidacion_id,monto,importe,moneda,fecha,medio,cuenta,concepto,created_at")
+        .select("id,tipo,origen,compra_id,venta_id,venta_pago_id,comision_liquidacion_id,monto,moneda,fecha,medio,cuenta,concepto,created_at")
         .order("created_at", { ascending: false })
         .limit(DASHBOARD_LIMIT)
     ),
@@ -262,17 +263,33 @@ async function loadDashboardData() {
 export default async function DashboardPage() {
   const data = await loadDashboardData();
   const metrics = buildDashboardMetrics(data);
+  let currentRole: string | null = isDemoMode ? mockEmpleado.rol : null;
+
+  if (!isDemoMode) {
+    const supabase = createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: employee } = await supabase
+        .from("empleados")
+        .select("rol")
+        .eq("id", user.id)
+        .maybeSingle<{ rol: string | null }>();
+
+      currentRole = employee?.rol ?? null;
+    }
+  }
+
+  const canViewFinancials = canViewCosts(currentRole);
 
   return (
     <section className="space-y-8">
-      <PageHeader
-        eyebrow="Executive view"
-        title="Dashboard"
-        description="P&L, operación comercial, inventario y estado general del negocio."
-      />
+      <DashboardAlerts alerts={metrics.alerts} />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        {metrics.topKpis.map((kpi, index) => (
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {metrics.topKpis.map((kpi) => (
           <KpiCard
             key={kpi.title}
             title={kpi.title}
@@ -290,28 +307,38 @@ export default async function DashboardPage() {
                       ? "warning"
                       : "default"
             }
-            featured={index === 0}
             badge={kpi.badge}
             progress={kpi.progress}
             note={kpi.note}
-            className={index === 0 ? "md:col-span-2 xl:col-span-2" : ""}
           />
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-        <PnlSummary
-          sales={metrics.pnl.sales}
-          cashIncome={metrics.pnl.cashIncome}
-          cashExpense={metrics.pnl.cashExpense}
-          purchases={metrics.pnl.purchases}
-          commissionsPaid={metrics.pnl.commissionsPaid}
-          otherExpenses={metrics.pnl.otherExpenses}
-          operatingResult={metrics.pnl.operatingResult}
-          annualOperatingResult={metrics.pnl.annualOperatingResult}
-          salesCount={metrics.pnl.salesCount}
-          salesMarginDescription={metrics.pnl.salesMarginDescription}
-          monthlySeriesByCurrency={metrics.pnl.monthlySeriesByCurrency}
+      <PnlSummary
+        sales={metrics.pnl.sales}
+        cashIncome={metrics.pnl.cashIncome}
+        cashExpense={metrics.pnl.cashExpense}
+        purchases={metrics.pnl.purchases}
+        commissionsPaid={metrics.pnl.commissionsPaid}
+        otherExpenses={metrics.pnl.otherExpenses}
+        operatingResult={metrics.pnl.operatingResult}
+        annualOperatingResult={metrics.pnl.annualOperatingResult}
+        salesMarginDescription={metrics.pnl.salesMarginDescription}
+        monthlySeriesByCurrency={metrics.pnl.monthlySeriesByCurrency}
+        canViewFinancials={canViewFinancials}
+      />
+
+      <div className="space-y-6">
+        <CommercialSummary
+          salesCount={metrics.commercial.salesCount}
+          activeLeads={metrics.commercial.activeLeads}
+          negotiationLeads={metrics.commercial.negotiationLeads}
+          wonLeads={metrics.commercial.wonLeads}
+          highInterestConversations={metrics.commercial.highInterestConversations}
+          attentionConversations={metrics.commercial.attentionConversations}
+          nextContactLeads={metrics.commercial.nextContactLeads}
+          openConversations={metrics.commercial.openConversations}
+          leadStages={metrics.commercial.leadStages}
         />
         <InventorySummary
           totalStock={metrics.inventory.totalStock}
@@ -326,25 +353,11 @@ export default async function DashboardPage() {
           preparationPending={metrics.inventory.preparationPending}
           preparationInProgress={metrics.inventory.preparationInProgress}
           preparationReady={metrics.inventory.preparationReady}
+          canViewCosts={canViewFinancials}
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)]">
-        <CommercialSummary
-          salesCount={metrics.commercial.salesCount}
-          activeLeads={metrics.commercial.activeLeads}
-          negotiationLeads={metrics.commercial.negotiationLeads}
-          wonLeads={metrics.commercial.wonLeads}
-          highInterestConversations={metrics.commercial.highInterestConversations}
-          attentionConversations={metrics.commercial.attentionConversations}
-          nextContactLeads={metrics.commercial.nextContactLeads}
-          openConversations={metrics.commercial.openConversations}
-          leadStages={metrics.commercial.leadStages}
-        />
-        <VendorActivitySummary vendors={metrics.vendorActivity} />
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+      <div className="space-y-6">
         <OperationsSummary
           pendingTramites={metrics.operations.pendingTramites}
           overdueTramites={metrics.operations.overdueTramites}
@@ -357,8 +370,9 @@ export default async function DashboardPage() {
           deliveryDelivered={metrics.operations.deliveryDelivered}
           deliveryObserved={metrics.operations.deliveryObserved}
         />
-        <DashboardAlerts alerts={metrics.alerts} />
+        {canViewFinancials ? <VendorActivitySummary vendors={metrics.vendorActivity} /> : null}
       </div>
+
     </section>
   );
 }

@@ -122,23 +122,17 @@ export function PresupuestosTable({ presupuestos }: { presupuestos: Presupuesto[
   const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-3xl border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-[#E5E7EB] p-4 xl:flex-row xl:items-end xl:justify-between">
-        <div className="space-y-2">
-          <h2 className="text-base font-semibold text-[#111827]">Presupuestos</h2>
-          <p className="text-sm leading-6 text-[#6B7280]">
-            Buscá por cliente, documento, dominio, vehículo o trámite.
-          </p>
-        </div>
-
-        <div className="grid gap-2 xl:grid-cols-[320px_180px_140px]">
-          <div className="relative">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap gap-2">
+          <div className="relative min-w-[260px] flex-1 sm:w-[320px] sm:flex-none">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar presupuesto"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -155,7 +149,7 @@ export function PresupuestosTable({ presupuestos }: { presupuestos: Presupuesto[
           <select
             value={stateFilter}
             onChange={(event) => setStateFilter(event.target.value as (typeof states)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
           >
             <option value="">Todos los estados</option>
             <option value="borrador">Borrador</option>
@@ -169,12 +163,16 @@ export function PresupuestosTable({ presupuestos }: { presupuestos: Presupuesto[
           <select
             value={currencyFilter}
             onChange={(event) => setCurrencyFilter(event.target.value as (typeof currencies)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 min-w-[160px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
           >
             <option value="">Todas las monedas</option>
             <option value="ARS">ARS</option>
             <option value="USD">USD</option>
           </select>
+        </div>
+        <p className="text-xs text-[#6B7280]">
+          Mostrando {visiblePresupuestos.length} de {filtered.length}
+        </p>
         </div>
       </div>
 

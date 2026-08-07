@@ -243,10 +243,10 @@ export default async function LeadDetailPage({
         </Link>
       </div>
 
-      <header className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
+      <header className="rounded-md border border-[#E5E7EB] bg-white p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
+            <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">
               {lead.nombre ?? "Sin nombre"}
             </h1>
             <div className="flex flex-wrap items-center gap-2">
@@ -254,7 +254,7 @@ export default async function LeadDetailPage({
               <LeadOriginBadge origin={lead.origen} />
             </div>
           </div>
-          <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
+          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827]">
             <p className="font-medium">Próximo contacto</p>
             <p className="mt-1 text-[#6B7280]">{formatDate(lead.proximo_contacto)}</p>
           </div>
@@ -263,9 +263,9 @@ export default async function LeadDetailPage({
 
       <LeadDetail lead={lead} sale={lead.venta ?? null} vehicles={vehicles} sellers={sellers} />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+      <div className="space-y-6">
         <div className="space-y-6">
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
+          <section className="rounded-md border border-[#E5E7EB] bg-white p-5">
             <h2 className="text-base font-semibold text-[#111827]">Datos del contacto</h2>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <div>
@@ -289,11 +289,11 @@ export default async function LeadDetailPage({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
+          <section className="rounded-md border border-[#E5E7EB] bg-white p-5">
             <h2 className="text-base font-semibold text-[#111827]">Vehículo de interés</h2>
             <div className="mt-4">
               {lead.vehiculo ? (
-                <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+                <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
                   <p className="text-sm font-medium text-[#111827]">
                     {lead.vehiculo.marca ?? "-"} {lead.vehiculo.modelo ?? ""}
                   </p>
@@ -302,14 +302,14 @@ export default async function LeadDetailPage({
                   </p>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]">
+                <div className="rounded-md border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]">
                   No hay vehículo asociado.
                 </div>
               )}
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
+          <section className="rounded-md border border-[#E5E7EB] bg-white p-5">
             <h2 className="text-base font-semibold text-[#111827]">Presupuesto y estado comercial</h2>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <div>

@@ -40,7 +40,7 @@ function KpiCard({
   description: string;
 }) {
   return (
-    <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+    <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
       <p className="text-sm font-medium text-[#6B7280]">{title}</p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-[#111827]">{value}</p>
       <p className="mt-2 text-xs leading-5 text-[#6B7280]">{description}</p>
@@ -78,7 +78,7 @@ export default async function EmpleadosPage() {
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Empleados</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">Empleados</h1>
         <p className="max-w-2xl text-sm leading-6 text-[#6B7280]">
           Equipo, roles y permisos operativos.
         </p>
@@ -107,7 +107,7 @@ export default async function EmpleadosPage() {
         />
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+      <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
         Desde esta pantalla se gestiona el equipo, sus roles y el estado operativo dentro del sistema.
       </div>
 

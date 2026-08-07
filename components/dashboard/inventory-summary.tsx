@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { DashboardChartCard } from "@/components/dashboard/dashboard-chart-card";
 import { SimpleBarChart } from "@/components/dashboard/simple-bar-chart";
-import { SimpleDonutChart } from "@/components/dashboard/simple-donut-chart";
 import { formatCurrencyByCurrency } from "@/lib/dashboard-metrics";
 
 type CurrencyTotals = {
@@ -23,6 +22,7 @@ export function InventorySummary({
   preparationPending,
   preparationInProgress,
   preparationReady,
+  canViewCosts = true,
 }: {
   totalStock: number;
   stockValued: CurrencyTotals;
@@ -36,14 +36,14 @@ export function InventorySummary({
   preparationPending: number;
   preparationInProgress: number;
   preparationReady: number;
+  canViewCosts?: boolean;
 }) {
   const publicationRate = totalStock > 0 ? Math.round((published / totalStock) * 100) : 0;
-  const totalInventory = totalStock + sold + consignment;
 
   return (
     <DashboardChartCard
-      title="Inventario y catálogo"
-      description="Distribución del stock, exposición online y estado de preparación."
+      title="Inventario"
+      description="Stock disponible, publicación online y preparación."
       action={
         <Link
           href="/inventario"
@@ -53,43 +53,30 @@ export function InventorySummary({
         </Link>
       }
     >
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
-        <div className="space-y-5">
-          <div className="rounded-[30px] bg-[#111827] p-5 text-white shadow-lg shadow-black/10">
-            <p className="text-xs uppercase tracking-[0.16em] text-white/55">Stock visible</p>
-            <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="text-4xl font-semibold tracking-tight">{totalStock}</p>
-                <p className="mt-2 text-sm leading-6 text-white/70">
-                  Unidades listas para mover entre venta y catálogo.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-right">
-                <p className="text-[10px] uppercase tracking-[0.16em] text-white/55">Publicación</p>
-                <p className="text-2xl font-semibold">{publicationRate}%</p>
-              </div>
-            </div>
+      <div className="space-y-4">
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Stat label="Stock disponible" value={totalStock} note={totalStock > 0 ? "Unidades en stock" : "Inventario pendiente de carga"} />
+            <Stat label="Publicados" value={published} note={`${publicationRate}% del stock`} />
+            <Stat label="Preparación pendiente" value={preparationPending} note="Unidades por terminar" tone="amber" />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-[28px] border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Valor publicado</p>
-              <p className="mt-2 text-lg font-semibold text-[#111827]">{formatCurrencyByCurrency(stockValued)}</p>
-              <p className="mt-2 text-xs text-[#6B7280]">Suma estimada del stock visible online.</p>
-            </div>
-            <div className="rounded-[28px] border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">Destacados</p>
-              <p className="mt-2 text-3xl font-semibold text-[#111827]">{highlighted}</p>
-              <p className="mt-2 text-xs text-[#6B7280]">Unidades con mayor prioridad comercial.</p>
-            </div>
+            {canViewCosts ? (
+              <Stat label="Valor estimado" value={formatCurrencyByCurrency(stockValued)} note="Stock visible y valorizado" tone="emerald" />
+            ) : (
+              <Stat label="Valor del stock" value="Reservado" note="Visible solo para administración" tone="slate" />
+            )}
+            <Stat label="Destacados" value={highlighted} note="Prioridad comercial" tone="slate" />
           </div>
 
-          <div className="rounded-[28px] border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-            <p className="text-sm font-semibold text-[#111827]">Preparación</p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <TinyMetric label="Pendiente" value={preparationPending} tone="slate" />
-              <TinyMetric label="En proceso" value={preparationInProgress} tone="amber" />
-              <TinyMetric label="Listo" value={preparationReady} tone="emerald" />
+          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-[#111827]">Preparación y exposición</p>
+                <p className="mt-1 text-xs text-[#6B7280]">Lo que está listo, en proceso o esperando publicación.</p>
+              </div>
+              <p className="text-xs text-[#6B7280]">{publishedWithoutPhoto} sin foto · {vehiclesWithoutPrice} sin precio</p>
             </div>
             <div className="mt-4">
               <SimpleBarChart
@@ -104,20 +91,17 @@ export function InventorySummary({
           </div>
         </div>
 
-        <div className="space-y-4">
-          <SimpleDonutChart
-            centerLabel="Inventario"
-            centerValue={`${totalInventory}`}
-            sublabel="Distribución visible"
-            segments={[
-              { label: "En stock", value: totalStock, tone: "#111827" },
-              { label: "Vendidos", value: sold, tone: "#10B981" },
-              { label: "Consignación", value: consignment, tone: "#F59E0B" },
-            ]}
-          />
-
-          <div className="space-y-3 rounded-[28px] border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-            <MiniStat label="Publicados" value={published} />
+        <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-[#111827]">Estado rápido</p>
+              <p className="mt-1 text-xs text-[#6B7280]">Señales que afectan publicación y venta.</p>
+            </div>
+            <p className="text-xs text-[#6B7280]">
+              {sold} vendidos · {consignment} consignación
+            </p>
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
             <MiniStat label="Sin publicar" value={unpublishedStock} tone="amber" />
             <MiniStat label="Sin foto" value={publishedWithoutPhoto} tone="rose" />
             <MiniStat label="Sin precio" value={vehiclesWithoutPrice} tone="slate" />
@@ -125,6 +109,35 @@ export function InventorySummary({
         </div>
       </div>
     </DashboardChartCard>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  note,
+  tone = "default",
+}: {
+  label: string;
+  value: number | string;
+  note: string;
+  tone?: "default" | "amber" | "emerald" | "slate";
+}) {
+  const toneClass =
+    tone === "amber"
+      ? "border-amber-200 bg-amber-50/80 text-amber-950"
+      : tone === "emerald"
+        ? "border-emerald-200 bg-emerald-50/80 text-emerald-950"
+        : tone === "slate"
+          ? "border-slate-200 bg-slate-50/80 text-slate-950"
+          : "border-[#E5E7EB] bg-white text-[#111827]";
+
+  return (
+    <div className={["rounded-md border px-4 py-4", toneClass].join(" ")}>
+      <p className="text-xs uppercase tracking-[0.14em] opacity-70">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
+      <p className="mt-2 text-xs opacity-75">{note}</p>
+    </div>
   );
 }
 
@@ -139,25 +152,9 @@ function MiniStat({ label, value, tone = "neutral" }: { label: string; value: nu
           : "border-[#E5E7EB] bg-white text-[#111827]";
 
   return (
-    <div className={["flex items-center justify-between rounded-2xl border px-4 py-3", toneClass].join(" ")}>
+    <div className={["flex items-center justify-between rounded-md border px-4 py-3", toneClass].join(" ")}>
       <span className="text-sm font-medium">{label}</span>
       <span className="text-sm font-semibold">{value}</span>
-    </div>
-  );
-}
-
-function TinyMetric({ label, value, tone }: { label: string; value: number; tone: "slate" | "amber" | "emerald" }) {
-  const toneClass =
-    tone === "amber"
-      ? "border-amber-200 bg-amber-50/80 text-amber-900"
-      : tone === "emerald"
-        ? "border-emerald-200 bg-emerald-50/80 text-emerald-900"
-        : "border-slate-200 bg-slate-50/80 text-slate-900";
-
-  return (
-    <div className={["rounded-2xl border px-4 py-3", toneClass].join(" ")}>
-      <p className="text-xs uppercase tracking-[0.14em] opacity-70">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
     </div>
   );
 }

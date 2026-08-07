@@ -4,16 +4,32 @@ function normalizeRole(role: UserRole) {
   return (role ?? "").toLowerCase();
 }
 
-function isAdmin(role: UserRole) {
+export function isAdmin(role: UserRole) {
   return normalizeRole(role) === "admin";
 }
 
-function isVendedor(role: UserRole) {
+export function isVendedor(role: UserRole) {
   return normalizeRole(role) === "vendedor";
 }
 
-function isGestor(role: UserRole) {
+export function isGestor(role: UserRole) {
   return normalizeRole(role) === "gestor";
+}
+
+export function canViewCosts(role: UserRole) {
+  return isAdmin(role);
+}
+
+export function canViewMargins(role: UserRole) {
+  return isAdmin(role);
+}
+
+export function canManageEmployees(role: UserRole) {
+  return isAdmin(role);
+}
+
+export function canManageSettings(role: UserRole) {
+  return isAdmin(role);
 }
 
 export function canManageInventory(role: UserRole) {
@@ -32,6 +48,10 @@ export function canManageComisiones(role: UserRole) {
   return isAdmin(role);
 }
 
+export function canManageCommissions(role: UserRole) {
+  return canManageComisiones(role);
+}
+
 export function canManageGestoria(role: UserRole) {
   return isAdmin(role) || isGestor(role);
 }
@@ -45,10 +65,18 @@ export function canManageWhatsapp(role: UserRole, isOwner = false) {
 }
 
 export function canManageEmpleados(role: UserRole) {
-  return isAdmin(role);
+  return canManageEmployees(role);
 }
 
 export function canManageConfiguracion(role: UserRole) {
+  return canManageSettings(role);
+}
+
+export function canViewTechnicalWhatsapp(role: UserRole) {
+  return isAdmin(role);
+}
+
+export function canEditCatalog(role: UserRole) {
   return isAdmin(role);
 }
 

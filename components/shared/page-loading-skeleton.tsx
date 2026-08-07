@@ -1,5 +1,5 @@
 function SkeletonBlock({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-xl bg-[#E5E7EB] ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-[#E5E7EB] ${className}`} />;
 }
 
 export function PageLoadingSkeleton({
@@ -25,7 +25,7 @@ export function PageLoadingSkeleton({
           {Array.from({ length: cards }).map((_, index) => (
             <div
               key={index}
-              className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm"
+              className="rounded-md border border-[#E5E7EB] bg-white p-4"
             >
               <SkeletonBlock className="h-4 w-28" />
               <SkeletonBlock className="mt-3 h-8 w-20" />
@@ -35,7 +35,7 @@ export function PageLoadingSkeleton({
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] p-4">
           <SkeletonBlock className="h-5 w-40" />
           <SkeletonBlock className="mt-2 h-4 w-60" />

@@ -99,24 +99,17 @@ export function EmpleadosTable({
   }, [empleados, query, roleFilter, statusFilter]);
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
       <div className="border-b border-[#E5E7EB] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-[#111827]">Equipo</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">
-              Filtrá por nombre, email, teléfono, cargo, rol o estado.
-            </p>
-          </div>
-
-          <div className="grid gap-2 lg:grid-cols-[320px_180px_180px]">
-            <div className="relative">
+          <div className="flex flex-wrap gap-2">
+            <div className="relative min-w-[260px] flex-1 sm:w-[320px] sm:flex-none">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Buscar empleado"
-                className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+                className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
               />
               {query ? (
                 <button
@@ -133,7 +126,7 @@ export function EmpleadosTable({
             <select
               value={roleFilter}
               onChange={(event) => setRoleFilter(event.target.value as (typeof roleOptions)[number])}
-              className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
             >
               <option value="">Todos los roles</option>
               <option value="admin">Admin</option>
@@ -144,13 +137,16 @@ export function EmpleadosTable({
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as (typeof statusOptions)[number])}
-              className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
             >
               <option value="all">Todos los estados</option>
               <option value="active">Activos</option>
               <option value="inactive">Inactivos</option>
             </select>
           </div>
+          <p className="text-xs text-[#6B7280]">
+            Mostrando {filtered.length} de {empleados.length}
+          </p>
         </div>
       </div>
 
@@ -212,7 +208,7 @@ export function EmpleadosTable({
                         <button
                           type="button"
                           onClick={() => setEditingId((current) => (current === employee.id ? null : employee.id))}
-                          className="inline-flex h-9 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+                          className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
                         >
                           {isEditing ? "Cerrar" : "Editar"}
                         </button>

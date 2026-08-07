@@ -86,7 +86,7 @@ function formatAmount(value: number | null, currency: string | null) {
 }
 
 function getSellerName(entrega: Entrega) {
-  return entrega.venta?.vendedor?.nombre ?? entrega.venta?.vendedor?.email ?? "—";
+  return entrega.venta?.vendedor?.nombre ?? "Sin vendedor";
 }
 
 function getVehicleSummary(entrega: Entrega) {
@@ -207,23 +207,17 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
   const hasMoreRows = filteredEntregas.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-[#E5E7EB] p-4 xl:flex-row xl:items-center xl:justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-[#111827]">Operaciones en seguimiento</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
-            Controlá pagos, usado recibido, gestoría y entrega física.
-          </p>
-        </div>
-
-        <div className="grid gap-2 xl:grid-cols-[320px_190px_180px_180px]">
-          <div className="relative">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap gap-2">
+          <div className="relative min-w-[260px] flex-1 sm:w-[320px] sm:flex-none">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar operación"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -237,11 +231,11 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
             ) : null}
           </div>
 
-          <div className="relative">
+          <div className="relative min-w-[190px] flex-1 sm:flex-none">
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as (typeof statusFilters)[number])}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full appearance-none rounded-md border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             >
               <option value="">Todos los estados</option>
               <option value="pendiente">Pendiente</option>
@@ -257,9 +251,9 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
             type="button"
             onClick={() => setWithUsedFilter((value) => !value)}
             className={[
-              "inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium transition",
+              "inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium transition",
               withUsedFilter
-                ? "border-[#111827] bg-[#111827] text-white"
+                ? "border-[#8A1538] bg-[#8A1538] text-white"
                 : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]",
             ].join(" ")}
           >
@@ -271,15 +265,19 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
             type="button"
             onClick={() => setWithPendingBalanceFilter((value) => !value)}
             className={[
-              "inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium transition",
+              "inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium transition",
               withPendingBalanceFilter
-                ? "border-[#111827] bg-[#111827] text-white"
+                ? "border-[#8A1538] bg-[#8A1538] text-white"
                 : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]",
             ].join(" ")}
           >
             <SlidersHorizontal className="h-4 w-4" />
             Con saldo pendiente
           </button>
+        </div>
+        <p className="text-xs text-[#6B7280]">
+          Mostrando {visibleEntregas.length} de {filteredEntregas.length}
+        </p>
         </div>
       </div>
 
@@ -403,7 +401,7 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
                         <button
                           type="button"
                           onClick={() => setOpenId(isOpen ? null : entrega.id)}
-                          className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+                          className="inline-flex items-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
                         >
                           <Edit3 className="h-4 w-4" />
                           {isOpen ? "Cerrar" : "Editar"}

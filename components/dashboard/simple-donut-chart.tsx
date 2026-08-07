@@ -25,7 +25,7 @@ export function SimpleDonutChart({
 
   if (!total) {
     return (
-      <div className={["rounded-[28px] border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-4 py-8 text-center text-sm text-[#6B7280]", className].join(" ")}>
+      <div className={["rounded-md border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-4 py-8 text-center text-sm text-[#6B7280]", className].join(" ")}>
         Sin datos para representar.
       </div>
     );
@@ -53,7 +53,7 @@ export function SimpleDonutChart({
       <div className="flex items-center justify-center">
         <div className="relative flex h-52 w-52 items-center justify-center">
           <div className="absolute inset-0 rounded-full" style={{ background: `conic-gradient(${gradient})` }} />
-          <div className="absolute inset-[18px] rounded-full border border-[#E5E7EB] bg-white shadow-inner" />
+          <div className="absolute inset-[18px] rounded-full border border-[#E5E7EB] bg-white" />
           <div className="relative z-10 text-center">
             <p className="text-xs uppercase tracking-[0.14em] text-[#6B7280]">{centerLabel}</p>
             <p className="mt-1 text-3xl font-semibold tracking-tight text-[#111827]">{centerValue}</p>
@@ -64,7 +64,7 @@ export function SimpleDonutChart({
 
       <div className="space-y-3">
         {slices.map((segment) => (
-          <div key={segment.label} className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
+          <div key={segment.label} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
             <div className="flex items-center justify-between gap-3">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-[#111827]">{segment.label}</p>

@@ -15,10 +15,10 @@ export function EmptyStateCard({
   icon?: ReactNode;
 }) {
   return (
-    <div className="flex min-h-[220px] items-center justify-center rounded-3xl border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-6 py-10 text-center">
+    <div className="flex min-h-[180px] items-center justify-center rounded-md border border-dashed border-[#CBD5E1] bg-white px-6 py-8 text-center">
       <div className="max-w-md space-y-4">
         {icon ? (
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white text-[#6B7280]">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md border border-[#D8A1B2] bg-[#FDF2F5] text-[#8A1538]">
             {icon}
           </div>
         ) : null}
@@ -31,7 +31,7 @@ export function EmptyStateCard({
         {actionHref && actionLabel ? (
           <Link
             href={actionHref}
-            className="inline-flex h-10 items-center justify-center rounded-xl bg-[#111827] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D1D5DB]"
+            className="inline-flex h-10 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D8A1B2]"
           >
             {actionLabel}
           </Link>

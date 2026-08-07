@@ -67,7 +67,7 @@ function KpiCard({
   detail?: string;
 }) {
   return (
-    <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+    <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
       <p className="text-sm font-medium text-[#6B7280]">{label}</p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-[#111827]">{value}</p>
       {detail ? <p className="mt-2 text-xs text-[#6B7280]">{detail}</p> : null}
@@ -115,25 +115,28 @@ export default async function CatalogoPage() {
       <header className="space-y-2">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
+            <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">
               Catálogo
             </h1>
             <p className="text-sm leading-6 text-[#6B7280]">
               Configuración de publicación online
             </p>
           </div>
-          <Link
-            href="/catalogo"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-          >
-            Ver catálogo público
-          </Link>
+          <div className="space-y-2 text-right">
+            <Link
+              href="/catalogo"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+            >
+              Abrir catálogo público
+            </Link>
+            <p className="text-xs text-[#6B7280]">Vista previa comercial de la vidriera online.</p>
+          </div>
         </div>
         {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: el catálogo y las publicaciones son mock y no se guardará nada en Supabase.
+          <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+            Modo demo: el catálogo y las publicaciones usan datos simulados y no se guardarán cambios reales.
           </div>
         ) : null}
       </header>
@@ -142,7 +145,7 @@ export default async function CatalogoPage() {
         <KpiCard
           label="Catálogo"
           value={config.activo ? "Activo" : "Inactivo"}
-          detail={config.titulo ?? undefined}
+          detail={config.activo ? "Visible públicamente" : "El catálogo público está oculto"}
         />
         <KpiCard label="Vehículos publicados" value={publishedCount} />
         <KpiCard label="Vehículos destacados" value={featuredCount} />

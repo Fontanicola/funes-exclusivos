@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { DashboardChartCard } from "@/components/dashboard/dashboard-chart-card";
-import { SimpleBarChart } from "@/components/dashboard/simple-bar-chart";
 import { formatCurrencyByCurrency } from "@/lib/dashboard-metrics";
 
 type VendorActivityItem = {
@@ -21,68 +20,53 @@ type VendorActivityItem = {
 };
 
 export function VendorActivitySummary({ vendors }: { vendors: VendorActivityItem[] }) {
-  const chartItems = vendors.slice(0, 5).map((vendor) => ({
-    label: vendor.nombre,
-    value: vendor.ventasMes,
-    tone: "emerald" as const,
-    helper: `${vendor.leadsActivos} leads · ${vendor.conversacionesActivas} chats`,
-  }));
+  const visibleVendors = vendors.slice(0, 5);
 
   return (
     <DashboardChartCard
-      title="Actividad por vendedor"
-      description="Seguimiento comercial, conversiones y carga operativa."
+      title="Actividad vendedores"
+      description="Lectura rápida por vendedor, sin competir con el bloque financiero."
       action={
         <div className="flex flex-wrap gap-3 text-sm">
-          <Link href="/crm" className="text-[#6B7280] underline-offset-4 hover:text-[#111827] hover:underline">
+          <Link href="/crm" className="text-[#8A1538] underline decoration-[#D8A1B2] underline-offset-4 hover:text-[#6F102D]">
             CRM
           </Link>
-          <Link href="/comisiones" className="text-[#6B7280] underline-offset-4 hover:text-[#111827] hover:underline">
+          <Link href="/comisiones" className="text-[#8A1538] underline decoration-[#D8A1B2] underline-offset-4 hover:text-[#6F102D]">
             Comisiones
           </Link>
         </div>
       }
     >
-      {vendors.length ? (
-        <div className="space-y-5">
-          <SimpleBarChart
-            items={chartItems}
-            emptyLabel="Sin actividad registrada."
-            compact
-            formatValue={(value) => `${value} ventas`}
-          />
-
-          <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB]">
-            <div className="grid grid-cols-[minmax(0,1.3fr)_repeat(5,minmax(0,1fr))] border-b border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
-              <span>Vendedor</span>
-              <span>Leads</span>
-              <span>Ventas</span>
-              <span>Chats</span>
-              <span>Atención</span>
-              <span>Comisiones</span>
-            </div>
-            <div className="divide-y divide-[#E5E7EB]">
-              {vendors.map((vendor) => (
-                <div key={vendor.id} className="grid grid-cols-[minmax(0,1.3fr)_repeat(5,minmax(0,1fr))] items-center gap-3 px-4 py-4 text-sm">
+      {visibleVendors.length ? (
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {visibleVendors.map((vendor) => (
+              <article key={vendor.id} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+                <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-medium text-[#111827]">{vendor.nombre}</p>
+                    <p className="text-sm font-semibold text-[#111827]">{vendor.nombre}</p>
                     <p className="text-xs text-[#6B7280]">{vendor.rol}</p>
                   </div>
-                  <StatCell value={vendor.leadsActivos} />
-                  <StatCell value={vendor.ventasMes} tone="emerald" />
-                  <StatCell value={vendor.conversacionesActivas} />
-                  <StatCell value={vendor.conversacionesAtencion} tone="rose" />
-                  <div className="text-[#111827]">
-                    <p className="font-medium">{formatCurrencyByCurrency(vendor.comisionesGeneradas)}</p>
-                    <p className="text-xs text-[#6B7280]">{vendor.leadsSeguimiento} seguimientos</p>
-                  </div>
+                  <p className="text-xs text-[#6B7280]">{vendor.leadsSeguimiento} seguimientos</p>
                 </div>
-              ))}
-            </div>
+                <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                  <MiniStat label="Leads" value={vendor.leadsActivos} />
+                  <MiniStat label="Ventas" value={vendor.ventasMes} />
+                  <MiniStat label="Chats" value={vendor.conversacionesActivas} />
+                  <MiniStat label="Atención" value={vendor.conversacionesAtencion} tone="rose" />
+                </div>
+                <div className="mt-4 rounded-md border border-[#E5E7EB] bg-white px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#6B7280]">Comisiones generadas</p>
+                  <p className="mt-1 text-sm font-semibold text-[#111827]">
+                    {formatCurrencyByCurrency(vendor.comisionesGeneradas)}
+                  </p>
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       ) : (
-        <div className="rounded-[28px] border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-5 py-8 text-sm text-[#6B7280]">
+        <div className="rounded-md border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-5 py-8 text-sm text-[#6B7280]">
           No hay actividad de vendedores para mostrar.
         </div>
       )}
@@ -90,13 +74,24 @@ export function VendorActivitySummary({ vendors }: { vendors: VendorActivityItem
   );
 }
 
-function StatCell({ value, tone = "default" }: { value: number; tone?: "default" | "emerald" | "rose" }) {
+function MiniStat({
+  label,
+  value,
+  tone = "slate",
+}: {
+  label: string;
+  value: number;
+  tone?: "slate" | "rose";
+}) {
   const toneClass =
-    tone === "emerald"
-      ? "text-emerald-700"
-      : tone === "rose"
-        ? "text-rose-700"
-        : "text-[#111827]";
+    tone === "rose"
+      ? "border-rose-200 bg-rose-50/80 text-rose-900"
+      : "border-slate-200 bg-white text-[#111827]";
 
-  return <span className={["font-medium", toneClass].join(" ")}>{value}</span>;
+  return (
+    <div className={["rounded-md border px-3 py-2", toneClass].join(" ")}>
+      <p className="text-[10px] uppercase tracking-[0.14em] opacity-70">{label}</p>
+      <p className="mt-1 text-base font-semibold">{value}</p>
+    </div>
+  );
 }

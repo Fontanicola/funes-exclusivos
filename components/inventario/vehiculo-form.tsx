@@ -9,6 +9,7 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import { canViewCosts } from "@/lib/auth/permissions";
 import {
   createVehiculoAction,
   updateVehiculoAction,
@@ -86,7 +87,7 @@ function Input({
     <input
       {...props}
       className={[
-        "h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     />
@@ -101,7 +102,7 @@ function Textarea({
     <textarea
       {...props}
       className={[
-        "min-h-[110px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "min-h-[110px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     />
@@ -117,7 +118,7 @@ function Select({
     <select
       {...props}
       className={[
-        "h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     >
@@ -149,7 +150,7 @@ function SubmitButton({ mode }: { mode: VehiculoFormMode }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-11 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-11 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "Guardando..." : mode === "edit" ? "Guardar cambios" : "Guardar vehículo"}
     </button>
@@ -190,32 +191,38 @@ export function VehiculoForm({
   mode,
   proveedores,
   vehiculo,
+  role = null,
 }: {
   mode: VehiculoFormMode;
   proveedores: Proveedor[];
   vehiculo?: VehiculoFormValue;
+  role?: string | null;
 }) {
   const [keptFotos, setKeptFotos] = useState<string[]>(
     () => parseFotosValue(vehiculo?.fotos)
   );
   const action = mode === "edit" ? updateVehiculoAction : createVehiculoAction;
   const [state, formAction] = useFormState(action, initialState);
+  const showInternalSection = canViewCosts(role);
 
   const initialPhotos = useMemo(() => parseFotosValue(vehiculo?.fotos), [vehiculo?.fotos]);
 
   const effectiveKeptFotos = mode === "edit" ? keptFotos : [];
 
   return (
-    <form action={formAction} className="space-y-6" encType="multipart/form-data">
+    <form action={formAction} className="flex flex-col gap-6" encType="multipart/form-data">
       {mode === "edit" && vehiculo?.id ? (
         <input type="hidden" name="id" value={vehiculo.id} />
       ) : null}
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="order-1 rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">
-            Datos del vehículo
+            Datos básicos
           </h2>
+          <p className="mt-1 text-sm text-[#6B7280]">
+            Lo esencial para identificar la unidad y cargarla rápido.
+          </p>
         </div>
 
         <div className="grid gap-4 px-5 py-5 md:grid-cols-2">
@@ -293,72 +300,21 @@ export function VehiculoForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="order-2 rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
-          <h2 className="text-base font-semibold text-[#111827]">Compra y proveedor</h2>
+          <h2 className="text-base font-semibold text-[#111827]">Precio comercial</h2>
+          <p className="mt-1 text-sm text-[#6B7280]">
+            Lo que se usa para publicar y vender la unidad.
+          </p>
         </div>
 
         <div className="grid gap-4 px-5 py-5 md:grid-cols-2">
           <div className="space-y-2">
-            <FieldLabel htmlFor="proveedor_id">Proveedor</FieldLabel>
-            <Select id="proveedor_id" name="proveedor_id" defaultValue={vehiculo?.proveedor_id ?? ""}>
-              <option value="">Sin proveedor</option>
-              {proveedores.map((proveedor) => (
-                <option key={proveedor.id} value={proveedor.id}>
-                  {proveedor.nombre ?? "Proveedor"}
-                  {proveedor.categoria ? ` · ${proveedor.categoria}` : ""}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="fecha_compra">Fecha compra</FieldLabel>
-            <Input
-              id="fecha_compra"
-              name="fecha_compra"
-              type="date"
-              defaultValue={formatDateValue(vehiculo?.fecha_compra ?? null)}
-            />
-          </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="motor">Motor</FieldLabel>
-            <Input id="motor" name="motor" placeholder="2.0 TSI / V6" defaultValue={vehiculo?.motor ?? ""} />
-          </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="ubicacion">Ubicación</FieldLabel>
-            <Input id="ubicacion" name="ubicacion" placeholder="Base / depósito / showroom" defaultValue={vehiculo?.ubicacion ?? ""} />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <FieldLabel htmlFor="nro_operacion">Nro. operación</FieldLabel>
-            <Input id="nro_operacion" name="nro_operacion" placeholder="OC-2026-001" defaultValue={vehiculo?.nro_operacion ?? ""} />
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-        <div className="border-b border-[#E5E7EB] px-5 py-4">
-          <h2 className="text-base font-semibold text-[#111827]">Pricing</h2>
-        </div>
-
-        <div className="grid gap-4 px-5 py-5 md:grid-cols-2">
-          <div className="space-y-2">
-            <FieldLabel htmlFor="costo_adquisicion">Costo adquisición</FieldLabel>
-            <Input
-              id="costo_adquisicion"
-              name="costo_adquisicion"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0"
-              defaultValue={vehiculo?.costo_adquisicion ?? ""}
-            />
-          </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="costo_moneda">Moneda costo *</FieldLabel>
+            <FieldLabel htmlFor="precio_moneda">Moneda *</FieldLabel>
             <Select
-              id="costo_moneda"
-              name="costo_moneda"
-              defaultValue={vehiculo?.costo_moneda ?? "ARS"}
+              id="precio_moneda"
+              name="precio_moneda"
+              defaultValue={vehiculo?.precio_moneda ?? "ARS"}
               required
             >
               <option value="ARS">ARS</option>
@@ -378,18 +334,6 @@ export function VehiculoForm({
             />
           </div>
           <div className="space-y-2">
-            <FieldLabel htmlFor="precio_moneda">Moneda venta *</FieldLabel>
-            <Select
-              id="precio_moneda"
-              name="precio_moneda"
-              defaultValue={vehiculo?.precio_moneda ?? "ARS"}
-              required
-            >
-              <option value="ARS">ARS</option>
-              <option value="USD">USD</option>
-            </Select>
-          </div>
-          <div className="space-y-2">
             <FieldLabel htmlFor="precio_contado">Precio contado</FieldLabel>
             <Input id="precio_contado" name="precio_contado" type="number" min="0" step="0.01" placeholder="0" defaultValue={vehiculo?.precio_contado ?? ""} />
           </div>
@@ -397,28 +341,107 @@ export function VehiculoForm({
             <FieldLabel htmlFor="precio_permuta">Precio permuta</FieldLabel>
             <Input id="precio_permuta" name="precio_permuta" type="number" min="0" step="0.01" placeholder="0" defaultValue={vehiculo?.precio_permuta ?? ""} />
           </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="precio_infoauto_actual">Infoauto actual</FieldLabel>
-            <Input id="precio_infoauto_actual" name="precio_infoauto_actual" type="number" min="0" step="0.01" placeholder="0" defaultValue={vehiculo?.precio_infoauto_actual ?? ""} />
-          </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="precio_infoauto_compra">Infoauto compra</FieldLabel>
-            <Input id="precio_infoauto_compra" name="precio_infoauto_compra" type="number" min="0" step="0.01" placeholder="0" defaultValue={vehiculo?.precio_infoauto_compra ?? ""} />
-          </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="precio_infoauto_anterior">Infoauto anterior</FieldLabel>
-            <Input id="precio_infoauto_anterior" name="precio_infoauto_anterior" type="number" min="0" step="0.01" placeholder="0" defaultValue={vehiculo?.precio_infoauto_anterior ?? ""} />
-          </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="costo_reposicion">Costo reposición</FieldLabel>
-            <Input id="costo_reposicion" name="costo_reposicion" type="number" min="0" step="0.01" placeholder="0" defaultValue={vehiculo?.costo_reposicion ?? ""} />
-          </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      {showInternalSection ? (
+        <div className="order-3 rounded-md border border-[#E5E7EB] bg-white">
+          <div className="border-b border-[#E5E7EB] px-5 py-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-semibold text-[#111827]">Compra y costos internos</h2>
+              <span className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
+                Uso interno
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-[#6B7280]">
+              Datos de compra, costo y referencia para control operativo.
+            </p>
+          </div>
+
+          <div className="grid gap-4 px-5 py-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <FieldLabel htmlFor="proveedor_id">Proveedor</FieldLabel>
+              <Select id="proveedor_id" name="proveedor_id" defaultValue={vehiculo?.proveedor_id ?? ""}>
+                <option value="">Sin proveedor</option>
+                {proveedores.map((proveedor) => (
+                  <option key={proveedor.id} value={proveedor.id}>
+                    {proveedor.nombre ?? "Proveedor"}
+                    {proveedor.categoria ? ` · ${proveedor.categoria}` : ""}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <FieldLabel htmlFor="fecha_compra">Fecha compra</FieldLabel>
+              <Input
+                id="fecha_compra"
+                name="fecha_compra"
+                type="date"
+                defaultValue={formatDateValue(vehiculo?.fecha_compra ?? null)}
+              />
+            </div>
+            <div className="space-y-2">
+              <FieldLabel htmlFor="motor">Motor</FieldLabel>
+              <Input id="motor" name="motor" placeholder="2.0 TSI / V6" defaultValue={vehiculo?.motor ?? ""} />
+            </div>
+            <div className="space-y-2">
+              <FieldLabel htmlFor="ubicacion">Ubicación</FieldLabel>
+              <Input id="ubicacion" name="ubicacion" placeholder="Base / depósito / showroom" defaultValue={vehiculo?.ubicacion ?? ""} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <FieldLabel htmlFor="nro_operacion">Nro. operación</FieldLabel>
+              <Input id="nro_operacion" name="nro_operacion" placeholder="OC-2026-001" defaultValue={vehiculo?.nro_operacion ?? ""} />
+            </div>
+            <div className="space-y-2">
+              <FieldLabel htmlFor="costo_adquisicion">Costo adquisición</FieldLabel>
+              <Input
+                id="costo_adquisicion"
+                name="costo_adquisicion"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0"
+                defaultValue={vehiculo?.costo_adquisicion ?? ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <FieldLabel htmlFor="costo_moneda">Moneda costo *</FieldLabel>
+              <Select
+                id="costo_moneda"
+                name="costo_moneda"
+                defaultValue={vehiculo?.costo_moneda ?? "ARS"}
+                required
+              >
+                <option value="ARS">ARS</option>
+                <option value="USD">USD</option>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <FieldLabel htmlFor="precio_infoauto_actual">Infoauto actual</FieldLabel>
+              <Input id="precio_infoauto_actual" name="precio_infoauto_actual" type="number" min="0" step="0.01" placeholder="0" defaultValue={vehiculo?.precio_infoauto_actual ?? ""} />
+            </div>
+            <div className="space-y-2">
+              <FieldLabel htmlFor="precio_infoauto_compra">Infoauto compra</FieldLabel>
+              <Input id="precio_infoauto_compra" name="precio_infoauto_compra" type="number" min="0" step="0.01" placeholder="0" defaultValue={vehiculo?.precio_infoauto_compra ?? ""} />
+            </div>
+            <div className="space-y-2">
+              <FieldLabel htmlFor="precio_infoauto_anterior">Infoauto anterior</FieldLabel>
+              <Input id="precio_infoauto_anterior" name="precio_infoauto_anterior" type="number" min="0" step="0.01" placeholder="0" defaultValue={vehiculo?.precio_infoauto_anterior ?? ""} />
+            </div>
+            <div className="space-y-2">
+              <FieldLabel htmlFor="costo_reposicion">Costo reposición</FieldLabel>
+              <Input id="costo_reposicion" name="costo_reposicion" type="number" min="0" step="0.01" placeholder="0" defaultValue={vehiculo?.costo_reposicion ?? ""} />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="order-4 rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">Preparación</h2>
+          <p className="mt-1 text-sm text-[#6B7280]">
+            Estado operativo y tareas pendientes antes de publicar.
+          </p>
         </div>
 
         <div className="grid gap-4 px-5 py-5 md:grid-cols-2">
@@ -469,20 +492,23 @@ export function VehiculoForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="order-5 rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
-          <h2 className="text-base font-semibold text-[#111827]">Publicación externa</h2>
+          <h2 className="text-base font-semibold text-[#111827]">Catálogo y publicaciones</h2>
+          <p className="mt-1 text-sm text-[#6B7280]">
+            Controla cómo se muestra esta unidad en el catálogo público.
+          </p>
         </div>
 
         <div className="grid gap-4 px-5 py-5 md:grid-cols-2">
-          <label className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
+          <label className="flex items-center gap-3 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
             <Checkbox
               name="publicado_mercadolibre"
               defaultChecked={Boolean(vehiculo?.publicado_mercadolibre)}
             />
             <span className="text-sm text-[#111827]">Publicado en MercadoLibre</span>
           </label>
-          <label className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
+          <label className="flex items-center gap-3 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3">
             <Checkbox
               name="publicado_rodados_google"
               defaultChecked={Boolean(vehiculo?.publicado_rodados_google)}
@@ -492,9 +518,12 @@ export function VehiculoForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
+      <div className="order-6 rounded-md border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
-          <h2 className="text-base font-semibold text-[#111827]">Fotos</h2>
+          <h2 className="text-base font-semibold text-[#111827]">Fotos y observaciones</h2>
+          <p className="mt-1 text-sm text-[#6B7280]">
+            Usá fotos horizontales y de buena calidad para el catálogo.
+          </p>
         </div>
 
         <div className="space-y-4 px-5 py-5">
@@ -517,13 +546,13 @@ export function VehiculoForm({
                     <label
                       key={`${url}-${index}`}
                       className={[
-                        "group flex cursor-pointer flex-col gap-2 rounded-2xl border p-3 transition",
+                        "group flex cursor-pointer flex-col gap-2 rounded-md border p-3 transition",
                         checked
                           ? "border-[#D1D5DB] bg-[#FAFAFA]"
                           : "border-[#E5E7EB] bg-white opacity-75 hover:bg-[#F9FAFB]",
                       ].join(" ")}
                     >
-                      <div className="flex h-28 items-center justify-center overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#FAFAFA]">
+                      <div className="flex h-28 items-center justify-center overflow-hidden rounded-md border border-[#E5E7EB] bg-[#FAFAFA]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={url}
@@ -573,26 +602,17 @@ export function VehiculoForm({
           <p className="text-sm text-[#6B7280]">
             JPG, PNG o WEBP. Máximo 8 imágenes.
           </p>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-        <div className="border-b border-[#E5E7EB] px-5 py-4">
-          <h2 className="text-base font-semibold text-[#111827]">Observaciones</h2>
-        </div>
-
-        <div className="grid gap-4 px-5 py-5">
           <div className="space-y-2">
-            <FieldLabel htmlFor="descripcion">Descripción</FieldLabel>
+            <FieldLabel htmlFor="descripcion">Descripción pública</FieldLabel>
             <Textarea
               id="descripcion"
               name="descripcion"
-              placeholder="Detalles generales de la unidad"
+              placeholder="Detalles generales visibles en el catálogo"
               defaultValue={vehiculo?.descripcion ?? ""}
             />
           </div>
           <div className="space-y-2">
-            <FieldLabel htmlFor="observaciones">Observaciones</FieldLabel>
+            <FieldLabel htmlFor="observaciones">Observaciones internas</FieldLabel>
             <Textarea
               id="observaciones"
               name="observaciones"
@@ -604,7 +624,7 @@ export function VehiculoForm({
       </div>
 
       {state.error ? (
-        <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-5 py-4 text-sm text-[#111827]">
+        <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-5 py-4 text-sm text-[#111827]">
           {state.error}
         </div>
       ) : null}
@@ -612,7 +632,7 @@ export function VehiculoForm({
       <div className="flex flex-col-reverse gap-3 border-t border-[#E5E7EB] pt-2 sm:flex-row sm:items-center sm:justify-end">
         <Link
           href="/inventario"
-          className="inline-flex h-11 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+          className="inline-flex h-11 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
         >
           Cancelar
         </Link>

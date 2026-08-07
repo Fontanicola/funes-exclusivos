@@ -10,7 +10,7 @@ type Instance = {
 };
 
 function getEmployeeName(instance: Instance) {
-  return instance.empleado?.nombre ?? instance.empleado?.email ?? "el vendedor";
+  return instance.empleado?.nombre ?? "el vendedor";
 }
 
 export function WhatsappConnectionAlert({ instancias }: { instancias: Instance[] }) {
@@ -26,11 +26,11 @@ export function WhatsappConnectionAlert({ instancias }: { instancias: Instance[]
       : `${problematic.length} conexiones de WhatsApp requieren atención.`;
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827] md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-3 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#111827] md:flex-row md:items-center md:justify-between">
       <p className="leading-6 text-[#6B7280]">{message}</p>
       <Link
         href="/whatsapp/conexiones"
-        className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+        className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
       >
         Gestionar conexiones
       </Link>

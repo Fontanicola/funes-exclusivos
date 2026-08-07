@@ -45,14 +45,14 @@ export default async function NuevaCompraPage() {
         </Link>
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Nueva compra</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">Nueva compra</h1>
           <p className="text-sm leading-6 text-[#6B7280]">
             Registrar compra e ingresar unidad al inventario
           </p>
         </div>
         {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: esta compra no se registrará hasta conectar Supabase.
+          <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+            Modo demo: esta compra usa datos simulados y no se registrará en el entorno real.
           </div>
         ) : null}
       </header>

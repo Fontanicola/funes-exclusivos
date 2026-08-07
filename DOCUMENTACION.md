@@ -1357,3 +1357,1217 @@
 
 - `npm run build` ejecutado al cierre de la corrección de UX/UI.
 - No quedaron errores de build al momento de generar esta documentación.
+
+## Simplificación del Dashboard ejecutivo
+
+### Qué se simplificó
+
+- Se reordenó `/dashboard` para que la lectura inicial sea más clara:
+  1. header ejecutivo,
+  2. bloque de alertas prioritarias,
+  3. 4 KPIs principales,
+  4. bloque principal de resultado del mes,
+  5. operación comercial,
+  6. inventario y operaciones,
+  7. actividad de vendedores en un nivel más secundario.
+- Se eliminó el bloque financiero duplicado que quedaba al final de la página.
+- Se redujo la cantidad de alertas visibles a un máximo de 4 para evitar ruido.
+- Se quitó el KPI de alertas del bloque superior para dejar exactamente 4 métricas ejecutivas.
+- Se recortó el copy redundante y se bajó la dominancia visual de los bloques menos críticos.
+
+### Paths modificados
+
+- `app/(dashboard)/dashboard/page.tsx`
+- `lib/dashboard-metrics.ts`
+- `components/dashboard/pnl-summary.tsx`
+- `components/dashboard/inventory-summary.tsx`
+- `components/dashboard/commercial-summary.tsx`
+- `components/dashboard/operations-summary.tsx`
+- `components/dashboard/dashboard-alerts.tsx`
+- `components/dashboard/vendor-activity-summary.tsx`
+- `components/dashboard/monthly-pnl-chart.tsx`
+
+### Tablas de Supabase involucradas
+
+- `public.vehiculos`
+- `public.ventas`
+- `public.ventas_entregas`
+- `public.vehiculo_gastos`
+- `public.vehiculo_documentos`
+- `public.compras_vehiculos`
+- `public.caja_movimientos`
+- `public.comisiones`
+- `public.comision_liquidaciones`
+- `public.leads`
+- `public.empleados`
+- `public.gestoria_tramites`
+- `public.gestoria_presupuestos`
+- `public.whatsapp_instancias`
+- `public.conversaciones`
+- `public.recordatorios`
+
+### Decisiones técnicas relevantes
+
+- Se mantuvo la misma lógica de datos y solo se recortó presentación/jerarquía.
+- Se conservaron las consultas ya existentes para no introducir riesgo en producción.
+- El bloque principal financiero quedó como una sola sección clara, con gráfico compacto embebido.
+- Las alertas visibles se limitaron a las prioritarias para mejorar escaneo visual.
+
+### Validación
+
+- `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
+- Build finalizado correctamente sin errores.
+
+## Rediseño detalle WhatsApp tipo inbox
+
+### Qué se rediseñó
+
+- Se reorganizó `/whatsapp/[id]` en un layout tipo inbox con:
+  - header superior compacto,
+  - hilo de mensajes como columna principal,
+  - panel lateral derecho para contacto, IA y seguimiento.
+- Se eliminó la repetición visual de contacto, estado e interés en múltiples cards.
+- Se ocultaron datos técnicos en la UI, incluyendo `instance_name`.
+- Se simplificó el panel lateral para evitar duplicación entre lectura y edición del seguimiento.
+- Se mejoró la experiencia vacía del hilo de mensajes para que no parezca una pantalla rota.
+
+### Paths modificados
+
+- `app/(dashboard)/whatsapp/[id]/page.tsx`
+- `components/whatsapp/conversacion-detail.tsx`
+- `components/whatsapp/messages-list.tsx`
+- `components/whatsapp/ai-summary-card.tsx`
+- `components/whatsapp/conversation-follow-up-form.tsx`
+- `components/whatsapp/conversation-header-actions.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+- `components/whatsapp/conversacion-status-badge.tsx`
+- `components/whatsapp/conversacion-interest-badge.tsx`
+
+### Problemas UX resueltos
+
+- Se corrigió la superposición visual entre acciones y badges en el encabezado del detalle.
+- Se redujo la redundancia de IA y seguimiento comercial.
+- El hilo de mensajes ganó protagonismo visual y ocupa ahora la zona principal.
+- Se evitó mostrar teléfonos duplicados en la tabla de conversaciones cuando ya se muestran en contacto.
+- Se reemplazó la lectura técnica por textos claros en español, incluyendo `No leído` y `Requiere atención`.
+
+### Tablas de Supabase involucradas
+
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+- `public.leads`
+- `public.empleados`
+- `public.vehiculos`
+
+### Decisiones técnicas relevantes
+
+- Se mantuvo la lógica de acciones existente para no introducir riesgo funcional.
+- Se separó el contenido del panel lateral en componentes pequeños para reducir ruido visual.
+- Se dejaron los datos técnicos fuera de la UI y solo en el flujo server-side.
+- Se priorizó una maquetación responsive con mensaje central, panel lateral fijo y acciones compactas.
+
+### Validación
+
+- `npm run build` ejecutado al cierre del rediseño.
+- Build finalizado correctamente sin errores.
+
+## Migración incremental de CSV actualizados
+
+### Qué se revisó
+
+- Se compararon los CSV actualizados recibidos por WhatsApp contra la carpeta histórica usada en la migración base.
+- Se generó un incremental con altas nuevas, evitando repetir registros ya cargados.
+- Se descartaron filas operativas de gestoría que no correspondían a vehículos reales, por ejemplo valores usados como dominio (`EFECTIVO`, `ENTREGO`).
+
+### SQL generado
+
+- `generated/funes-migration/incremental-2026-08-05/01_incremental_altas.sql`
+- `generated/funes-migration/incremental-2026-08-05/02_validacion_incremental.sql`
+- `generated/funes-migration/incremental-2026-08-05/00_reporte_incremental.md`
+
+### Altas detectadas
+
+- `proveedores`: 1
+- `vehiculos`: 4
+- `compras_vehiculos`: 34
+- `vehiculo_gastos`: 69
+- `ventas`: 20
+- `ventas_pagos`: 33
+- `ventas_entregas`: 13
+- `gestoria_tramites`: 31
+- `comisiones`: 7
+- `comision_liquidaciones`: 1
+- `recordatorios`: 10
+
+### Paths creados/modificados
+
+- `scripts/funes-migration/generate_incremental_updated_excels.py`
+- `generated/funes-migration/incremental-2026-08-05/01_incremental_altas.sql`
+- `generated/funes-migration/incremental-2026-08-05/02_validacion_incremental.sql`
+- `generated/funes-migration/incremental-2026-08-05/00_reporte_incremental.md`
+- `generated/funes-migration/incremental-2026-08-05/sources/`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+
+- `public.proveedores`
+- `public.vehiculos`
+- `public.compras_vehiculos`
+- `public.vehiculo_gastos`
+- `public.ventas`
+- `public.ventas_pagos`
+- `public.ventas_entregas`
+- `public.gestoria_tramites`
+- `public.comisiones`
+- `public.comision_liquidaciones`
+- `public.recordatorios`
+
+### Decisiones técnicas relevantes
+
+- El SQL incremental usa `ON CONFLICT (id) DO NOTHING` para que una reejecución accidental no duplique registros por id.
+- La comparación se hizo por claves de negocio, no por número de fila, para evitar falsos positivos cuando los CSV cambian de orden.
+- No se generaron deletes ni updates masivos. Los cambios sobre registros ya existentes quedan para una segunda pasada controlada si Funes confirma que quiere pisar valores históricos.
+- Se copiaron los CSV fuente usados en `generated/funes-migration/incremental-2026-08-05/sources/` para dejar trazabilidad.
+
+### Validación
+
+- Se validó que el SQL no use columnas que ya habían fallado en Supabase (`importe` en caja, `concepto`/`observaciones` en gastos).
+- Se validó que no se emitan enums inválidos conocidos como `listo` u `otros_gastos`.
+- Se validó que las filas incrementales no tengan nulos en campos obligatorios críticos.
+- Se corrigió el mapeo de pagos con `tipo = credito`: el tipo se conserva como crédito, pero `medio` se guarda como `otro` para respetar el enum `caja_medio`.
+
+## Migración operativa Funes desde CSV
+
+### Qué se construyó
+
+- Se creó un generador local de SQL para migrar la información operativa histórica de Funes desde los CSV adjuntos.
+- Se separó la migración en tres archivos:
+  - reset operativo destructivo,
+  - import de datos reales,
+  - queries de validación post-migración.
+- Se generó un reporte de migración con conteos, decisiones tomadas, archivos procesados y pendientes manuales.
+
+### Paths creados/modificados
+
+- `scripts/funes-migration/generate_funes_sql.py`
+- `generated/funes-migration/00_reset_operational_data.sql`
+- `generated/funes-migration/01_import_funes_data.sql`
+- `generated/funes-migration/02_validation_queries.sql`
+- `generated/funes-migration/chunks/001_import_chunk.sql` a `generated/funes-migration/chunks/017_import_chunk.sql`
+- `generated/funes-migration/migration_report.md`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+
+- `public.proveedores`
+- `public.vehiculos`
+- `public.compras_vehiculos`
+- `public.vehiculo_gastos`
+- `public.ventas`
+- `public.ventas_pagos`
+- `public.ventas_entregas`
+- `public.caja_movimientos`
+- `public.gestoria_tramites`
+- `public.comisiones`
+- `public.comision_liquidaciones`
+- `public.recordatorios`
+
+### Decisiones técnicas relevantes
+
+- El reset no borra `empleados`, `configuracion_general` ni `catalogo_config` para evitar dejar usuarios sin acceso o perder configuración base.
+- Los IDs se generan de forma determinística por fuente/dominio/fila para que los vínculos entre vehículos, ventas, pagos, entregas, compras y gestoría sean consistentes.
+- `LP.csv` se usa como fuente de stock/lista actual y pisa datos comerciales de la base histórica cuando coincide el dominio.
+- Los archivos `Renta MM-YYYY.csv` se usan como fuente de ventas y rentabilidad histórica.
+- `Caja 2025-2026.csv` se migra como movimientos manuales de caja, calculando `ingreso`/`egreso` según el signo del importe.
+- Los datos que no tienen columna equivalente directa se preservan como JSON en `observaciones` o `seguimiento_comentarios`.
+- Los vendedores históricos que no se pueden vincular con un usuario real de Supabase Auth quedan preservados en `observaciones`, sin crear perfiles falsos.
+- Para respetar el `NOT NULL` de `ventas.vendedor_id`, `comisiones.vendedor_id` y `comision_liquidaciones.vendedor_id`, el SQL resuelve vendedores por nombre contra `empleados` y usa como fallback el primer empleado activo, priorizando admin/vendedor. El nombre histórico original queda preservado en `observaciones`.
+- Para respetar el índice único `ventas_vehiculo_registrada_unique_idx`, cuando los Excel históricos traen más de una venta registrada para el mismo vehículo se conserva la primera como `registrada` y las siguientes se importan como `anulada`, agregando una nota de migración en `observaciones`.
+- `Peritaje.pdf` fue detectado como PDF escaneado sin texto extraíble; queda pendiente para OCR o carga documental manual.
+- Se normalizan defaults obligatorios detectados contra el schema real: `vehiculos.fotos` como `text[]`, flags de catálogo/publicación en `false`, `estado_preparacion = sin_preparar` y `fecha_ingreso` con fallback a la fecha de migración cuando el Excel no trae fecha de compra.
+- Se saneó la carga de importes: los valores base que el schema exige no negativos (`costos`, `precios`, `pagos`, `gastos`) se importan solo si son `>= 0`; los negativos derivados de fórmulas o ajustes históricos quedan preservados en el JSON crudo de `observaciones`.
+- Las celdas con `%` explícito se descartan para campos monetarios para evitar que porcentajes de rentabilidad entren como costos, precios o pagos.
+- Para compatibilidad con el enum real `vehiculo_estado_preparacion`, la migración importa todos los vehículos con `estado_preparacion = sin_preparar`; los estados históricos de preparación quedan preservados en comentarios/metadata.
+- `vehiculos.marca` y `vehiculos.modelo` se completan con `Sin marca` / `Sin modelo` cuando la fuente trae campos vacíos o valores inválidos como `0`, respetando el `NOT NULL` del schema y preservando la fila original en metadata.
+- `compras_vehiculos.fecha` y `vehiculo_gastos.fecha` usan fallback `fecha_compra || fecha_venta || fecha_ingreso || fecha_migración` para respetar los `NOT NULL` del schema cuando los Excel históricos no traen fecha de compra.
+- `vehiculo_gastos` se importa con columnas compatibles con el schema real (`tipo`, `monto`, `moneda`, `fecha`, `detalle`); el concepto descriptivo se conserva en `tipo/detalle` en lugar de usar columnas inexistentes.
+- El tipo histórico `otros_gastos` se normaliza a `preparacion` por compatibilidad con el enum `vehiculo_gasto_tipo`, manteniendo la etiqueta original en `detalle`.
+- `caja_movimientos` se alinea al schema real usando `monto` como importe operativo; no se inserta ni consulta la columna auxiliar `importe`, porque no existe en la tabla real.
+- `caja_movimientos.periodo` se normaliza a fecha de inicio de mes (`YYYY-MM-01`), por ejemplo `ene-25` pasa a `2025-01-01`; el valor textual original queda preservado en el JSON de `observaciones`.
+- `caja_movimientos.detalle_1` se completa siempre para respetar el `NOT NULL`: referencia del Excel, proveedor/tercero, concepto o `Movimiento importado` como fallback.
+- `gestoria_tramites.fecha_finalizacion` solo se importa cuando el trámite queda `completado`; si la fila histórica sigue `en_proceso`, cualquier fecha de cierre dudosa queda preservada en `seguimiento_comentarios.raw` para respetar el check `gestoria_fecha_finalizacion_estado_check`.
+- `gestoria_tramites.fecha_inicio` se completa siempre para respetar el `NOT NULL`: se usa la fecha operativa disponible y, si el Excel no trae una fecha interpretable, la fecha de migración como fallback.
+- Las comisiones históricas sin una venta vinculable por dominio generan una venta mínima de soporte para respetar el `NOT NULL`/FK de `comisiones.venta_id`; la comisión original queda preservada y la venta incluye una nota de migración en `observaciones`.
+- `comision_liquidaciones.periodo` se importa como fecha de inicio de mes (`YYYY-MM-01`) para compatibilidad con el schema real.
+- `recordatorios.fecha_vencimiento` se completa siempre para respetar el `NOT NULL`; si la fuente no trae fecha de entrega/trámite, se usa la fecha de migración como vencimiento operativo.
+
+### Conteos generados
+
+- `proveedores`: 590
+- `vehiculos`: 1761
+- `compras_vehiculos`: 1740
+- `vehiculo_gastos`: 2146
+- `ventas`: 2129
+- `ventas_pagos`: 2979
+- `ventas_entregas`: 698
+- `caja_movimientos`: 7825
+- `gestoria_tramites`: 600
+- `comisiones`: 84
+- `comision_liquidaciones`: 18
+- `recordatorios`: 225
+
+### Pendientes antes de ejecutar en producción
+
+- Revisar manualmente los SQL generados antes de ejecutarlos porque el primer archivo borra datos operativos.
+- Confirmar que los nombres de columnas del esquema real coincidan con los usados por la app.
+- Ejecutar primero `00_reset_operational_data.sql`, luego `01_import_funes_data.sql` y finalmente `02_validation_queries.sql`.
+- Si Supabase SQL Editor rechaza `01_import_funes_data.sql` por tamaño, ejecutar los chunks de `generated/funes-migration/chunks/` en orden numérico.
+- Revisar filas sin dominio y vendedores históricos para limpieza posterior.
+
+## UX layout: bloques principales apilados
+
+### Qué se corrigió
+
+- Se corrigieron pantallas donde los bloques principales estaban uno al lado del otro y quedaban incómodos para operar.
+- Los módulos principales ahora se apilan uno debajo del otro y ocupan todo el ancho disponible.
+- Se mantuvieron grillas internas solo donde aportan densidad útil, como KPIs, campos de formulario, filas compactas o visualizaciones.
+
+### Paths modificados
+
+- `app/(dashboard)/recordatorios/page.tsx`
+- `app/(dashboard)/caja/page.tsx`
+- `app/(dashboard)/whatsapp/conexiones/page.tsx`
+- `app/(dashboard)/configuracion/page.tsx`
+- `app/(dashboard)/inventario/[id]/page.tsx`
+- `app/(dashboard)/crm/[id]/page.tsx`
+- `app/(dashboard)/dashboard/page.tsx`
+- `components/dashboard/pnl-summary.tsx`
+- `components/dashboard/inventory-summary.tsx`
+- `components/ventas/renta-kpis.tsx`
+- `components/inventario/vehiculo-detail.tsx`
+- `components/gestoria/presupuesto-detail.tsx`
+- `components/gestoria/presupuesto-form.tsx`
+
+### Problemas UX resueltos
+
+- Recordatorios: el formulario y la tabla dejaron de competir lado a lado; ahora el listado ocupa todo el módulo.
+- Caja: la carga rápida y los movimientos quedan en lectura vertical, evitando una tabla comprimida.
+- WhatsApp conexiones: creación de instancia y grilla de conexiones quedan ordenadas en flujo vertical.
+- Configuración: formulario y resumen ya no se comprimen en columnas laterales.
+- Inventario detalle: documentos y formulario documental quedan en bloques completos.
+- CRM detalle y presupuestos de gestoría: se redujo la sensación de paneles apretados.
+- Dashboard y Rentabilidad: los bloques grandes de análisis ya no quedan partidos en columnas equivalentes.
+
+### Tablas de Supabase involucradas
+
+- No se modificaron queries ni schema.
+- El cambio fue exclusivamente de presentación.
+
+### Decisiones técnicas relevantes
+
+- No se tocaron layouts intencionalmente laterales como el inbox de WhatsApp y el detalle público del catálogo, porque ahí la distribución en dos zonas cumple una función clara.
+- No se modificaron grillas internas de campos/KPIs para no perder densidad operativa.
+
+## UX Dashboard ejecutivo final
+
+### Qué se mejoró
+
+- Se hizo una pasada específica sobre `/dashboard` para reforzar jerarquía ejecutiva y reducir ruido visual.
+- El primer bloque ahora comunica mejor `Atención requerida`, con copy más directo y CTA sobrio.
+- El bloque `Resultado del mes` quedó más enfocado:
+  - resultado operativo mensual como lectura principal,
+  - acumulado anual como dato secundario,
+  - ingresos de caja, egresos y ventas devengadas como métricas de contexto,
+  - gráfico mensual como apoyo, no como bloque dominante.
+- Se compactó `Inventario` para evitar visualizaciones redundantes y priorizar señales accionables: stock, publicación, preparación, unidades sin foto/precio.
+- Se renombró el bloque operativo a `Operaciones` para evitar solaparse con el bloque de inventario.
+
+### Paths modificados
+
+- `app/(dashboard)/dashboard/page.tsx`
+- `components/dashboard/dashboard-alerts.tsx`
+- `components/dashboard/pnl-summary.tsx`
+- `components/dashboard/inventory-summary.tsx`
+- `components/dashboard/operations-summary.tsx`
+
+### Problemas UX resueltos
+
+- Menos repetición de métricas financieras dentro del dashboard.
+- Menos cards con el mismo peso visual.
+- Mejor lectura del primer pantallazo: alertas, KPIs, resultado del mes.
+- Inventario más compacto y orientado a acción.
+- Copy menos genérico y más útil para operación diaria.
+
+### Tablas de Supabase involucradas
+
+- No se modificaron queries ni reglas de negocio.
+- El cambio fue exclusivamente de presentación sobre métricas ya calculadas.
+
+### Validación
+
+- `npm run build` ejecutado después de la pasada.
+- Build finalizado correctamente. Queda solo el warning conocido de Supabase en Edge Runtime.
+
+## Rediseño operativo de Gestoría
+
+### Qué se construyó
+
+- Se reemplazó la vista principal de `/gestoria` por un tablero operativo tipo kanban.
+- Las operaciones ahora se organizan por etapa:
+  - `Presupuesto`
+  - `Escribanía`
+  - `Gestoría`
+  - `Terminado`
+- Cada card de operación muestra:
+  - vehículo/venta,
+  - cliente,
+  - gestor asignado,
+  - tipo de gestión: interna, cliente o mixta,
+  - fecha de envío,
+  - fecha de firma,
+  - vencimiento,
+  - presupuesto asociado,
+  - costo final de transferencia,
+  - estado del trámite.
+- Se agregaron acciones rápidas por card para actualizar:
+  - etapa,
+  - estado general,
+  - gestor asignado,
+  - tipo de gestión,
+  - fechas operativas,
+  - costo final,
+  - presupuesto confirmado,
+  - CAT,
+  - documentación física,
+  - escribanía/retiro,
+  - transferencia registral,
+  - retiro de documentación por cliente,
+  - transferencia municipal,
+  - comentarios de seguimiento.
+- El formulario de nuevo trámite ahora permite cargar desde el inicio:
+  - etapa operativa,
+  - tipo de gestión,
+  - fecha de envío,
+  - fecha de firma,
+  - costo final de transferencia,
+  - moneda,
+  - presupuesto confirmado.
+
+### Paths modificados/creados
+
+- `app/(dashboard)/gestoria/page.tsx`
+- `app/(dashboard)/gestoria/actions.ts`
+- `components/gestoria/gestoria-kanban.tsx`
+- `components/gestoria/gestoria-form.tsx`
+- `lib/mock-data.ts`
+
+### Tablas de Supabase involucradas
+
+- `public.gestoria_tramites`
+- `public.gestoria_presupuestos`
+- `public.empleados`
+- `public.ventas`
+- `public.vehiculos`
+
+### Decisiones técnicas relevantes
+
+- El tablero usa los campos nuevos agregados a `gestoria_tramites` para representar el flujo real observado en la reunión.
+- `responsable_id` se reutiliza como gestor asignado para no crear una segunda relación innecesaria.
+- Los presupuestos se consultan por separado desde `gestoria_presupuestos` y se vinculan por `tramite_id`.
+- Se mantuvo `/gestoria/presupuestos` como módulo específico para presupuesto detallado, mientras que `/gestoria` funciona como bandeja operativa.
+- Las actualizaciones rápidas usan Server Actions con validación de sesión y permisos `admin/gestor`.
+- No se modificó RLS ni se agregaron dependencias.
+
+### Validación
+
+- `npm run build` ejecutado después del rediseño.
+- Build finalizado correctamente sin errores.
+
+## Auditoría general UX y funcionamiento
+
+### Qué se revisó
+
+- Se ejecutó una validación completa de producción con `npm run build`.
+- Se revisaron residuos visibles de UX detectados en auditorías anteriores:
+  - headers internos repetidos dentro de tablas,
+  - filtros desbordados o separados de acciones principales,
+  - textos técnicos visibles,
+  - referencias antiguas al color naranja,
+  - labels en inglés o internos.
+- Se revisaron especialmente las rutas operativas principales:
+  - `/dashboard`
+  - `/inventario`
+  - `/compras`
+  - `/ventas`
+  - `/ventas/renta`
+  - `/ventas/pendientes-entrega`
+  - `/caja`
+  - `/crm`
+  - `/whatsapp`
+  - `/gestoria`
+  - `/gestoria/presupuestos`
+  - `/comisiones`
+  - `/empleados`
+  - `/recordatorios`
+  - `/dashboard/catalogo`
+
+### Qué se corrigió
+
+- Se eliminaron headers internos repetidos en listados principales para que el usuario no vea dos títulos de sección al mismo tiempo.
+- Se consolidaron acciones, buscadores y filtros en una misma barra de trabajo en:
+  - Compras
+  - Ventas
+  - CRM
+  - Caja
+  - Comisiones
+  - WhatsApp
+  - Gestoría
+  - Presupuestos de gestoría
+  - Catálogo interno
+  - Empleados
+  - Recordatorios
+  - Pendientes de entrega
+  - Rentabilidad
+- Se movieron acciones principales o secundarias al toolbar del listado:
+  - `Nueva compra`
+  - `Nueva venta`
+  - `Pendientes de entrega`
+  - `Rentabilidad`
+  - `Nuevo lead`
+  - `Liquidaciones`
+  - `Conexiones`
+  - `Presupuestos`
+  - `Nuevo trámite`
+- Se sumaron contadores discretos de resultados en toolbars para orientar sin agregar nuevas cards.
+- Se quitó el header interno del Dashboard para que la pantalla arranque directamente con `Atención requerida`.
+- Se dejó `Volver a Ventas` en Rentabilidad como link secundario, no como header grande.
+- Se corrigió un JSX desbalanceado en `RecordatoriosTable` detectado por build.
+- Se corrigió una variable mal nombrada en el contador del catálogo interno.
+
+### Paths modificados en esta pasada
+
+- `app/(dashboard)/dashboard/page.tsx`
+- `app/(dashboard)/compras/page.tsx`
+- `app/(dashboard)/ventas/page.tsx`
+- `app/(dashboard)/ventas/renta/page.tsx`
+- `app/(dashboard)/caja/page.tsx`
+- `app/(dashboard)/crm/page.tsx`
+- `app/(dashboard)/comisiones/page.tsx`
+- `app/(dashboard)/gestoria/page.tsx`
+- `app/(dashboard)/whatsapp/page.tsx`
+- `app/(dashboard)/recordatorios/page.tsx`
+- `components/compras/compras-table.tsx`
+- `components/ventas/ventas-table.tsx`
+- `components/ventas/renta-table.tsx`
+- `components/ventas/pendientes-entrega-table.tsx`
+- `components/caja/caja-movimientos-table.tsx`
+- `components/crm/leads-table.tsx`
+- `components/comisiones/comisiones-table.tsx`
+- `components/gestoria/gestoria-table.tsx`
+- `components/gestoria/presupuestos-table.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+- `components/catalogo/catalogo-vehiculos-table.tsx`
+- `components/empleados/empleados-table.tsx`
+- `components/recordatorios/recordatorios-table.tsx`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+
+- No se modificó schema ni SQL.
+- Las pantallas revisadas siguen consultando las tablas operativas ya existentes:
+  - `vehiculos`
+  - `compras_vehiculos`
+  - `ventas`
+  - `ventas_entregas`
+  - `ventas_pagos`
+  - `caja_movimientos`
+  - `comisiones`
+  - `leads`
+  - `conversaciones`
+  - `whatsapp_instancias`
+  - `gestoria_tramites`
+  - `gestoria_presupuestos`
+  - `empleados`
+  - `recordatorios`
+
+### Decisiones técnicas relevantes
+
+- No se agregaron dependencias.
+- No se cambió lógica de negocio ni Server Actions.
+- No se tocó RLS, Auth, middleware ni webhook Evolution.
+- Se mantuvo el criterio UX definido para Funes:
+  - el header superior de plataforma indica la sección actual;
+  - dentro de cada listado, buscador, filtros y acciones viven en la misma barra;
+  - los headers repetidos dentro de cards/listados se eliminan salvo que identifiquen una sección funcional real.
+
+### Validación
+
+- `npm run build` ejecutado después de los ajustes.
+- Build finalizado correctamente sin errores.
+- Queda una advertencia no bloqueante de Supabase en Edge Runtime dentro de middleware, ya existente y sin impacto en esta pasada.
+
+## Polish UX profesional integral
+
+### Qué se mejoró
+
+- Se implementó un patrón de filtros avanzados reutilizable para que las pantallas con muchas opciones no carguen visualmente toda la toolbar.
+- Se aplicó `Más filtros` en:
+  - WhatsApp
+  - Recordatorios
+  - Rentabilidad
+- Se compactaron títulos internos grandes en pantallas de creación, detalle y administración para que el panel se sienta más operativo.
+- Se redujo decoración del dashboard interno eliminando overlays visuales en KPIs.
+- Se hizo más tipo inbox el detalle de conversación WhatsApp:
+  - header más bajo,
+  - mensajes con mayor protagonismo,
+  - fondo de hilo más claro,
+  - burbuja saliente con bordó suave,
+  - card de IA más compacta.
+- Se agregó un componente `FormSection` para estandarizar progresivamente formularios largos sin cambiar lógica ni schema.
+- Se eliminó un gradiente decorativo de la ficha interna de vehículo, manteniendo un placeholder neutro.
+
+### Paths creados
+
+- `components/common/advanced-filters.tsx`
+- `components/common/form-section.tsx`
+
+### Paths modificados
+
+- `app/(dashboard)/whatsapp/[id]/page.tsx`
+- `app/(dashboard)/whatsapp/conexiones/page.tsx`
+- `app/(dashboard)/gestoria/presupuestos/nuevo/page.tsx`
+- `app/(dashboard)/gestoria/presupuestos/page.tsx`
+- `app/(dashboard)/gestoria/presupuestos/[id]/page.tsx`
+- `app/(dashboard)/dashboard/catalogo/page.tsx`
+- `app/(dashboard)/configuracion/page.tsx`
+- `app/(dashboard)/comisiones/liquidaciones/page.tsx`
+- `app/(dashboard)/comisiones/liquidaciones/[id]/page.tsx`
+- `app/(dashboard)/compras/nueva/page.tsx`
+- `app/(dashboard)/crm/nuevo/page.tsx`
+- `app/(dashboard)/crm/[id]/page.tsx`
+- `app/(dashboard)/gestoria/nuevo/page.tsx`
+- `app/(dashboard)/ventas/nueva/page.tsx`
+- `app/(dashboard)/inventario/nuevo/page.tsx`
+- `app/(dashboard)/inventario/[id]/page.tsx`
+- `app/(dashboard)/inventario/[id]/editar/page.tsx`
+- `app/(dashboard)/ventas/pendientes-entrega/page.tsx`
+- `app/(dashboard)/empleados/page.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+- `components/whatsapp/messages-list.tsx`
+- `components/whatsapp/ai-summary-card.tsx`
+- `components/recordatorios/recordatorios-table.tsx`
+- `components/ventas/renta-table.tsx`
+- `components/dashboard/kpi-card.tsx`
+- `components/inventario/vehiculo-detail.tsx`
+- `DOCUMENTACION.md`
+
+### Problemas UX resueltos
+
+- Toolbars muy cargadas en pantallas con muchos filtros.
+- Títulos internos demasiado grandes en páginas operativas.
+- Detalle WhatsApp todavía demasiado parecido a ficha administrativa.
+- Dashboard con decoración visual innecesaria para un panel operativo.
+- Placeholder interno de vehículo demasiado decorativo para uso administrativo.
+
+### Tablas de Supabase involucradas
+
+- No se modificó schema ni SQL.
+- Las mejoras son de presentación sobre pantallas que usan:
+  - `conversaciones`
+  - `conversacion_mensajes`
+  - `recordatorios`
+  - `ventas`
+  - `ventas_entregas`
+  - `vehiculos`
+  - `gestoria_presupuestos`
+  - `comision_liquidaciones`
+  - `empleados`
+
+### Decisiones técnicas relevantes
+
+- No se agregaron dependencias.
+- No se tocaron Server Actions ni reglas de negocio.
+- No se modificó el webhook Evolution.
+- Se preservó el catálogo público con una estética más comercial; la reducción decorativa se aplicó al panel interno.
+- `FormSection` queda disponible para migrar formularios largos progresivamente sin hacer una reescritura riesgosa.
+
+### Validación
+
+- `npm run build` ejecutado al finalizar.
+- Build finalizado correctamente sin errores.
+- Permanece la advertencia no bloqueante de Supabase en middleware/Edge Runtime.
+
+## Aplicación completa del sistema visual HA
+
+### Qué se aplicó
+
+- Se incorporó un `DESIGN.md` propio para Funes Exclusivos basado en el manual visual de referencia, adaptado al producto real de concesionaria.
+- Se creó `AGENTS.md` para que futuras pasadas de desarrollo respeten el sistema visual, el tono de producto y las restricciones operativas.
+- Se normalizó la base visual hacia una UI B2B premium, compacta y operativa:
+  - fondo blanco como superficie principal;
+  - acento bordó corporativo para acciones, foco, links y estados activos;
+  - bordes sutiles;
+  - radios medios (`rounded-md`);
+  - sombras eliminadas o reducidas al mínimo;
+  - tablas compactas con encabezados en mayúsculas;
+  - formularios con foco bordó y lenguaje de negocio.
+- Se agregó un encabezado contextual global con breadcrumb dentro del layout privado para mantener orientación permanente sin recargar cada pantalla.
+- Se ajustó el sidebar:
+  - navegación más compacta;
+  - item activo con acento bordó;
+  - fondo blanco;
+  - avatar circular;
+  - sin acción de logout visible cuando el sidebar está colapsado.
+- Se reforzó la limpieza de datos visibles:
+  - en listados operativos se prioriza mostrar nombres de personas en vez de emails;
+  - se eliminaron errores visibles que mencionaban infraestructura;
+  - se mantuvieron nombres técnicos solo donde son columnas, logs o valores internos no visibles.
+- Se extendió el middleware para cubrir también `/compras` y `/recordatorios`, manteniendo encabezado contextual y protección consistente.
+- Se corrigieron detalles finos de copy y consistencia, incluyendo el texto de seguimiento de CRM y mensajes de WhatsApp.
+
+### Paths creados
+
+- `DESIGN.md`
+- `AGENTS.md`
+- `components/dashboard/breadcrumb-header.tsx`
+
+### Paths modificados principales
+
+- `app/globals.css`
+- `tailwind.config.ts`
+- `middleware.ts`
+- `lib/supabase/middleware.ts`
+- `lib/supabase/server.ts`
+- `lib/supabase/client.ts`
+- `app/(dashboard)/layout.tsx`
+- `app/(dashboard)/dashboard/page.tsx`
+- `components/dashboard/sidebar.tsx`
+- `components/dashboard/user-menu.tsx`
+- `components/dashboard/kpi-card.tsx`
+- `components/shared/page-header.tsx`
+- `components/shared/empty-state-card.tsx`
+- `components/common/filter-bar.tsx`
+- `components/common/table-shell.tsx`
+- `components/whatsapp/whatsapp-instance-card.tsx`
+- `components/whatsapp/whatsapp-connection-alert.tsx`
+- `components/whatsapp/messages-list.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+- `components/crm/crm-pipeline.tsx`
+- `components/crm/leads-table.tsx`
+- `components/crm/lead-interactions-timeline.tsx`
+- `components/ventas/pendientes-entrega-table.tsx`
+- `components/comisiones/comisiones-comparativa.tsx`
+- `components/recordatorios/recordatorio-form.tsx`
+- `components/recordatorios/recordatorios-table.tsx`
+- `app/(dashboard)/whatsapp/actions.ts`
+- `app/login/actions.ts`
+
+### Problemas UX resueltos
+
+- Se eliminó la apariencia de dashboard genérico con fondos grises, radios grandes y sombras decorativas.
+- Las acciones principales dejaron de depender del negro como color primario y pasaron al acento bordó definido por marca.
+- Los links visibles ahora tienen tratamiento consistente de link: bordó y subrayado.
+- Los estados de foco en inputs/selects pasaron de gris neutro a bordó suave.
+- Se redujo exposición visual de emails como fallback en listados donde el usuario espera ver personas, no cuentas.
+- Se corrigieron rutas protegidas que no participaban del middleware y podían perder contexto visual.
+- Se eliminó copy técnico visible de errores de WhatsApp y configuración.
+- Se corrigió la query de Caja en el dashboard para usar la columna real `monto` y evitar avisos runtime por una columna histórica `importe`.
+
+### Tablas de Supabase involucradas
+
+- No se modificó schema ni se crearon tablas.
+- Las pantallas afectadas siguen usando las tablas ya existentes del sistema:
+  - `empleados`
+  - `vehiculos`
+  - `ventas`
+  - `caja_movimientos`
+  - `comisiones`
+  - `leads`
+  - `conversaciones`
+  - `whatsapp_instancias`
+  - `recordatorios`
+
+### Decisiones técnicas relevantes
+
+- Se priorizó una capa visual global y de bajo riesgo antes que reescribir cada módulo.
+- El breadcrumb se resuelve desde middleware mediante `x-pathname` para no acoplar cada página a lógica de navegación.
+- No se tocaron reglas de negocio, RLS, SQL ni integraciones externas.
+- Los términos técnicos siguen existiendo en nombres de columnas, tipos y logs server-side, pero no se presentan como copy de producto.
+
+### Validación
+
+- `npm run build` ejecutado luego de esta última pasada visual.
+- Build finalizado correctamente sin errores.
+
+## Ajuste de toolbar operativa por sección
+
+### Qué se ajustó
+
+- Se estableció como regla de producto que el header de plataforma es el único encabezado contextual de cada ruta.
+- Se eliminaron headers internos repetidos en Inventario para evitar duplicar `Operación / Inventario`.
+- Se movió la acción principal `Nuevo vehículo` a la misma fila que el buscador y el filtro `Solo stock`.
+- Se agregó contador operativo compacto en la barra de Inventario: unidades filtradas sobre total.
+- Se actualizó `DESIGN.md` y `AGENTS.md` para que futuras secciones sigan el mismo patrón:
+  - acción principal,
+  - buscador,
+  - filtros,
+  - acciones secundarias,
+  - todo en una misma toolbar con wrap.
+
+### Paths modificados
+
+- `app/(dashboard)/inventario/page.tsx`
+- `components/inventario/inventario-table.tsx`
+- `DESIGN.md`
+- `AGENTS.md`
+- `DOCUMENTACION.md`
+
+### Decisión visual
+
+- Los títulos internos de listados/tablas se consideran ruido visual cuando la plataforma ya muestra la sección actual.
+- En desktop, los controles deben convivir en una sola fila.
+- En mobile, pueden apilarse, pero siguen perteneciendo a una única toolbar operativa.
+
+## QA UX final
+
+### Qué se revisó
+
+- Se hizo una pasada final sobre las rutas y pantallas principales del sistema:
+  - `/dashboard`
+  - `/ventas/renta`
+  - `/recordatorios`
+  - `/whatsapp`
+  - `/whatsapp/[id]`
+  - `/inventario`
+  - `/inventario/nuevo`
+  - `/inventario/[id]`
+  - `/inventario/[id]/editar`
+  - `/caja`
+  - `/comisiones`
+  - `/comisiones/liquidaciones`
+  - `/crm`
+  - `/gestoria`
+  - `/gestoria/presupuestos`
+  - `/catalogo`
+  - `/empleados`
+  - `/configuracion`
+  - `/login`
+- También se repasaron tablas, filtros, headers, empty states y copy visible repetido en modo demo.
+
+### Qué se corrigió
+
+- Se reforzó la jerarquía visual del dashboard para que `Atención requerida` y los KPIs principales sigan siendo lo primero visible.
+- Se normalizó el lenguaje visible de `Renta` a `Rentabilidad` en la UI pública del módulo de ventas.
+- Se ajustaron textos y banners de demo para que suenen más comerciales y menos técnicos.
+- Se corrigió copy visible de login para no exponer frases innecesariamente técnicas en el acceso.
+- Se dejó el catálogo, WhatsApp, caja, recordatorios y gestoría con copy más limpio y sin ruido visual adicional.
+
+### Paths modificados
+
+- `app/login/page.tsx`
+- `app/(dashboard)/caja/page.tsx`
+- `app/(dashboard)/comisiones/page.tsx`
+- `app/(dashboard)/comisiones/liquidaciones/page.tsx`
+- `app/(dashboard)/compras/nueva/page.tsx`
+- `app/(dashboard)/crm/nuevo/page.tsx`
+- `app/(dashboard)/crm/page.tsx`
+- `app/(dashboard)/dashboard/catalogo/page.tsx`
+- `app/(dashboard)/gestoria/nuevo/page.tsx`
+- `app/(dashboard)/gestoria/page.tsx`
+- `app/(dashboard)/gestoria/presupuestos/nuevo/page.tsx`
+- `app/(dashboard)/gestoria/presupuestos/page.tsx`
+- `app/(dashboard)/inventario/nuevo/page.tsx`
+- `app/(dashboard)/inventario/page.tsx`
+- `app/(dashboard)/recordatorios/page.tsx`
+- `app/(dashboard)/ventas/nueva/page.tsx`
+- `app/(dashboard)/ventas/page.tsx`
+- `app/(dashboard)/ventas/renta/page.tsx`
+- `app/(dashboard)/whatsapp/page.tsx`
+
+### Problemas UX cerrados
+
+- Se eliminaron mensajes visibles de demo que todavía sonaban a infraestructura.
+- Se corrigieron textos de acceso para que la experiencia inicial se sienta más de producto y menos de entorno técnico.
+- Se terminó de cerrar la diferencia entre la nomenclatura interna del módulo y el label visible al usuario final.
+
+### Pendientes UX
+
+- Quedan términos técnicos en código y logs server-side por necesidad operativa, pero no se muestran como copy principal en la UI.
+- Si en futuras pasadas se quiere llevar el tono todavía más “premium”, se puede unificar el copy de demo en un banner compartido sin cambiar lógica.
+
+### Tablas de Supabase involucradas
+
+- No se cambiaron tablas en esta pasada final de QA UX.
+- El ajuste fue únicamente de presentación y copy sobre las tablas ya utilizadas por las pantallas revisadas.
+
+### Validación
+
+- `npm run build` ejecutado al cierre de la pasada final.
+- Build completado correctamente sin errores TypeScript ni de runtime estático.
+
+## Sistema visual basado en referencia HA
+
+### Qué se modificó
+
+- Se incorporó un manual propio de diseño para Funes Exclusivos basado en la referencia de HA Control de Obra, adaptado a la operación de concesionaria.
+- Se agregó una guía operativa para agentes con reglas de UX, permisos, Supabase, WhatsApp y validación.
+- Se normalizó la base visual del sistema hacia una UI más compacta:
+  - fondo general blanco,
+  - radios `rounded-md`,
+  - bordes sutiles,
+  - foco visible bordó,
+  - botones primarios bordó,
+  - sidebar activo bordó,
+  - empty states y headers compartidos más sobrios.
+- Se redujo la sensación de cards infladas reemplazando radios grandes por radios operativos en `app` y `components`.
+
+### Paths creados
+
+- `DESIGN.md`
+- `AGENTS.md`
+
+### Paths modificados
+
+- `app/globals.css`
+- `tailwind.config.ts`
+- `app/(dashboard)/layout.tsx`
+- `components/shared/page-header.tsx`
+- `components/shared/empty-state-card.tsx`
+- `components/common/filter-bar.tsx`
+- `components/common/table-shell.tsx`
+- `components/dashboard/sidebar.tsx`
+- `components/dashboard/kpi-card.tsx`
+- `app/**`
+- `components/**`
+
+### Decisiones visuales tomadas
+
+- Se eligió `#8A1538` como color principal operativo para acciones, foco y estados activos.
+- Se mantuvo el panel interno en fondo blanco para reforzar una sensación enterprise y reducir ruido visual.
+- Se usó `rounded-md` como radio base para acercar la interfaz a un producto operativo B2B.
+- Se preservaron los colores de estado existentes para no perder lectura rápida de alertas, errores, pendientes y positivos.
+
+### Tablas de Supabase involucradas
+
+- No hubo cambios de schema ni SQL.
+- La pasada fue de UX, documentación y estilos compartidos sobre pantallas existentes.
+
+### Pendientes
+
+- Queda como mejora futura migrar gradualmente todas las tablas a menus de tres puntitos para acciones por fila.
+- Algunas pantallas conservan estructuras propias por estabilidad; el nuevo `DESIGN.md` queda como referencia para futuras iteraciones visuales.
+
+## Permisos visuales por rol
+
+### Qué se ajustó
+
+- Se endureció la UI por rol para ocultar datos sensibles e internos sin tocar RLS ni el schema.
+- Se ocultaron costos, márgenes y secciones internas a perfiles no administrativos donde correspondía.
+- Se limitaron acciones manuales de caja, comisiones y configuración a los roles permitidos.
+- Se simplificó el dashboard para que administración vea la lectura financiera completa y el resto vea una versión más comercial/operativa.
+
+### Paths modificados
+
+- `lib/auth/permissions.ts`
+- `app/(dashboard)/dashboard/page.tsx`
+- `components/dashboard/pnl-summary.tsx`
+- `components/dashboard/inventory-summary.tsx`
+- `app/(dashboard)/inventario/page.tsx`
+- `app/(dashboard)/inventario/[id]/page.tsx`
+- `app/(dashboard)/inventario/[id]/editar/page.tsx`
+- `components/inventario/inventario-table.tsx`
+- `components/inventario/vehiculo-form.tsx`
+- `components/inventario/vehiculo-detail.tsx`
+- `app/(dashboard)/ventas/page.tsx`
+- `components/ventas/ventas-table.tsx`
+- `app/(dashboard)/ventas/renta/page.tsx`
+- `components/ventas/renta-kpis.tsx`
+- `components/ventas/renta-table.tsx`
+- `app/(dashboard)/caja/page.tsx`
+- `components/caja/caja-movimiento-form.tsx`
+- `app/(dashboard)/comisiones/page.tsx`
+
+### Datos sensibles ocultados por rol
+
+- Costo de adquisición, costo de reposición y referencias internas de compra en inventario.
+- Sección `Compra y costos internos` en formulario y detalle de vehículo para perfiles sin permisos.
+- Márgenes, resultado operativo e indicadores financieros de `Rentabilidad` para roles no administrativos.
+- Valor estimado del stock en el dashboard para perfiles sin acceso a costos.
+- Actividad de vendedores y lectura financiera del dashboard para perfiles no administrativos.
+- Formulario manual de caja para vendedores.
+- Acción de liquidaciones en comisiones para roles no administrativos.
+
+### Tablas de Supabase involucradas
+
+- `public.empleados`
+- `public.vehiculos`
+- `public.ventas`
+- `public.ventas_pagos`
+- `public.ventas_entregas`
+- `public.caja_movimientos`
+- `public.comisiones`
+- `public.comision_liquidaciones`
+
+### Decisiones técnicas relevantes
+
+- Los permisos visuales se resolvieron con helpers simples en `lib/auth/permissions.ts` para evitar complejidad innecesaria.
+- Se mantuvo la lógica de negocio y la seguridad real en RLS; la UI solo oculta lo que no corresponde mostrar.
+- Las páginas principales ahora reciben el rol del empleado para decidir qué columnas, métricas y acciones exponer.
+- Se preservó el modo demo y la experiencia de lectura para administración sin afectar rutas públicas ni el flujo operativo.
+
+## Polish global de tablas, filtros, headers y empty states
+
+### Qué se pulió
+
+- Se unificó el patrón visual de headers, filtros y empty states en las pantallas más cargadas.
+- Se incorporaron componentes comunes livianos para reutilizar patrones:
+  - `components/common/page-header.tsx`
+  - `components/common/empty-state.tsx`
+  - `components/common/filter-bar.tsx`
+  - `components/common/table-shell.tsx`
+- Se mejoró el comportamiento responsive de filtros para evitar truncamientos como `Todos los vendedore` o `Todas las moned`.
+- Se reemplazaron empty states genéricos por mensajes de estado inicial y sin resultados más claros.
+- Se homogeneizó la jerarquía visual de los headers principales con `PageHeader`.
+
+### Paths modificados
+
+- `components/common/page-header.tsx`
+- `components/common/empty-state.tsx`
+- `components/common/filter-bar.tsx`
+- `components/common/table-shell.tsx`
+- `app/(dashboard)/caja/page.tsx`
+- `app/(dashboard)/compras/page.tsx`
+- `app/(dashboard)/crm/page.tsx`
+- `app/(dashboard)/comisiones/page.tsx`
+- `app/(dashboard)/gestoria/page.tsx`
+- `app/(dashboard)/recordatorios/page.tsx`
+- `app/(dashboard)/ventas/renta/page.tsx`
+- `components/compras/compras-table.tsx`
+- `components/comisiones/comisiones-table.tsx`
+- `components/crm/leads-table.tsx`
+- `components/gestoria/gestoria-table.tsx`
+- `components/recordatorios/recordatorios-table.tsx`
+- `components/ventas/renta-table.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+
+### Problemas UX resueltos
+
+- Se corrigió el desborde visual de filtros en múltiples tablas.
+- Se unificó el copy de empty states para distinguir entre base vacía y sin resultados por filtros.
+- Se reforzó la consistencia de los encabezados con título, descripción y acción principal.
+- Se redujo la sensación de CRUD genérico en listados de compras, comisiones, CRM, gestoría, recordatorios, WhatsApp y rentabilidad.
+
+### Tablas de Supabase involucradas
+
+- `public.caja_movimientos`
+- `public.compras_vehiculos`
+- `public.comisiones`
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+- `public.gestoria_tramites`
+- `public.leads`
+- `public.recordatorios`
+- `public.ventas`
+- `public.vehiculos`
+
+### Decisiones técnicas relevantes
+
+- No se cambió lógica de negocio ni queries.
+- Los patrones comunes se resolvieron con componentes livianos y ajustes de layout en lugar de un refactor grande.
+- Se mantuvo light mode y la paleta sobria ya definida para no romper la identidad visual.
+
+### Validación
+
+- `npm run build` ejecutado después del polish global.
+- Build finalizado correctamente sin errores.
+
+## Catálogo público premium
+
+### Qué se mejoró
+
+- Se rediseñó la ruta pública `/catalogo` como una vidriera comercial premium, con un hero más fuerte de marca, CTA de WhatsApp destacado y microcopy de confianza.
+- Se simplificaron y ordenaron los filtros para que no compitan con el hero, usando una barra secundaria más discreta y responsive.
+- Se mejoraron las cards públicas de vehículo para que la foto tenga protagonismo, con metadata más clara y CTA más visibles.
+- Se reforzó el detalle público de cada unidad con una jerarquía más comercial y una acción de WhatsApp más evidente.
+- Se mejoró el empty state público para que parezca una página de catálogo y no una pantalla administrativa vacía.
+- Se generaron fotos demo vectoriales locales para que el catálogo mock se vea poblado sin depender de assets externos.
+
+### Paths modificados
+
+- `app/catalogo/page.tsx`
+- `app/catalogo/[id]/page.tsx`
+- `components/catalogo-publico/catalogo-header.tsx`
+- `components/catalogo-publico/catalogo-filters.tsx`
+- `components/catalogo-publico/catalogo-vehicle-card.tsx`
+- `components/catalogo-publico/catalogo-vehicle-grid.tsx`
+- `components/catalogo-publico/catalogo-vehicle-detail.tsx`
+- `components/catalogo-publico/catalogo-empty-state.tsx`
+- `app/(dashboard)/dashboard/catalogo/page.tsx`
+- `components/catalogo/catalogo-settings-form.tsx`
+- `lib/mock-data.ts`
+
+### Problemas UX resueltos
+
+- La portada del catálogo dejó de verse genérica y pasó a sentirse como una vidriera premium de concesionaria.
+- Se reforzó el CTA principal de WhatsApp arriba del todo.
+- Se evitó que los filtros compitan visualmente con el hero.
+- Las cards ahora dan más protagonismo a la imagen y muestran menos ruido comercial.
+- El detalle público quedó más claro y limpio, sin exponer información interna.
+
+### Tablas de Supabase involucradas
+
+- `public.catalogo_config`
+- `public.vehiculos`
+
+### Decisiones técnicas relevantes
+
+- No se tocaron reglas de publicación ni acciones de backend.
+- Para el demo se generaron imágenes vectoriales locales embebidas en `lib/mock-data.ts`, evitando dependencias externas o assets nuevos.
+- Se mantuvieron las rutas públicas y el SEO existente, ajustando solo la presentación y el copy.
+
+### Validación
+
+- `npm run build` ejecutado luego del rediseño.
+- Build finalizado correctamente sin errores.
+
+## UX/UI vehículo: datos comerciales e internos
+
+### Qué se mejoró
+
+- Se reorganizó el formulario de alta y edición de vehículo en secciones más claras:
+  - `Datos básicos`
+  - `Precio comercial`
+  - `Compra y costos internos`
+  - `Preparación`
+  - `Catálogo y publicaciones`
+  - `Fotos y observaciones`
+- Se separó visualmente la información comercial de la información interna para que la carga sea más rápida y menos confusa.
+- Se movieron fotos y observaciones al final del formulario, con copy más breve y orientado al uso real.
+- Se reforzó la ficha interna del vehículo para que los datos de proveedor/operación no compitan con el resumen comercial.
+
+### Paths modificados
+
+- `components/inventario/vehiculo-form.tsx`
+- `components/inventario/vehiculo-detail.tsx`
+
+### Problemas UX resueltos
+
+- Se redujo la mezcla entre pricing comercial y costos internos.
+- Se hizo más clara la jerarquía entre información operativa, catálogo y fotos.
+- Se marcó la sección interna con un tratamiento visual sutil para no confundirla con datos públicos.
+- Se aclararon labels como `Observaciones internas` y `Descripción pública` para evitar ambigüedad.
+
+### Tablas de Supabase involucradas
+
+- `public.vehiculos`
+- `public.proveedores`
+
+### Decisiones técnicas relevantes
+
+- No se modificaron nombres de columnas, Server Actions ni validaciones.
+- La reorganización se resolvió solo con estructura visual y orden de render, usando `order-*` y cards agrupadas.
+- No se ocultaron campos por rol en esta etapa para evitar introducir dependencias nuevas de permisos en el formulario.
+
+### Validación
+
+- `npm run build` ejecutado luego del ajuste visual.
+- Build finalizado correctamente sin errores.
+
+## UX/UI Caja: carga rápida y tabla simplificada
+
+### Qué se mejoró
+
+- Se reorganizó `/caja` para que la pantalla arranque con un resumen del mes más claro, seguido de la carga rápida y luego el listado.
+- Se simplificó el formulario de carga para que los campos principales queden arriba y los detalles opcionales abajo, con lenguaje de negocio.
+- Se redujo la tabla de movimientos a menos columnas visibles por defecto, priorizando fecha, tipo, medio, concepto, referencia, cuenta y monto.
+- Se agregó detalle expandible por fila para no perder trazabilidad sin saturar la vista principal.
+- Se eliminó el copy técnico visible como `Detalle 1`, `Detalle 2` y `Detalle 3`, reemplazándolo por labels más claros para el usuario.
+
+### Paths modificados
+
+- `app/(dashboard)/caja/page.tsx`
+- `app/(dashboard)/caja/actions.ts`
+- `components/caja/caja-movimiento-form.tsx`
+- `components/caja/caja-movimientos-table.tsx`
+- `components/caja/caja-kpi-card.tsx`
+- `components/caja/caja-summary.tsx`
+- `components/caja/caja-tipo-badge.tsx`
+
+### Problemas UX resueltos
+
+- Se redujo el overflow horizontal innecesario en el listado.
+- Se hizo más legible el bloque de carga rápida con jerarquía visual de datos principales y opcionales.
+- Se reemplazaron labels internos por lenguaje de negocio:
+  - `Detalle 1` → `Referencia`
+  - `Detalle 2` → `Comprobante / nota`
+  - `Detalle 3` → `Proveedor / tercero`
+- Se mejoró la lectura del resumen mensual evitando paredes de métricas sin contexto.
+
+### Tablas de Supabase involucradas
+
+- `public.caja_movimientos`
+- `public.proveedores`
+- `public.activos`
+- `public.comision_liquidaciones`
+- `public.compras_vehiculos`
+- `public.ventas`
+
+### Decisiones técnicas relevantes
+
+- No se tocó la lógica de negocio ni la creación automática de movimientos desde ventas, compras o comisiones.
+- La mejora se resolvió con presentación, jerarquía visual y un detalle expandible por fila para mantener densidad sin perder información.
+- Se mantuvo la validación de Server Actions y solo se ajustó el copy de error para que el usuario vea `Referencia` en vez de un label técnico.
+
+### Validación
+
+- `npm run build` ejecutado luego del ajuste visual.
+- Build finalizado correctamente sin errores.
+
+## Rediseño inbox WhatsApp
+
+### Qué se rediseñó
+
+- Se reorganizó `/whatsapp/[id]` para funcionar como un inbox B2B:
+  - header superior compacto,
+  - columna principal para el hilo de mensajes,
+  - panel lateral derecho para contacto, IA y seguimiento.
+- Se redujo la redundancia visual entre contacto, estado, IA y seguimiento.
+- Se ocultaron identificadores técnicos de instancia y payload de la UI.
+- Se simplificó la tabla de conversaciones para que la columna IA sea más clara y no duplique teléfono en el lead.
+
+### Paths modificados
+
+- `app/(dashboard)/whatsapp/[id]/page.tsx`
+- `components/whatsapp/conversacion-detail.tsx`
+- `components/whatsapp/messages-list.tsx`
+- `components/whatsapp/ai-summary-card.tsx`
+- `components/whatsapp/conversation-follow-up-form.tsx`
+- `components/whatsapp/conversation-header-actions.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+
+### Problemas UX resueltos
+
+- El hilo de mensajes pasó a ser el protagonista visual de la pantalla.
+- Se evitaron cards apiladas con la misma información repetida.
+- El encabezado superior ahora concentra las acciones principales sin superponer badges.
+- La tabla de conversaciones dejó de mostrar teléfono duplicado entre contacto y lead.
+- Se eliminaron textos técnicos visibles como `Unread` o nombres de instancia en el detalle.
+
+### Tablas de Supabase involucradas
+
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+- `public.leads`
+- `public.empleados`
+- `public.vehiculos`
+
+### Decisiones técnicas relevantes
+
+- Se reutilizaron las acciones existentes para no tocar el flujo comercial.
+- La edición de seguimiento se mantuvo en un solo formulario con campos ocultos para conservar los datos IA sin duplicar UI.
+- El botón de resumen IA se movió al encabezado para darle más protagonismo y evitar un panel recargado.
+
+### Validación
+
+- `npm run build` ejecutado al cierre del rediseño.
+- Build finalizado correctamente sin errores.

@@ -1,7 +1,9 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
+import { canViewMargins } from "@/lib/auth/permissions";
 import { PaymentMethodBadge } from "./payment-method-badge";
 import { VentaStatusBadge } from "./venta-status-badge";
 
@@ -99,7 +101,7 @@ function getClientSubtitle(venta: Venta) {
 }
 
 function getSellerName(venta: Venta) {
-  return venta.vendedor?.nombre ?? venta.vendedor?.email ?? "—";
+  return venta.vendedor?.nombre ?? "Sin vendedor";
 }
 
 function getPaymentsSummary(pagos: Array<Record<string, any>> | undefined) {
@@ -135,11 +137,20 @@ function getDeliverySummary(estado: string | null | undefined) {
   return "Pendiente";
 }
 
-export function VentasTable({ ventas }: { ventas: Venta[] }) {
+export function VentasTable({
+  ventas,
+  role = null,
+  toolbarAction,
+}: {
+  ventas: Venta[];
+  role?: string | null;
+  toolbarAction?: ReactNode;
+}) {
   const [query, setQuery] = useState("");
   const [methodFilter, setMethodFilter] = useState<(typeof paymentMethods)[number]>("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
   const MAX_VISIBLE_ROWS = 200;
+  const showMargins = canViewMargins(role);
 
   const filteredVentas = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -176,23 +187,18 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
   const hasMoreRows = filteredVentas.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-[#E5E7EB] p-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-[#111827]">Ventas registradas</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
-            Buscá por cliente, contacto, documento, vehículo o vendedor.
-          </p>
-        </div>
-
-        <div className="grid gap-2 md:grid-cols-[320px_180px_160px]">
-          <div className="relative">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            {toolbarAction ? <div className="shrink-0">{toolbarAction}</div> : null}
+          <div className="relative min-w-[260px] flex-1 sm:w-[320px] sm:flex-none">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar venta"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -206,11 +212,11 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
             ) : null}
           </div>
 
-          <div className="relative">
+          <div className="relative min-w-[180px] flex-1 sm:flex-none">
             <select
               value={methodFilter}
               onChange={(event) => setMethodFilter(event.target.value as (typeof paymentMethods)[number])}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full appearance-none rounded-md border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             >
               <option value="">Todos los métodos</option>
               <option value="transferencia">Transferencia</option>
@@ -221,17 +227,21 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
             </select>
           </div>
 
-          <div className="relative">
+          <div className="relative min-w-[170px] flex-1 sm:flex-none">
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full appearance-none rounded-md border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             >
               <option value="">Todos los estados</option>
               <option value="registrada">Registrada</option>
               <option value="anulada">Anulada</option>
             </select>
           </div>
+        </div>
+          <p className="text-xs text-[#6B7280]">
+            Mostrando {visibleVentas.length} de {filteredVentas.length}
+          </p>
         </div>
       </div>
 
@@ -302,17 +312,23 @@ export function VentasTable({ ventas }: { ventas: Venta[] }) {
                         <p className="text-xs text-[#6B7280]">
                           {getPaymentsSummary(venta.pagos)}
                         </p>
-                        <p className="text-xs text-[#6B7280]">
-                          {getMarginSummary(venta)}
-                        </p>
-                        {venta.resultado_operativo != null || venta.rotacion_dias != null ? (
-                          <p className="text-xs text-[#9CA3AF]">
-                            {venta.resultado_operativo != null
-                              ? `Rentabilidad ${formatMoney(venta.resultado_operativo, venta.moneda)}`
-                              : "Rentabilidad sin dato"}
-                            {venta.rotacion_dias != null ? ` · ${venta.rotacion_dias} días` : ""}
-                          </p>
-                        ) : null}
+                        {showMargins ? (
+                          <>
+                            <p className="text-xs text-[#6B7280]">
+                              {getMarginSummary(venta)}
+                            </p>
+                            {venta.resultado_operativo != null || venta.rotacion_dias != null ? (
+                              <p className="text-xs text-[#9CA3AF]">
+                                {venta.resultado_operativo != null
+                                  ? `Rentabilidad ${formatMoney(venta.resultado_operativo, venta.moneda)}`
+                                  : "Rentabilidad sin dato"}
+                                {venta.rotacion_dias != null ? ` · ${venta.rotacion_dias} días` : ""}
+                              </p>
+                            ) : null}
+                          </>
+                        ) : (
+                          <p className="text-xs text-[#9CA3AF]">Datos comerciales visibles para tu rol.</p>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3 align-middle">

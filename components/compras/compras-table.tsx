@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { VehiculoStatusBadge } from "@/components/inventario/vehiculo-status-badge";
@@ -83,7 +84,7 @@ function getProviderSummary(compra: Compra) {
   };
 }
 
-export function ComprasTable({ compras }: { compras: Compra[] }) {
+export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; toolbarAction?: ReactNode }) {
   const [query, setQuery] = useState("");
   const [currencyFilter, setCurrencyFilter] = useState<(typeof currencyFilters)[number]>("");
   const [withDebt, setWithDebt] = useState(false);
@@ -119,23 +120,18 @@ export function ComprasTable({ compras }: { compras: Compra[] }) {
   const hasMoreRows = filteredCompras.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-[#E5E7EB] p-4 xl:flex-row xl:items-center xl:justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-[#111827]">Compras de vehículos</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
-            Buscá por proveedor, dominio, marca, modelo o número de operación.
-          </p>
-        </div>
-
-        <div className="grid gap-2 xl:grid-cols-[320px_180px_170px]">
-          <div className="relative">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            {toolbarAction ? <div className="shrink-0">{toolbarAction}</div> : null}
+            <div className="relative min-w-[260px] flex-1 sm:w-[320px] sm:flex-none">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar compra"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -147,33 +143,37 @@ export function ComprasTable({ compras }: { compras: Compra[] }) {
                 <X className="h-3.5 w-3.5" />
               </button>
             ) : null}
-          </div>
+            </div>
 
-          <div className="relative">
+            <div className="min-w-[180px] flex-1 sm:flex-none">
             <select
               value={currencyFilter}
               onChange={(event) => setCurrencyFilter(event.target.value as (typeof currencyFilters)[number])}
-              className="h-10 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full appearance-none rounded-md border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:w-auto"
             >
               <option value="">Todas las monedas</option>
               <option value="ARS">ARS</option>
               <option value="USD">USD</option>
             </select>
-          </div>
+            </div>
 
-          <button
+            <button
             type="button"
             onClick={() => setWithDebt((value) => !value)}
             className={[
-              "inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium transition",
+              "inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium transition",
               withDebt
-                ? "border-[#111827] bg-[#111827] text-white"
+                ? "border-[#8A1538] bg-[#8A1538] text-white"
                 : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]",
             ].join(" ")}
           >
             <SlidersHorizontal className="h-4 w-4" />
             Con deuda
-          </button>
+            </button>
+          </div>
+          <p className="text-xs text-[#6B7280]">
+            Mostrando {visibleCompras.length} de {filteredCompras.length}
+          </p>
         </div>
       </div>
 
@@ -248,8 +248,14 @@ export function ComprasTable({ compras }: { compras: Compra[] }) {
               <tr>
                 <td colSpan={9} className="px-4 py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
-                    <p className="text-sm font-medium text-[#111827]">No hay resultados para mostrar</p>
-                    <p className="text-sm text-[#6B7280]">Probá limpiando filtros o cargando nuevas compras.</p>
+                    <p className="text-sm font-medium text-[#111827]">
+                      {compras.length ? "No encontramos compras con esos filtros" : "Todavía no hay compras cargadas"}
+                    </p>
+                    <p className="text-sm text-[#6B7280]">
+                      {compras.length
+                        ? "Probá limpiar la búsqueda o ajustar la moneda."
+                        : "Registrá la primera compra para empezar a seguir stock y costos."}
+                    </p>
                   </div>
                 </td>
               </tr>

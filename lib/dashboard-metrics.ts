@@ -1105,24 +1105,30 @@ export function buildDashboardMetrics(input: DashboardMetricsInput): DashboardMe
   const criticalAlertsCount = alerts.filter((alert) => alert.severity === "critical").length;
   const resultForTopKpi = formatCurrencyByCurrency(subtractTotals(cashIncome, cashExpense));
 
+  const currentMonthSalesCount = currentMonthSales.filter(isRegisteredSale).length;
+  const currentCashResult = subtractTotals(cashIncome, cashExpense);
+  const stockDescription =
+    stockVehicles.length > 0
+      ? `${publishedVehicles.length} publicados · ${unpublishedStock} sin publicar`
+      : "Inventario pendiente de carga";
+  const salesDescription =
+    currentMonthSalesCount > 0
+      ? `${formatCurrencyByCurrency(salesAmount)} registradas`
+      : "Sin ventas registradas este mes";
+  const cashDescription =
+    cashIncome.ARS || cashIncome.USD || Object.keys(cashIncome.other).length || cashExpense.ARS || cashExpense.USD || Object.keys(cashExpense.other).length
+      ? "Caja real del período"
+      : "Sin movimientos cargados";
+  const leadsDescription =
+    activeLeads.length > 0
+      ? `${formatNumber(negotiationLeads.length)} en negociación · ${formatNumber(wonLeads.length)} ganados`
+      : "Cargá leads para activar el pipeline";
+
   const topKpis = [
     {
-      title: "Stock disponible",
-      value: formatNumber(stockVehicles.length),
-      description: `${publishedVehicles.length} publicados · ${unpublishedStock} sin publicar`,
-      href: "/inventario",
-      tone: "highlight" as const,
-      featured: true,
-      badge: "Inventario",
-      progress: {
-        value: stockVehicles.length > 0 ? Math.round((publishedVehicles.length / stockVehicles.length) * 100) : 0,
-        label: "Publicación",
-      },
-    },
-    {
       title: "Ventas del mes",
-      value: formatNumber(currentMonthSales.filter(isRegisteredSale).length),
-      description: `${formatCurrencyByCurrency(salesAmount)} registradas`,
+      value: formatNumber(currentMonthSalesCount),
+      description: salesDescription,
       href: "/ventas",
       tone: "success" as const,
       badge: "Cierres",
@@ -1130,19 +1136,31 @@ export function buildDashboardMetrics(input: DashboardMetricsInput): DashboardMe
     },
     {
       title: "Resultado caja mes",
-      value: formatCurrencyByCurrency(subtractTotals(cashIncome, cashExpense)),
-      description: "Caja real antes de comisiones y compras.",
+      value: formatCurrencyByCurrency(currentCashResult),
+      description: cashDescription,
       href: "/caja",
-      tone: "highlight" as const,
+      tone: "warning" as const,
       badge: "Caja",
       note: resultForTopKpi,
     },
     {
+      title: "Stock disponible",
+      value: formatNumber(stockVehicles.length),
+      description: stockDescription,
+      href: "/inventario",
+      tone: "info" as const,
+      badge: "Inventario",
+      progress: {
+        value: stockVehicles.length > 0 ? Math.round((publishedVehicles.length / stockVehicles.length) * 100) : 0,
+        label: "Publicación",
+      },
+    },
+    {
       title: "Leads activos",
       value: formatNumber(activeLeads.length),
-      description: `${formatNumber(negotiationLeads.length)} en negociación · ${formatNumber(wonLeads.length)} ganados`,
+      description: leadsDescription,
       href: "/crm",
-      tone: "info" as const,
+      tone: "neutral" as const,
       badge: "Pipeline",
       progress: {
         value:
@@ -1151,15 +1169,6 @@ export function buildDashboardMetrics(input: DashboardMetricsInput): DashboardMe
             : 0,
         label: "Negociación",
       },
-    },
-    {
-      title: "Alertas críticas",
-      value: formatNumber(criticalAlertsCount),
-      description: `${formatNumber(alerts.length)} alertas totales activas`,
-      href: "/dashboard",
-      tone: criticalAlertsCount ? ("critical" as const) : ("neutral" as const),
-      badge: criticalAlertsCount ? "Revisar" : "Sin riesgo",
-      note: criticalAlertsCount ? "Hay señales urgentes para atender" : "El panel está estable",
     },
   ];
 
@@ -1229,7 +1238,7 @@ export function buildDashboardMetrics(input: DashboardMetricsInput): DashboardMe
       cajaByMedium,
     },
     vendorActivity,
-    alerts: alerts.slice(0, 5),
+    alerts: alerts.slice(0, 4),
   };
 }
 

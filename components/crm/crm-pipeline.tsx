@@ -40,7 +40,7 @@ type PipelineEstado = {
 };
 
 function getSellerName(lead: Lead) {
-  return lead.vendedor?.nombre ?? lead.vendedor?.email ?? "Sin vendedor";
+  return lead.vendedor?.nombre ?? "Sin vendedor";
 }
 
 function getVehicleSummary(lead: Lead) {
@@ -68,7 +68,7 @@ export function CrmPipeline({
       ];
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+    <section className="rounded-md border border-[#E5E7EB] bg-white p-4">
       <div className="space-y-1 border-b border-[#E5E7EB] pb-4">
         <h2 className="text-base font-semibold text-[#111827]">Pipeline</h2>
         <p className="text-sm text-[#6B7280]">
@@ -84,7 +84,7 @@ export function CrmPipeline({
             const stateLeads = leads.filter((lead) => lead.estado === state.slug);
 
             return (
-              <div key={state.id} className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+              <div key={state.id} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
                 <div className="flex items-center justify-between gap-2 border-b border-[#E5E7EB] pb-3">
                   <div>
                     <p className="text-sm font-semibold text-[#111827]">{state.nombre}</p>
@@ -101,7 +101,7 @@ export function CrmPipeline({
                       <Link
                         key={lead.id}
                         href={`/crm/${lead.id}`}
-                        className="block rounded-xl border border-[#E5E7EB] bg-white p-3 transition hover:bg-[#F9FAFB]"
+                        className="block rounded-md border border-[#E5E7EB] bg-white p-3 transition hover:bg-[#F9FAFB]"
                       >
                         <div className="space-y-2">
                           <div>
@@ -118,7 +118,7 @@ export function CrmPipeline({
                       </Link>
                     ))
                   ) : (
-                    <div className="rounded-xl border border-dashed border-[#E5E7EB] bg-white px-3 py-6 text-center text-xs text-[#6B7280]">
+                    <div className="rounded-md border border-dashed border-[#E5E7EB] bg-white px-3 py-6 text-center text-xs text-[#6B7280]">
                       Sin leads en esta etapa.
                     </div>
                   )}

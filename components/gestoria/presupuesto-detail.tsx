@@ -102,7 +102,7 @@ function StatusActions({ presupuestoId, estado }: { presupuestoId: string; estad
           name="estado"
           value={nextState}
           disabled={disabled && nextState !== "anulado"}
-          className="inline-flex h-9 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] transition hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] transition hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
           type="submit"
         >
           {nextState.charAt(0).toUpperCase() + nextState.slice(1)}
@@ -140,13 +140,13 @@ export function PresupuestoDetail({
   return (
     <section className="space-y-6">
       {isLocked ? (
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#6B7280]">
+        <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-3 text-sm text-[#6B7280]">
           Este presupuesto está bloqueado para edición porque ya fue facturado o anulado.
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <article className="rounded-3xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
+      <div className="space-y-6">
+        <article className="rounded-md border border-[#E5E7EB] bg-white p-5">
           <div className="flex flex-col gap-3 border-b border-[#E5E7EB] pb-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-2">
               <PresupuestoStatusBadge status={presupuesto.estado} />
@@ -208,7 +208,7 @@ export function PresupuestoDetail({
           </div>
 
           {presupuesto.observaciones ? (
-            <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+            <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-[#9CA3AF]">Observaciones</p>
               <p className="mt-2 text-sm leading-6 text-[#6B7280]">{presupuesto.observaciones}</p>
             </div>
@@ -216,12 +216,12 @@ export function PresupuestoDetail({
         </article>
 
         <aside className="space-y-4">
-          <article className="rounded-3xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
+          <article className="rounded-md border border-[#E5E7EB] bg-white p-5">
             <h3 className="text-base font-semibold text-[#111827]">Ítems</h3>
             <div className="mt-4 space-y-3">
               {items.length ? (
                 items.map((item) => (
-                  <div key={getItemKey(item)} className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+                  <div key={getItemKey(item)} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
                         <PresupuestoItemTypeBadge type={item.tipo} />

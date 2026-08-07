@@ -214,7 +214,7 @@ export async function createVehiculoAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar cambios." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar cambios." };
   }
 
   const supabase = createSupabaseServerClient();
@@ -311,7 +311,7 @@ export async function updateVehiculoAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar cambios." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar cambios." };
   }
 
   const supabase = createSupabaseServerClient();

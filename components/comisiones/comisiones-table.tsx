@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { ComisionStatusBadge } from "./comision-status-badge";
@@ -66,7 +67,7 @@ function formatMoney(value: number | null, currency: string | null) {
 }
 
 function getSellerName(comision: Comision) {
-  return comision.vendedor?.nombre ?? comision.vendedor?.email ?? "—";
+  return comision.vendedor?.nombre ?? "Sin vendedor";
 }
 
 function getVehicleSummary(comision: Comision) {
@@ -79,7 +80,7 @@ function getVehicleSummary(comision: Comision) {
   return { title, subtitle };
 }
 
-export function ComisionesTable({ comisiones }: { comisiones: Comision[] }) {
+export function ComisionesTable({ comisiones, toolbarAction }: { comisiones: Comision[]; toolbarAction?: ReactNode }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
   const [currencyFilter, setCurrencyFilter] = useState<(typeof currencies)[number]>("");
@@ -113,23 +114,18 @@ export function ComisionesTable({ comisiones }: { comisiones: Comision[] }) {
   const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-[#E5E7EB] p-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-[#111827]">Comisiones</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
-            Buscá por vendedor, cliente, vehículo o dominio.
-          </p>
-        </div>
-
-        <div className="grid gap-2 md:grid-cols-[320px_160px_140px]">
-          <div className="relative">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            {toolbarAction ? <div className="shrink-0">{toolbarAction}</div> : null}
+            <div className="relative min-w-[260px] flex-1 sm:w-[320px] sm:flex-none">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar comisión"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -141,29 +137,33 @@ export function ComisionesTable({ comisiones }: { comisiones: Comision[] }) {
                 <X className="h-3.5 w-3.5" />
               </button>
             ) : null}
+            </div>
+
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
+            >
+              <option value="">Todos los estados</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="aprobada">Aprobada</option>
+              <option value="pagada">Pagada</option>
+              <option value="anulada">Anulada</option>
+            </select>
+
+            <select
+              value={currencyFilter}
+              onChange={(event) => setCurrencyFilter(event.target.value as (typeof currencies)[number])}
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
+            >
+              <option value="">Todas las monedas</option>
+              <option value="ARS">ARS</option>
+              <option value="USD">USD</option>
+            </select>
           </div>
-
-          <select
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Todos los estados</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="aprobada">Aprobada</option>
-            <option value="pagada">Pagada</option>
-            <option value="anulada">Anulada</option>
-          </select>
-
-          <select
-            value={currencyFilter}
-            onChange={(event) => setCurrencyFilter(event.target.value as (typeof currencies)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Todas las monedas</option>
-            <option value="ARS">ARS</option>
-            <option value="USD">USD</option>
-          </select>
+          <p className="text-xs text-[#6B7280]">
+            Mostrando {visibleComisiones.length} de {filtered.length}
+          </p>
         </div>
       </div>
 
@@ -227,10 +227,12 @@ export function ComisionesTable({ comisiones }: { comisiones: Comision[] }) {
                 <td colSpan={8} className="px-4 py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
                     <p className="text-sm font-medium text-[#111827]">
-                      No hay resultados para mostrar
+                      {comisiones.length ? "No encontramos comisiones con esos filtros" : "Todavía no hay comisiones cargadas"}
                     </p>
                     <p className="text-sm leading-6 text-[#6B7280]">
-                      Probá ajustar los filtros o buscá otra comisión.
+                      {comisiones.length
+                        ? "Probá limpiar la búsqueda o ajustar el estado."
+                        : "Cuando haya ventas, las comisiones aparecerán acá."}
                     </p>
                   </div>
                 </td>

@@ -5,7 +5,7 @@ export function createSupabaseBrowserClient() {
   const env = getSupabaseEnv();
 
   if (!env) {
-    throw new Error("Falta configurar Supabase en .env.local.");
+    throw new Error("Falta configurar el entorno.");
   }
 
   return createBrowserClient(env.supabaseUrl, env.supabaseAnonKey);

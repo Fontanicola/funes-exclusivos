@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { isDemoMode } from "@/lib/demo-mode";
+import { canManageCommissions } from "@/lib/auth/permissions";
+import { mockEmpleado } from "@/lib/mock-data";
 import { mockComisiones } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ComisionesComparativa } from "@/components/comisiones/comisiones-comparativa";
@@ -130,23 +132,42 @@ function getUniqueSoldUnits(comisiones: Comision[]) {
 
 export default async function ComisionesPage() {
   let comisiones: Comision[] = mockComisiones as Comision[];
+  let currentRole: string | null = mockEmpleado.rol;
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
-    const { data } = await supabase
+    const [
+      { data },
+      {
+        data: { user },
+      },
+    ] = await Promise.all([
+      supabase
       .from("comisiones")
       .select(
         "id,venta_id,vendedor_id,base_comision,porcentaje,monto_comision,moneda,estado,fecha_generada,fecha_pago,observaciones,created_at,vendedor:empleados!comisiones_vendedor_id_fkey(id,nombre,email,rol),venta:ventas!comisiones_venta_id_fkey(id,fecha_venta,cliente_nombre,precio_venta,moneda,metodo_pago,estado,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio))"
       )
       .order("fecha_generada", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(150);
+      .limit(150),
+      supabase.auth.getUser(),
+    ]);
 
     comisiones = ((data ?? []) as unknown as RawComision[]).map((comision) => ({
       ...comision,
       vendedor: normalizeSingleRelation(comision.vendedor),
       venta: normalizeSingleRelation(comision.venta),
     }));
+
+    if (user) {
+      const { data: employee } = await supabase
+        .from("empleados")
+        .select("id,rol,activo")
+        .eq("id", user.id)
+        .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+      currentRole = employee?.rol ?? null;
+    }
   }
 
   const comisionesValidas = comisiones.filter(
@@ -158,39 +179,20 @@ export default async function ComisionesPage() {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
-            Comisiones
-          </h1>
-          <p className="text-sm leading-6 text-[#6B7280]">
-            KPIs y comparativa comercial por vendedor
-          </p>
-          </div>
-
-          <Link
-            href="/comisiones/liquidaciones"
-            className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-          >
-            Liquidaciones
-          </Link>
+      {isDemoMode ? (
+        <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+          Modo demo: las comisiones usan datos simulados y no consultarán datos reales.
         </div>
-        {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: las comisiones son mock y no se consultará Supabase.
-          </div>
-        ) : null}
-      </header>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">Unidades vendidas</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
             {unidadesVendidas}
           </p>
         </article>
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">Monto total vendido</p>
           <p className="mt-3 text-2xl font-semibold tracking-tight text-[#111827]">
             {summarize(montoTotalVendido)}
@@ -199,7 +201,7 @@ export default async function ComisionesPage() {
             {formatBreakdown(montoTotalVendido)}
           </p>
         </article>
-        <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+        <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">Comisión generada</p>
           <p className="mt-3 text-2xl font-semibold tracking-tight text-[#111827]">
             {summarize(comisionGenerada)}
@@ -211,7 +213,19 @@ export default async function ComisionesPage() {
       </div>
 
       <ComisionesComparativa comisiones={comisiones} />
-      <ComisionesTable comisiones={comisiones} />
+      <ComisionesTable
+        comisiones={comisiones}
+        toolbarAction={
+          canManageCommissions(currentRole) ? (
+            <Link
+              href="/comisiones/liquidaciones"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+            >
+              Liquidaciones
+            </Link>
+          ) : null
+        }
+      />
     </section>
   );
 }

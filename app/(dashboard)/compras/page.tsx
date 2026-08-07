@@ -82,27 +82,19 @@ export default async function ComprasPage() {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-3">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Compras</h1>
-            <p className="text-sm leading-6 text-[#6B7280]">
-              Ingreso de unidades, proveedores y costos de adquisición
-            </p>
-          </div>
-
+      <CompraKpis compras={compras} />
+      <ComprasTable
+        compras={compras}
+        toolbarAction={
           <Link
             href="/compras/nueva"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A]"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
           >
             <Plus className="h-4 w-4" />
             Nueva compra
           </Link>
-        </div>
-      </header>
-
-      <CompraKpis compras={compras} />
-      <ComprasTable compras={compras} />
+        }
+      />
     </section>
   );
 }

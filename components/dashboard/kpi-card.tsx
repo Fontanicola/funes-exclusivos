@@ -24,11 +24,11 @@ const toneClasses: Record<KpiTone, { shell: string; title: string; accent: strin
   neutral: {
     shell: "border-[#E5E7EB] bg-white/95",
     title: "text-[#111827]",
-    accent: "bg-[#111827]",
+    accent: "bg-[#8A1538]",
     badge: "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]",
   },
   highlight: {
-    shell: "border-[#111827] bg-[#111827]",
+    shell: "border-[#8A1538] bg-[#8A1538]",
     title: "text-white",
     accent: "bg-white",
     badge: "border-white/15 bg-white/10 text-white/80",
@@ -95,7 +95,7 @@ function ProgressRing({
                   : "#475569"} ${clamped * 3.6}deg, rgba(255,255,255,0.18) 0deg)`,
         }}
       >
-        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${tone === "highlight" ? "bg-[#111827] text-white" : "bg-white text-[#111827]"}`}>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${tone === "highlight" ? "bg-[#8A1538] text-white" : "bg-white text-[#111827]"}`}>
           <span className="text-[11px] font-semibold">{clamped}%</span>
         </div>
       </div>
@@ -130,12 +130,10 @@ export function KpiCard({
   const content = (
     <article
       className={[
-        "group relative h-full overflow-hidden rounded-[28px] border shadow-[0_10px_30px_rgba(15,23,42,0.04)] transition",
+        "group relative h-full overflow-hidden rounded-md border transition",
         classes.shell,
         featured ? "p-6" : "p-5",
-        resolvedTone === "highlight"
-          ? "shadow-[0_16px_40px_rgba(15,23,42,0.12)]"
-          : "hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgba(15,23,42,0.08)]",
+        resolvedTone === "highlight" ? "" : "hover:border-[#D8A1B2]",
         className,
       ].join(" ")}
     >
@@ -174,17 +172,12 @@ export function KpiCard({
         </div>
 
         {note ? (
-          <div className={`rounded-2xl border px-3 py-2 text-xs ${resolvedTone === "highlight" ? "border-white/10 bg-white/5 text-white/70" : "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]"}`}>
+          <div className={`rounded-md border px-3 py-2 text-xs ${resolvedTone === "highlight" ? "border-white/10 bg-white/5 text-white/70" : "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]"}`}>
             {note}
           </div>
         ) : null}
       </div>
 
-      {resolvedTone === "highlight" ? (
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_35%)]" />
-      ) : (
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.45),transparent_45%)] opacity-60" />
-      )}
     </article>
   );
 

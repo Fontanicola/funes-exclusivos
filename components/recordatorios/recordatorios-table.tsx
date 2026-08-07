@@ -7,6 +7,7 @@ import {
   completeRecordatorioAction,
   postponeRecordatorioAction,
 } from "@/app/(dashboard)/recordatorios/actions";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 import { RecordatorioStatusBadge } from "./recordatorio-status-badge";
 import { RecordatorioPriorityBadge } from "./recordatorio-priority-badge";
 import { RecordatorioTypeBadge } from "./recordatorio-type-badge";
@@ -273,23 +274,17 @@ export function RecordatoriosTable({
   const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="space-y-4 border-b border-[#E5E7EB] p-5">
-        <div className="space-y-2">
-          <h2 className="text-base font-semibold text-[#111827]">Listado de recordatorios</h2>
-          <p className="max-w-2xl text-sm leading-6 text-[#6B7280]">
-            Buscá por título, descripción, persona o entidad vinculada. Los vencidos y los de hoy aparecen primero en la tabla general.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap gap-2">
           <div className="relative min-w-[260px] flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar recordatorio"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -307,7 +302,7 @@ export function RecordatoriosTable({
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as (typeof statusOptions)[number])}
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:w-auto"
               title={getStatusFilterLabel(statusFilter)}
             >
               <option value="">Todos los estados</option>
@@ -320,57 +315,9 @@ export function RecordatoriosTable({
 
           <div className="min-w-[180px] flex-1 sm:flex-none">
             <select
-              value={priorityFilter}
-              onChange={(event) => setPriorityFilter(event.target.value as (typeof priorityOptions)[number])}
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
-              title={getPriorityFilterLabel(priorityFilter)}
-            >
-              <option value="">Todas las prioridades</option>
-              <option value="baja">Baja</option>
-              <option value="media">Media</option>
-              <option value="alta">Alta</option>
-              <option value="critica">Crítica</option>
-            </select>
-          </div>
-
-          <div className="min-w-[180px] flex-1 sm:flex-none">
-            <select
-              value={typeFilter}
-              onChange={(event) => setTypeFilter(event.target.value)}
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
-            >
-              <option value="">Todos los tipos</option>
-              <option value="seguimiento_crm">Seguimiento CRM</option>
-              <option value="gestoria">Gestoría</option>
-              <option value="entrega">Entrega</option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="caja">Caja</option>
-              <option value="comision">Comisión</option>
-              <option value="inventario">Inventario</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
-
-          <div className="min-w-[180px] flex-1 sm:flex-none">
-            <select
-              value={assigneeFilter}
-              onChange={(event) => setAssigneeFilter(event.target.value)}
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
-            >
-              <option value="">Todos los asignados</option>
-              {employees.map((employee) => (
-                <option key={employee.id} value={employee.id}>
-                  {employee.nombre ?? employee.email ?? employee.id}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="min-w-[180px] flex-1 sm:flex-none">
-            <select
               value={dueFilter}
               onChange={(event) => setDueFilter(event.target.value as (typeof dueFilters)[number])}
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6] sm:w-auto"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:w-auto"
             >
               <option value="all">Todas las fechas</option>
               <option value="today">Hoy</option>
@@ -378,7 +325,60 @@ export function RecordatoriosTable({
               <option value="soon">Próximos 7 días</option>
             </select>
           </div>
+          <AdvancedFilters>
+            <div className="min-w-[180px] flex-1 sm:flex-none">
+              <select
+                value={priorityFilter}
+                onChange={(event) => setPriorityFilter(event.target.value as (typeof priorityOptions)[number])}
+                className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:w-auto"
+                title={getPriorityFilterLabel(priorityFilter)}
+              >
+                <option value="">Todas las prioridades</option>
+                <option value="baja">Baja</option>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
+                <option value="critica">Crítica</option>
+              </select>
+            </div>
+
+            <div className="min-w-[180px] flex-1 sm:flex-none">
+              <select
+                value={typeFilter}
+                onChange={(event) => setTypeFilter(event.target.value)}
+                className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:w-auto"
+              >
+                <option value="">Todos los tipos</option>
+                <option value="seguimiento_crm">Seguimiento CRM</option>
+                <option value="gestoria">Gestoría</option>
+                <option value="entrega">Entrega</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="caja">Caja</option>
+                <option value="comision">Comisión</option>
+                <option value="inventario">Inventario</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+
+            <div className="min-w-[180px] flex-1 sm:flex-none">
+              <select
+                value={assigneeFilter}
+                onChange={(event) => setAssigneeFilter(event.target.value)}
+                className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:w-auto"
+              >
+                <option value="">Todos los asignados</option>
+                {employees.map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.nombre ?? employee.email ?? "Empleado"}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </AdvancedFilters>
+          <p className="text-xs text-[#6B7280]">
+            Mostrando {visibleRecordatorios.length} de {filtered.length}
+          </p>
         </div>
+      </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -469,14 +469,14 @@ export function RecordatoriosTable({
                             <input type="hidden" name="id" value={recordatorio.id} />
                             <button
                               type="submit"
-                              className="inline-flex items-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                              className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100"
                             >
                               <Check className="h-3.5 w-3.5" />
                               Completar
                             </button>
                           </form>
 
-                          <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+                          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
                             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
                               <CalendarClock className="h-3.5 w-3.5" />
                               Posponer
@@ -506,7 +506,7 @@ export function RecordatoriosTable({
                             <input type="hidden" name="id" value={recordatorio.id} />
                             <button
                               type="submit"
-                              className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-800 transition hover:bg-rose-100"
+                              className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-800 transition hover:bg-rose-100"
                             >
                               <Ban className="h-3.5 w-3.5" />
                               Cancelar
@@ -522,8 +522,17 @@ export function RecordatoriosTable({
               })
             ) : (
               <tr>
-                <td className="px-4 py-12 text-center text-sm text-[#6B7280]" colSpan={8}>
-                  No hay recordatorios con esos filtros.
+                <td className="px-4 py-12 text-center" colSpan={8}>
+                  <div className="mx-auto max-w-sm space-y-2">
+                    <p className="text-sm font-medium text-[#111827]">
+                      {recordatorios.length ? "No encontramos recordatorios con esos filtros" : "Todavía no hay recordatorios cargados"}
+                    </p>
+                    <p className="text-sm leading-6 text-[#6B7280]">
+                      {recordatorios.length
+                        ? "Probá ajustar el estado, la prioridad o la fecha."
+                        : "Creá el primer recordatorio para seguir vencimientos y seguimientos."}
+                    </p>
+                  </div>
                 </td>
               </tr>
             )}

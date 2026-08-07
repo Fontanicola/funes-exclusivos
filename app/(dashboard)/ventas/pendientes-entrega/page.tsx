@@ -141,7 +141,7 @@ export default async function PendientesEntregaPage() {
       <header className="space-y-3">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Pendientes de entrega</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">Pendientes de entrega</h1>
             <p className="text-sm leading-6 text-[#6B7280]">
               Seguimiento de operaciones vendidas hasta la entrega final
             </p>
@@ -149,7 +149,7 @@ export default async function PendientesEntregaPage() {
 
           <Link
             href="/ventas"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver a ventas
@@ -165,7 +165,7 @@ export default async function PendientesEntregaPage() {
           ["Listas para entregar", ready],
           ["Entregadas", delivered],
         ].map(([label, value]) => (
-          <article key={label as string} className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+          <article key={label as string} className="rounded-md border border-[#E5E7EB] bg-white p-4">
             <p className="text-sm font-medium text-[#6B7280]">{label as string}</p>
             <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">{value as number}</p>
           </article>

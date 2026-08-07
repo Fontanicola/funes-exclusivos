@@ -52,7 +52,7 @@ export async function updateEmpleadoAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar cambios reales." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar cambios." };
   }
 
   const auth = await getAuthUser();

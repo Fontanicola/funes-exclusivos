@@ -304,7 +304,6 @@ async function createCajaMovimientosFromPagos(
     venta_pago_id: payment.id,
     tipo: "ingreso",
     monto: parseNumberLike(payment?.importe) ?? 0,
-    importe: parseNumberLike(payment?.importe) ?? 0,
     moneda: payment?.moneda ?? params.moneda,
     fecha: params.fechaVenta,
     medio: payment?.medio ?? payment?.tipo,

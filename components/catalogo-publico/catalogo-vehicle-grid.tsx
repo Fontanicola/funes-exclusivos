@@ -121,6 +121,18 @@ export function CatalogoVehicleGrid({
       .sort((a, b) => compareBySort(a, b, sortBy));
   }, [anio, marca, maxPrice, minPrice, onlyFeatured, query, sortBy, vehiculos]);
 
+  if (!vehiculos.length) {
+    return (
+      <section className="space-y-5">
+        <CatalogoEmptyState
+          title="No hay vehículos publicados en este momento"
+          description="Consultanos por WhatsApp para conocer próximas unidades disponibles."
+          whatsappContacto={config.whatsapp_contacto}
+        />
+      </section>
+    );
+  }
+
   return (
     <section className="space-y-5">
       <CatalogoFilters
@@ -159,8 +171,8 @@ export function CatalogoVehicleGrid({
         </div>
       ) : (
         <CatalogoEmptyState
-          title="No hay vehículos publicados en este momento."
-          description="Volvé más tarde o consultanos por WhatsApp para conocer nuevas unidades disponibles."
+          title="No hay vehículos publicados en este momento"
+          description="Consultanos por WhatsApp para conocer próximas unidades disponibles."
           whatsappContacto={config.whatsapp_contacto}
         />
       )}

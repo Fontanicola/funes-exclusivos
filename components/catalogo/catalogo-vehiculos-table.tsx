@@ -68,7 +68,7 @@ function Input({
     <input
       {...props}
       className={[
-        "h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     />
@@ -83,7 +83,7 @@ function Textarea({
     <textarea
       {...props}
       className={[
-        "min-h-[72px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "min-h-[72px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     />
@@ -97,7 +97,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-10 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-10 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "Guardando..." : "Guardar"}
     </button>
@@ -193,7 +193,7 @@ function CatalogoRow({
   return (
     <tr className="transition hover:bg-[#F9FAFB]">
       <td className="px-4 py-4 align-top">
-        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#FAFAFA]">
+        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md border border-[#E5E7EB] bg-[#FAFAFA]">
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -326,7 +326,7 @@ function CatalogoRow({
               href={`/catalogo/${vehicle.id}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-9 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
             >
               Ver
             </Link>
@@ -361,23 +361,17 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
   }, [onlyStock, publicationFilter, query, vehiculos]);
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-[#E5E7EB] p-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-[#111827]">Vehículos del catálogo</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
-            Editá publicación, destacado, orden y contenido visible.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-          <div className="relative w-full lg:w-[320px]">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap gap-2">
+          <div className="relative min-w-[260px] flex-1 sm:w-[320px] sm:flex-none">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar vehículo"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -396,7 +390,7 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
             onChange={(event) =>
               setPublicationFilter(event.target.value as (typeof publicationFilters)[number]["value"])
             }
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           >
             {publicationFilters.map((option) => (
               <option key={option.value || "all"} value={option.value}>
@@ -409,15 +403,19 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
             type="button"
             onClick={() => setOnlyStock((current) => !current)}
             className={[
-              "inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium transition",
+              "inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium transition",
               onlyStock
-                ? "border-[#E5E7EB] bg-[#18181B] text-white hover:bg-[#27272A]"
+                ? "border-[#E5E7EB] bg-[#8A1538] text-white hover:bg-[#6F102D]"
                 : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]",
             ].join(" ")}
           >
             <SlidersHorizontal className="h-4 w-4" />
             Solo stock
           </button>
+        </div>
+        <p className="text-xs text-[#6B7280]">
+          Mostrando {filteredVehiculos.length} de {vehiculos.length}
+        </p>
         </div>
       </div>
 

@@ -212,7 +212,7 @@ function SignedUrlButton({ documento }: { documento: VehiculoDocumento }) {
         onClick={() => {
           popupRef.current = window.open("", "_blank");
         }}
-        className="inline-flex h-9 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+        className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
       >
         Abrir
       </button>
@@ -238,7 +238,7 @@ function DocumentoEstadoForm({
         <select
           name="estado"
           defaultValue={documento.estado ?? "pendiente"}
-          className="h-9 rounded-xl border border-[#E5E7EB] bg-white px-2.5 text-xs text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+          className="h-9 rounded-md border border-[#E5E7EB] bg-white px-2.5 text-xs text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
         >
           {statuses.filter(Boolean).map((status) => (
             <option key={status} value={status}>
@@ -268,7 +268,7 @@ function UpdateButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-9 items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] px-3 text-xs font-medium text-[#111827] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-3 text-xs font-medium text-[#111827] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "..." : "Actualizar"}
     </button>
@@ -282,7 +282,7 @@ function DeleteButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-9 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-3 text-xs font-medium text-rose-800 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-9 items-center justify-center rounded-md border border-rose-200 bg-rose-50 px-3 text-xs font-medium text-rose-800 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "..." : "Borrar"}
     </button>
@@ -342,7 +342,7 @@ export function VehiculoDocumentosTable({
   const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-[32px] border border-[#E5E7EB] bg-white shadow-sm">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
       <div className="flex flex-col gap-3 border-b border-[#E5E7EB] p-4">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -356,9 +356,9 @@ export function VehiculoDocumentosTable({
             type="button"
             onClick={() => setOnlyOverdue((current) => !current)}
             className={[
-              "inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium transition",
+              "inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium transition",
               onlyOverdue
-                ? "border-[#E5E7EB] bg-[#18181B] text-white hover:bg-[#27272A]"
+                ? "border-[#E5E7EB] bg-[#8A1538] text-white hover:bg-[#6F102D]"
                 : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]",
             ].join(" ")}
           >
@@ -372,14 +372,14 @@ export function VehiculoDocumentosTable({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar documento"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
           </div>
 
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           >
             <option value="">Todos los estados</option>
             {statuses.filter(Boolean).map((status) => (
@@ -392,7 +392,7 @@ export function VehiculoDocumentosTable({
           <select
             value={typeFilter}
             onChange={(event) => setTypeFilter(event.target.value as (typeof types)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+            className="h-10 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           >
             <option value="">Todos los tipos</option>
             {types.filter(Boolean).map((type) => (

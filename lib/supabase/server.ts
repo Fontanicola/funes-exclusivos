@@ -6,7 +6,7 @@ export function createSupabaseServerClient() {
   const env = getSupabaseEnv();
 
   if (!env) {
-    throw new Error("Falta configurar Supabase en .env.local.");
+    throw new Error("Falta configurar el entorno.");
   }
 
   const cookieStore = cookies();

@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockConversacionMensajes, mockConversaciones } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { ConversationHeaderActions } from "@/components/whatsapp/conversation-header-actions";
 import { ConversacionDetail } from "@/components/whatsapp/conversacion-detail";
-import { ConversacionMessages } from "@/components/whatsapp/conversacion-messages";
+import { MessagesList } from "@/components/whatsapp/messages-list";
 import { ConversacionInterestBadge } from "@/components/whatsapp/conversacion-interest-badge";
 import { ConversacionStatusBadge } from "@/components/whatsapp/conversacion-status-badge";
 
@@ -179,26 +180,54 @@ export default async function WhatsappConversationPage({
         >
           Volver a WhatsApp
         </Link>
-        <div className="flex flex-wrap items-center gap-2">
-          <ConversacionStatusBadge status={conversation.estado} />
-          <ConversacionInterestBadge interest={conversation.interes_compra} />
-        </div>
       </div>
 
-      <header className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
-            {conversation.contacto_nombre ?? conversation.contacto_telefono ?? "Sin contacto"}
-          </h1>
-          <p className="text-sm leading-6 text-[#6B7280]">
-            {conversation.last_message_preview ?? "Conversación sincronizada desde WhatsApp"}
-          </p>
+      <header className="rounded-md border border-[#E5E7EB] bg-white px-4 py-3">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 space-y-2">
+            <div className="space-y-2">
+              <h1 className="text-xl font-semibold tracking-tight text-[#111827]">
+                {conversation.contacto_nombre ?? conversation.contacto_telefono ?? "Sin contacto"}
+              </h1>
+              <p className="text-sm leading-6 text-[#6B7280]">
+                {conversation.contacto_telefono ?? conversation.contacto_email ?? "Sin dato de contacto"}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <ConversacionStatusBadge status={conversation.estado} />
+              <ConversacionInterestBadge interest={conversation.ia_interes_compra ?? conversation.interes_compra} />
+              {conversation.requiere_atencion ? (
+                <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#FEF3C7] px-2.5 py-1 text-xs font-medium text-[#92400E]">
+                  Requiere atención
+                </span>
+              ) : null}
+              {conversation.unread_count && conversation.unread_count > 0 ? (
+                <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 text-xs font-medium text-[#6B7280]">
+                  {conversation.unread_count === 1 ? "1 no leído" : `${conversation.unread_count} no leídos`}
+                </span>
+              ) : null}
+            </div>
+            {conversation.last_message_preview ? (
+              <p className="max-w-3xl text-sm leading-6 text-[#6B7280]">
+                {conversation.last_message_preview}
+              </p>
+            ) : null}
+          </div>
+
+          <ConversationHeaderActions
+            conversationId={conversation.id}
+            hasSummary={Boolean(conversation.ia_resumen ?? conversation.resumen_ia)}
+          />
         </div>
       </header>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <MessagesList
+          messages={messages}
+          lastMessagePreview={conversation.last_message_preview}
+          hasRecentActivity={Boolean(conversation.last_message_preview)}
+        />
         <ConversacionDetail conversation={conversation} />
-        <ConversacionMessages messages={messages} />
       </div>
     </section>
   );

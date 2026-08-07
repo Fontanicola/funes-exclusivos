@@ -56,7 +56,7 @@ export async function updateConfiguracionGeneralAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar configuración real." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar configuración real." };
   }
 
   const supabase = createSupabaseServerClient();

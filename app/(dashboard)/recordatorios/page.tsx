@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { isDemoMode } from "@/lib/demo-mode";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { mockEmpleados, mockRecordatorios, mockEmpleado } from "@/lib/mock-data";
@@ -267,28 +266,11 @@ export default async function RecordatoriosPage() {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-3">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Recordatorios</h1>
-            <p className="text-sm leading-6 text-[#6B7280]">
-              Seguimientos, vencimientos y alertas operativas.
-            </p>
-          </div>
-          <Link
-            href="/dashboard"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-          >
-            Volver al dashboard
-          </Link>
+      {isDemoMode ? (
+        <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+          Modo demo: los recordatorios usan datos simulados y no se guardarán cambios reales.
         </div>
-
-        {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: los recordatorios son mock y no se guardará nada en Supabase.
-          </div>
-        ) : null}
-      </header>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <KpiCard title="Pendientes" value={String(kpis.pendientes)} description="Seguimientos activos" variant="default" />
@@ -298,7 +280,7 @@ export default async function RecordatoriosPage() {
         <KpiCard title="Completados del mes" value={String(kpis.completadosMes)} description="Cerrados este mes" variant="positive" />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)]">
+      <div className="space-y-6">
         <RecordatorioForm
           employees={assignableEmployees.length ? assignableEmployees : employees}
           defaultAsignadoId={currentEmployeeId}

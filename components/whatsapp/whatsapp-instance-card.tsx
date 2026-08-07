@@ -58,7 +58,7 @@ function formatDateTime(value: string | null) {
 }
 
 function getEmployeeName(instance: Instance) {
-  return instance.empleado?.nombre ?? instance.empleado?.email ?? "Sin vendedor";
+  return instance.empleado?.nombre ?? "Sin vendedor";
 }
 
 function looksLikeBase64(value: string) {
@@ -108,7 +108,7 @@ function ActionButton({
       <button
         type="submit"
         className={[
-          "inline-flex h-9 items-center justify-center rounded-xl border px-3 text-xs font-medium transition",
+          "inline-flex h-9 items-center justify-center rounded-md border px-3 text-xs font-medium transition",
           tone === "danger"
             ? "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]"
             : "border-[#E5E7EB] bg-[#FAFAFA] text-[#111827] hover:bg-white",
@@ -195,7 +195,7 @@ export function WhatsappInstanceCard({
   }, [instance.qr_base64, instance.qr_code]);
 
   return (
-    <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+    <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-sm font-semibold text-[#111827]">{getEmployeeName(instance)}</p>
@@ -205,37 +205,37 @@ export function WhatsappInstanceCard({
       </div>
 
       <div className="mt-4 space-y-3 text-sm">
-        <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+        <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
           <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Teléfono conectado</p>
           <p className="mt-1 text-sm text-[#111827]">{instance.telefono_conectado ?? "—"}</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
             <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Perfil</p>
             <p className="mt-1 text-sm text-[#111827]">{instance.nombre_perfil ?? "—"}</p>
           </div>
-          <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
             <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Última sync</p>
             <p className="mt-1 text-sm text-[#111827]">{formatDateTime(instance.last_sync_at)}</p>
           </div>
-          <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
             <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Última conexión</p>
             <p className="mt-1 text-sm text-[#111827]">{formatDateTime(instance.last_connection_at)}</p>
           </div>
-          <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
             <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Vendedor</p>
             <p className="mt-1 text-sm text-[#111827]">{getEmployeeName(instance)}</p>
           </div>
         </div>
 
         {instance.last_error ? (
-          <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-3 text-xs leading-5 text-[#6B7280]">
+          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3 text-xs leading-5 text-[#6B7280]">
             {instance.last_error}
           </div>
         ) : null}
 
         {showQr ? (
-          <div className="flex flex-col items-start gap-3 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+          <div className="flex flex-col items-start gap-3 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
             <div className="space-y-1">
               <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">Código QR</p>
               <p className="text-xs text-[#6B7280]">
@@ -244,7 +244,7 @@ export function WhatsappInstanceCard({
               {qrExpired ? <p className="text-xs text-[#6B7280]">QR vencido, refrescalo.</p> : null}
             </div>
             {qrError ? (
-              <div className="flex h-44 w-44 items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white px-3 text-center text-xs text-[#6B7280]">
+              <div className="flex h-44 w-44 items-center justify-center rounded-md border border-dashed border-[#E5E7EB] bg-white px-3 text-center text-xs text-[#6B7280]">
                 {qrError}
               </div>
             ) : qrImageSrc ? (
@@ -252,10 +252,10 @@ export function WhatsappInstanceCard({
               <img
                 src={qrImageSrc}
                 alt="QR de WhatsApp"
-                className="h-44 w-44 rounded-2xl border border-[#E5E7EB] bg-white p-2"
+                className="h-44 w-44 rounded-md border border-[#E5E7EB] bg-white p-2"
               />
             ) : (
-              <div className="flex h-44 w-44 items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white px-3 text-center text-xs text-[#6B7280]">
+              <div className="flex h-44 w-44 items-center justify-center rounded-md border border-dashed border-[#E5E7EB] bg-white px-3 text-center text-xs text-[#6B7280]">
                 QR no disponible. Probá refrescar QR.
               </div>
             )}
@@ -268,7 +268,7 @@ export function WhatsappInstanceCard({
         <button
           type="button"
           onClick={() => setShowQr((current) => !current)}
-          className="inline-flex h-9 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+          className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
         >
           Ver QR
         </button>

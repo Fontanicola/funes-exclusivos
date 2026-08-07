@@ -7,7 +7,7 @@ import {
   normalizeFotosArray,
 } from "@/app/(dashboard)/inventario/actions";
 import { isDemoMode } from "@/lib/demo-mode";
-import { mockProveedores } from "@/lib/mock-data";
+import { mockEmpleado, mockProveedores } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VehiculoForm } from "@/components/inventario/vehiculo-form";
 
@@ -35,16 +35,35 @@ export default async function EditarVehiculoPage({ params }: PageProps) {
   }
 
   let proveedores: Proveedor[] = mockProveedores as Proveedor[];
+  let currentRole: string | null = mockEmpleado.rol;
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
-    const { data } = await supabase
-      .from("proveedores")
-      .select("id,nombre,categoria")
-      .eq("activo", true)
-      .order("nombre");
+    const [
+      { data },
+      {
+        data: { user },
+      },
+    ] = await Promise.all([
+      supabase
+        .from("proveedores")
+        .select("id,nombre,categoria")
+        .eq("activo", true)
+        .order("nombre"),
+      supabase.auth.getUser(),
+    ]);
 
     proveedores = (data ?? []) as Proveedor[];
+
+    if (user) {
+      const { data: employee } = await supabase
+        .from("empleados")
+        .select("id,rol,activo")
+        .eq("id", user.id)
+        .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+      currentRole = employee?.rol ?? null;
+    }
   }
 
   const fotos = await normalizeFotosArray(vehiculo.fotos);
@@ -65,7 +84,7 @@ export default async function EditarVehiculoPage({ params }: PageProps) {
         </Link>
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
+          <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">
             Editar vehículo
           </h1>
           <p className="text-sm leading-6 text-[#6B7280]">
@@ -77,6 +96,7 @@ export default async function EditarVehiculoPage({ params }: PageProps) {
       <VehiculoForm
         mode="edit"
         proveedores={proveedores}
+        role={currentRole}
         vehiculo={{
           id: vehiculo.id,
           marca: vehiculo.marca,

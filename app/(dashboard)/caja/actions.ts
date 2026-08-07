@@ -34,13 +34,58 @@ function toLowerTrimmed(value: FormDataEntryValue | null) {
   return toOptionalString(value).toLowerCase();
 }
 
+const MONTHS: Record<string, string> = {
+  ene: "01",
+  feb: "02",
+  mar: "03",
+  abr: "04",
+  may: "05",
+  jun: "06",
+  jul: "07",
+  ago: "08",
+  sep: "09",
+  oct: "10",
+  nov: "11",
+  dic: "12",
+};
+
+function toPeriodDate(value: FormDataEntryValue | null) {
+  const raw = toOptionalString(value).toLowerCase().replace(/\./g, "");
+  if (!raw) return null;
+
+  const yearMonth = raw.match(/^(\d{4})[-/](\d{1,2})$/);
+  if (yearMonth) {
+    const month = Number(yearMonth[2]);
+    if (month >= 1 && month <= 12) {
+      return `${yearMonth[1]}-${String(month).padStart(2, "0")}-01`;
+    }
+  }
+
+  const monthYear = raw.match(/^([a-záéíóúñ]{3})[-/ ](\d{2,4})$/);
+  if (monthYear) {
+    const month = MONTHS[monthYear[1].normalize("NFD").replace(/[\u0300-\u036f]/g, "").slice(0, 3)];
+    const yearNumber = Number(monthYear[2]);
+    if (month && Number.isFinite(yearNumber)) {
+      const year = yearNumber < 100 ? 2000 + yearNumber : yearNumber;
+      return `${year}-${month}-01`;
+    }
+  }
+
+  const dateValue = raw.match(/^(\d{4})-(\d{2})-\d{2}$/);
+  if (dateValue) {
+    return `${dateValue[1]}-${dateValue[2]}-01`;
+  }
+
+  return "invalid";
+}
+
 export async function createCajaMovimientoAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
     return {
-      error: "Modo demo activo: conectá Supabase para guardar movimientos reales.",
+      error: "Modo demo activo: conectá el entorno real para guardar movimientos.",
     };
   }
 
@@ -74,7 +119,7 @@ export async function createCajaMovimientoAction(
   const detalle1 = toOptionalString(formData.get("detalle_1"));
   const detalle2 = toOptionalString(formData.get("detalle_2"));
   const detalle3 = toOptionalString(formData.get("detalle_3"));
-  const periodo = toOptionalString(formData.get("periodo"));
+  const periodo = toPeriodDate(formData.get("periodo"));
   const cuenta = toOptionalString(formData.get("cuenta"));
   const ventaId = toOptionalString(formData.get("venta_id"));
   const ventaPagoId = toOptionalString(formData.get("venta_pago_id"));
@@ -102,7 +147,11 @@ export async function createCajaMovimientoAction(
   }
 
   if (!detalle1) {
-    return { error: "Detalle 1 es obligatorio." };
+    return { error: "La referencia es obligatoria." };
+  }
+
+  if (periodo === "invalid") {
+    return { error: "El período debe tener formato 2026-07, 2026-07-01 o jul-26." };
   }
 
   const { error } = await supabase.from("caja_movimientos").insert({
@@ -113,13 +162,12 @@ export async function createCajaMovimientoAction(
     medio,
     concepto: concepto || null,
     monto,
-    importe: monto,
     moneda,
     fecha,
     detalle_1: detalle1,
     detalle_2: detalle2 || null,
     detalle_3: detalle3 || null,
-    periodo: periodo || null,
+    periodo,
     cuenta: cuenta || null,
     proveedor_id: proveedorId || null,
     activo_id: activoId || null,

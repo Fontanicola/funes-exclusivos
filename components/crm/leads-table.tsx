@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { LeadOriginBadge } from "./lead-origin-badge";
@@ -78,10 +79,10 @@ function getContactLine(lead: Lead) {
 }
 
 function getSellerName(lead: Lead) {
-  return lead.vendedor?.nombre ?? lead.vendedor?.email ?? "—";
+  return lead.vendedor?.nombre ?? "Sin vendedor";
 }
 
-export function LeadsTable({ leads }: { leads: Lead[] }) {
+export function LeadsTable({ leads, toolbarAction }: { leads: Lead[]; toolbarAction?: ReactNode }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
   const [originFilter, setOriginFilter] = useState<(typeof origins)[number]>("");
@@ -119,23 +120,18 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
   const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-[#E5E7EB] p-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-[#111827]">Leads</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
-            Buscá por nombre, contacto, vehículo o vendedor.
-          </p>
-        </div>
-
-        <div className="grid gap-2 md:grid-cols-[320px_160px_160px]">
-          <div className="relative">
+    <section className="rounded-md border border-[#E5E7EB] bg-white">
+      <div className="border-b border-[#E5E7EB] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            {toolbarAction ? <div className="shrink-0">{toolbarAction}</div> : null}
+            <div className="relative min-w-[260px] flex-1 sm:w-[320px] sm:flex-none">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar lead"
-              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
+              className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-9 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
             />
             {query ? (
               <button
@@ -147,37 +143,41 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
                 <X className="h-3.5 w-3.5" />
               </button>
             ) : null}
+            </div>
+
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
+            >
+              <option value="">Todos los estados</option>
+              <option value="nuevo">Nuevo</option>
+              <option value="contactado">Contactado</option>
+              <option value="interesado">Interesado</option>
+              <option value="negociacion">Negociación</option>
+              <option value="reservado">Reservado</option>
+              <option value="ganado">Ganado</option>
+              <option value="perdido">Perdido</option>
+            </select>
+
+            <select
+              value={originFilter}
+              onChange={(event) => setOriginFilter(event.target.value as (typeof origins)[number])}
+              className="h-10 min-w-[180px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6] sm:flex-none"
+            >
+              <option value="">Todos los orígenes</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="instagram">Instagram</option>
+              <option value="facebook">Facebook</option>
+              <option value="web">Web</option>
+              <option value="referido">Referido</option>
+              <option value="presencial">Presencial</option>
+              <option value="otro">Otro</option>
+            </select>
           </div>
-
-          <select
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Todos los estados</option>
-            <option value="nuevo">Nuevo</option>
-            <option value="contactado">Contactado</option>
-            <option value="interesado">Interesado</option>
-            <option value="negociacion">Negociación</option>
-            <option value="reservado">Reservado</option>
-            <option value="ganado">Ganado</option>
-            <option value="perdido">Perdido</option>
-          </select>
-
-          <select
-            value={originFilter}
-            onChange={(event) => setOriginFilter(event.target.value as (typeof origins)[number])}
-            className="h-10 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]"
-          >
-            <option value="">Todos los orígenes</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="instagram">Instagram</option>
-            <option value="facebook">Facebook</option>
-            <option value="web">Web</option>
-            <option value="referido">Referido</option>
-            <option value="presencial">Presencial</option>
-            <option value="otro">Otro</option>
-          </select>
+          <p className="text-xs text-[#6B7280]">
+            Mostrando {visibleLeads.length} de {filtered.length}
+          </p>
         </div>
       </div>
 
@@ -234,7 +234,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
                     <td className="px-4 py-3 align-middle">
                       <Link
                         href={`/crm/${lead.id}`}
-                        className="inline-flex items-center rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+                        className="inline-flex items-center rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
                       >
                         Ver
                       </Link>
@@ -247,10 +247,12 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
                 <td colSpan={8} className="px-4 py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
                     <p className="text-sm font-medium text-[#111827]">
-                      No hay resultados para mostrar
+                      {leads.length ? "No encontramos leads con esos filtros" : "Todavía no hay leads cargados"}
                     </p>
                     <p className="text-sm leading-6 text-[#6B7280]">
-                      Probá ajustar los filtros o buscar otro lead.
+                      {leads.length
+                        ? "Probá limpiar la búsqueda o cambiar el estado."
+                        : "Cargá el primer lead para comenzar a seguir oportunidades."}
                     </p>
                   </div>
                 </td>

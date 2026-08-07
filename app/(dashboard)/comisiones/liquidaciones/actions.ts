@@ -108,7 +108,7 @@ export async function updateLiquidacionEstadoAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar cambios reales." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar cambios." };
   }
 
   const supabase = createSupabaseServerClient();
@@ -182,7 +182,6 @@ export async function updateLiquidacionEstadoAction(
       comision_liquidacion_id: liquidacion.id,
       tipo: "egreso",
       monto: neto,
-      importe: neto,
       moneda: liquidacion.moneda ?? "ARS",
       fecha: currentDate,
       medio: medioCaja,

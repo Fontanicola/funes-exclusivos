@@ -59,7 +59,7 @@ export async function createCompraVehiculoAction(
   formData: FormData
 ): Promise<ActionState> {
   if (isDemoMode) {
-    return { error: "Modo demo activo: conectá Supabase para guardar compras reales." };
+    return { error: "Modo demo activo: conectá el entorno real para guardar compras." };
   }
 
   const supabase = createSupabaseServerClient();
@@ -105,7 +105,7 @@ export async function createCompraVehiculoAction(
   if (!marca || !modelo) return { error: "Marca y modelo son obligatorios." };
   if (!["ARS", "USD"].includes(moneda)) return { error: "La moneda debe ser ARS o USD." };
   if (precioCompra == null || precioCompra < 0) return { error: "El precio de compra es obligatorio." };
-  if (!["sin_preparar", "pendiente", "en proceso", "listo"].includes(estadoPreparacion)) {
+  if (!["sin_preparar"].includes(estadoPreparacion)) {
     return { error: "El estado de preparación no es válido." };
   }
   if (generarMovimientoCaja && (montoPagadoCaja == null || montoPagadoCaja <= 0)) {
@@ -187,11 +187,10 @@ export async function createCompraVehiculoAction(
     vehiculo_id: vehiculoId,
     proveedor_id: proveedorId,
     tipo: "compra",
-    concepto: "Compra de vehículo",
-    importe: precioCompra,
+    monto: precioCompra,
     moneda,
     fecha,
-    observaciones: observacionesCompra,
+    detalle: "Compra de vehículo",
     created_by: authResult.user.id,
     updated_by: authResult.user.id,
   });
@@ -219,7 +218,6 @@ export async function createCompraVehiculoAction(
       compra_id: compraData.id,
       tipo: "egreso",
       monto: montoPagadoCaja,
-      importe: montoPagadoCaja,
       moneda,
       fecha,
       medio: medioCaja || "otro",

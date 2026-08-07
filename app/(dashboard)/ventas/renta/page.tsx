@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
+import { canViewMargins } from "@/lib/auth/permissions";
 import {
   calculateRentaKpis,
   calculateRentaRows,
@@ -11,6 +12,7 @@ import {
   type RentaVenta,
 } from "@/lib/renta-metrics";
 import {
+  mockEmpleado,
   mockVentas,
   mockVehiculoGastos,
   mockVentasPagos,
@@ -45,6 +47,7 @@ export default async function VentaRentaPage() {
   let gastos = mockVehiculoGastos as RentaExpense[];
   let pagos = mockVentasPagos as RentaPayment[];
   let entregas = mockVentasEntregas as RentaDelivery[];
+  let currentRole: string | null = mockEmpleado.rol;
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
@@ -100,11 +103,20 @@ export default async function VentaRentaPage() {
       .select("id,venta_id,estado,fecha_entrega")
       .limit(150);
 
-    const [ventasResult, gastosResult, pagosResult, entregasResult] = await Promise.all([
+    const [
+      ventasResult,
+      gastosResult,
+      pagosResult,
+      entregasResult,
+      {
+        data: { user },
+      },
+    ] = await Promise.all([
       ventasQuery,
       gastosQuery,
       pagosQuery,
       entregasQuery,
+      supabase.auth.getUser(),
     ]);
 
     ventas = ((ventasResult.data ?? []) as unknown as RawVenta[]).map((venta) => ({
@@ -116,38 +128,39 @@ export default async function VentaRentaPage() {
     gastos = (gastosResult.data ?? []) as RentaExpense[];
     pagos = (pagosResult.data ?? []) as RentaPayment[];
     entregas = (entregasResult.data ?? []) as RentaDelivery[];
+
+    if (user) {
+      const { data: employee } = await supabase
+        .from("empleados")
+        .select("id,rol,activo")
+        .eq("id", user.id)
+        .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+      currentRole = employee?.rol ?? null;
+    }
   }
 
   const rows = calculateRentaRows(ventas, gastos, pagos, entregas);
   const metrics = calculateRentaKpis(rows);
+  const canSeeFinancials = canViewMargins(currentRole);
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2">
-            <Link
-              href="/ventas"
-              className="inline-flex items-center gap-2 text-sm font-medium text-[#6B7280] transition hover:text-[#111827]"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Volver a Ventas
-            </Link>
-            <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Rentabilidad</h1>
-            <p className="text-sm leading-6 text-[#6B7280]">
-              Análisis de margen, pagos, gastos y resultado por operación.
-            </p>
-          </div>
+      <Link
+        href="/ventas"
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#6B7280] transition hover:text-[#111827]"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Volver a Ventas
+      </Link>
+      {isDemoMode ? (
+        <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+          Modo demo: los cálculos usan datos simulados para mostrar una lectura operativa.
         </div>
-        {isDemoMode ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: los cálculos se hacen con datos mock para simular la lectura operativa real.
-          </div>
-        ) : null}
-      </header>
+      ) : null}
 
-      <RentaKpis metrics={metrics} />
-      <RentaTable rows={rows} />
+      <RentaKpis metrics={metrics} canViewFinancials={canSeeFinancials} />
+      <RentaTable rows={rows} canViewFinancials={canSeeFinancials} />
     </section>
   );
 }

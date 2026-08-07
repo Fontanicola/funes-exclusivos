@@ -46,7 +46,7 @@ function Input({
     <input
       {...props}
       className={[
-        "h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     />
@@ -61,7 +61,7 @@ function Textarea({
     <textarea
       {...props}
       className={[
-        "min-h-[96px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "min-h-[96px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     />
@@ -77,7 +77,7 @@ function Select({
     <select
       {...props}
       className={[
-        "h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#D1D5DB] focus:ring-2 focus:ring-[#F3F4F6]",
+        "h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]",
         className,
       ].join(" ")}
     >
@@ -93,7 +93,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-10 items-center justify-center rounded-xl bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-10 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "Guardando..." : "Guardar cambios"}
     </button>
@@ -123,7 +123,7 @@ export function EntregaEditForm({
   }, [onSaved, state.success]);
 
   return (
-    <form action={formAction} className="space-y-4 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+    <form action={formAction} className="space-y-4 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
       <input type="hidden" name="id" value={entrega.id} />
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -222,13 +222,13 @@ export function EntregaEditForm({
       </div>
 
       {state.error ? (
-        <div className="rounded-xl border border-[#FEE2E2] bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]">
+        <div className="rounded-md border border-[#FEE2E2] bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]">
           {state.error}
         </div>
       ) : null}
 
       {state.success ? (
-        <div className="rounded-xl border border-[#D1FAE5] bg-[#ECFDF5] px-4 py-3 text-sm text-[#065F46]">
+        <div className="rounded-md border border-[#D1FAE5] bg-[#ECFDF5] px-4 py-3 text-sm text-[#065F46]">
           {state.success}
         </div>
       ) : null}
@@ -238,7 +238,7 @@ export function EntregaEditForm({
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex h-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+          className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
         >
           Cancelar
         </button>

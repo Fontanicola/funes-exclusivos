@@ -19,7 +19,7 @@ function getErrorMessage(error?: string | string[]) {
     case "inactive":
       return "Usuario inactivo o sin perfil operativo.";
     case "config":
-      return "Falta configuración de Supabase.";
+      return "Falta configurar el entorno.";
     default:
       return null;
   }
@@ -37,7 +37,7 @@ export default function LoginPage({
   if (isDemoMode) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#F7F7F5] px-4 text-[#111827]">
-        <section className="w-full max-w-md rounded-2xl border border-[#E5E7EB] bg-white p-8 shadow-sm">
+        <section className="w-full max-w-md rounded-md border border-[#E5E7EB] bg-white p-8">
           <div className="mb-8">
             <div className="flex justify-center">
               <Image
@@ -51,13 +51,13 @@ export default function LoginPage({
             </div>
             <h1 className="mt-6 text-2xl font-semibold">Modo demo activo</h1>
             <p className="mt-2 text-sm leading-6 text-[#6B7280]">
-              Podés navegar el dashboard con datos mock sin conectar Supabase.
+              Podés navegar el dashboard con datos simulados sin conectar una cuenta real.
             </p>
           </div>
 
           <Link
             href="/dashboard"
-            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#111827] px-4 text-sm font-medium text-white transition hover:bg-[#1F2937]"
+            className="inline-flex h-11 w-full items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
           >
             Entrar al dashboard
           </Link>
@@ -68,7 +68,7 @@ export default function LoginPage({
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#F7F7F5] px-4 text-[#111827]">
-      <section className="w-full max-w-md rounded-2xl border border-[#E5E7EB] bg-white p-8 shadow-sm">
+      <section className="w-full max-w-md rounded-md border border-[#E5E7EB] bg-white p-8">
         <div className="mb-8">
           <div className="flex justify-center">
             <Image

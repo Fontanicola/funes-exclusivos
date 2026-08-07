@@ -148,27 +148,27 @@ export default async function WhatsappConnectionsPage() {
         </Link>
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">
+          <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">
             Conexiones WhatsApp
           </h1>
           <p className="text-sm leading-6 text-[#6B7280]">
             QR e instancias Evolution API por vendedor
           </p>
         </div>
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+        <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
           Si el QR no aparece o vence, usá Refrescar QR.
         </div>
       </header>
 
-      <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <aside className="xl:sticky xl:top-6 xl:self-start">
+      <div className="space-y-6">
+        <div>
           <WhatsappInstanceCreateForm employees={employees} />
           {!canManageAll && currentEmployee ? (
-            <p className="mt-3 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-xs leading-5 text-[#6B7280]">
+            <p className="mt-3 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-xs leading-5 text-[#6B7280]">
               Estás viendo solo tu instancia. La conexión se crea y administra para {currentEmployee.nombre ?? currentEmployee.email ?? "tu usuario"}.
             </p>
           ) : null}
-        </aside>
+        </div>
 
         <WhatsappInstancesGrid instancias={instancias} canManageAll={canManageAll} />
       </div>

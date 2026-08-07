@@ -68,13 +68,13 @@ export default async function ConfiguracionPage() {
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-[#111827]">Configuración</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">Configuración</h1>
         <p className="max-w-2xl text-sm leading-6 text-[#6B7280]">
           Datos de empresa y parámetros operativos del sistema.
         </p>
       </header>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+      <div className="space-y-6">
         <ConfiguracionGeneralForm config={config} />
         <ConfiguracionSummary config={config} />
       </div>

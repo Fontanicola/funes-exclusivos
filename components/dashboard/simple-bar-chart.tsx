@@ -18,7 +18,7 @@ const toneClasses: Record<NonNullable<SimpleBarChartItem["tone"]>, string> = {
   emerald: "bg-emerald-500",
   amber: "bg-amber-500",
   rose: "bg-rose-500",
-  zinc: "bg-[#111827]",
+  zinc: "bg-[#8A1538]",
 };
 
 export function SimpleBarChart({
@@ -30,7 +30,7 @@ export function SimpleBarChart({
 }: SimpleBarChartProps) {
   if (!items.length) {
     return (
-      <div className={["rounded-3xl border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]", className].join(" ")}>
+      <div className={["rounded-md border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]", className].join(" ")}>
         {emptyLabel}
       </div>
     );
