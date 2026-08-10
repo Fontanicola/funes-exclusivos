@@ -5,6 +5,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleado, mockProveedores, mockVehiculos } from "@/lib/mock-data";
 import { canManageInventory } from "@/lib/auth/permissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { InventarioTable } from "@/components/inventario/inventario-table";
 
 export const metadata: Metadata = {
@@ -82,13 +83,15 @@ export default async function InventarioPage() {
         data: { user },
       },
     ] = await Promise.all([
-      supabase
-        .from("vehiculos")
-        .select(
-          "id,marca,modelo,version,anio,color,km,dominio,motor,ubicacion,nro_operacion,proveedor_id,fecha_compra,costo_adquisicion,costo_moneda,precio_venta,precio_moneda,precio_infoauto_compra,precio_infoauto_actual,precio_infoauto_anterior,precio_permuta,precio_contado,costo_reposicion,estado,estado_preparacion,chapero,preparacion_comentarios,publicado_mercadolibre,publicado_rodados_google,fotos,fecha_ingreso,created_at"
-        )
-        .order("created_at", { ascending: false })
-        .limit(200),
+      fetchAllSupabaseRows((from, to) =>
+        supabase
+          .from("vehiculos")
+          .select(
+            "id,marca,modelo,version,anio,color,km,dominio,motor,ubicacion,nro_operacion,proveedor_id,fecha_compra,costo_adquisicion,costo_moneda,precio_venta,precio_moneda,precio_infoauto_compra,precio_infoauto_actual,precio_infoauto_anterior,precio_permuta,precio_contado,costo_reposicion,estado,estado_preparacion,chapero,preparacion_comentarios,publicado_mercadolibre,publicado_rodados_google,fotos,fecha_ingreso,created_at"
+          )
+          .order("created_at", { ascending: false })
+          .range(from, to)
+      ),
       supabase
         .from("proveedores")
         .select("id,nombre,categoria")

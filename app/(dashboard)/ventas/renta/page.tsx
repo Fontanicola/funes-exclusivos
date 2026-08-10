@@ -19,6 +19,7 @@ import {
   mockVentasEntregas,
 } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { RentaKpis } from "@/components/ventas/renta-kpis";
 import { RentaTable } from "@/components/ventas/renta-table";
 
@@ -52,10 +53,11 @@ export default async function VentaRentaPage() {
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
 
-    const ventasQuery = supabase
-      .from("ventas")
-      .select(
-        [
+    const ventasQuery = fetchAllSupabaseRows((from, to) =>
+      supabase
+        .from("ventas")
+        .select(
+          [
           "id",
           "fecha_venta",
           "cliente_nombre",
@@ -80,28 +82,35 @@ export default async function VentaRentaPage() {
           "vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio,fecha_compra,costo_adquisicion,costo_moneda,costo_reposicion,precio_infoauto_compra,precio_infoauto_actual)",
           "vehiculo_recibido:vehiculos!ventas_vehiculo_recibido_id_fkey(id,marca,modelo,version,anio,dominio,costo_adquisicion,costo_moneda)",
           "vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email)",
-        ].join(",")
-      )
-      .order("fecha_venta", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(150);
+          ].join(",")
+        )
+        .order("fecha_venta", { ascending: false })
+        .order("created_at", { ascending: false })
+        .range(from, to)
+    );
 
-    const gastosQuery = supabase
-      .from("vehiculo_gastos")
-      .select("id,vehiculo_id,tipo,monto,moneda,fecha,detalle")
-      .order("fecha", { ascending: true })
-      .limit(150);
+    const gastosQuery = fetchAllSupabaseRows((from, to) =>
+      supabase
+        .from("vehiculo_gastos")
+        .select("id,vehiculo_id,tipo,monto,moneda,fecha,detalle")
+        .order("fecha", { ascending: true })
+        .range(from, to)
+    );
 
-    const pagosQuery = supabase
-      .from("ventas_pagos")
-      .select("id,venta_id,tipo,fecha,importe,moneda,medio,detalle")
-      .order("fecha", { ascending: true })
-      .limit(150);
+    const pagosQuery = fetchAllSupabaseRows((from, to) =>
+      supabase
+        .from("ventas_pagos")
+        .select("id,venta_id,tipo,fecha,importe,moneda,medio,detalle")
+        .order("fecha", { ascending: true })
+        .range(from, to)
+    );
 
-    const entregasQuery = supabase
-      .from("ventas_entregas")
-      .select("id,venta_id,estado,fecha_entrega")
-      .limit(150);
+    const entregasQuery = fetchAllSupabaseRows((from, to) =>
+      supabase
+        .from("ventas_entregas")
+        .select("id,venta_id,estado,fecha_entrega")
+        .range(from, to)
+    );
 
     const [
       ventasResult,

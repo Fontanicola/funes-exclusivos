@@ -1418,6 +1418,61 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Auditoría de datos y completitud del Dashboard
+
+### Qué se revisó y corrigió
+
+- Se auditaron las consultas de `/dashboard`, `/ventas`, `/ventas/renta`, `/inventario`, `/compras`, `/caja`, `/gestoria`, `/recordatorios` y `/ventas/pendientes-entrega`.
+- Se detectó que varias consultas quedaban limitadas a los primeros 100, 150 o 200 registros, por lo que la interfaz no representaba el total real de Supabase.
+- Se agregó paginación server-side reutilizable en `lib/supabase/paginated.ts`, recorriendo páginas de 1.000 registros hasta completar cada fuente.
+- El Dashboard ahora considera el total disponible de ventas, vehículos, compras, movimientos de caja, gastos, entregas, trámites, presupuestos y recordatorios, manteniendo las relaciones opcionales normalizadas.
+- `/ventas` y `/ventas/renta` ahora cargan el histórico completo disponible, incluyendo pagos, gastos y entregas sin cortar en 150 registros.
+- Se mantuvo la regla operativa: las ventas `registrada` participan de totales y resultados; las ventas `anulada` permanecen visibles como histórico, pero no se contabilizan como ventas efectivas ni como ingresos.
+
+### Verificación sobre Supabase
+
+- En la auditoría se encontraron 2.130 ventas: 1.449 registradas y 681 anuladas.
+- También se verificaron 7.825 movimientos de caja, 1.762 vehículos, 1.740 compras, 698 entregas, 600 trámites y 225 recordatorios.
+- Las tablas `leads` y `conversaciones` actualmente no tienen registros reales; por eso sus métricas del Dashboard muestran cero hasta que se carguen datos.
+
+### Paths modificados
+
+- `lib/supabase/paginated.ts`
+- `app/(dashboard)/dashboard/page.tsx`
+- `app/(dashboard)/ventas/page.tsx`
+- `app/(dashboard)/ventas/renta/page.tsx`
+- `app/(dashboard)/ventas/pendientes-entrega/page.tsx`
+- `app/(dashboard)/inventario/page.tsx`
+- `app/(dashboard)/compras/page.tsx`
+- `app/(dashboard)/caja/page.tsx`
+- `app/(dashboard)/gestoria/page.tsx`
+- `app/(dashboard)/recordatorios/page.tsx`
+
+### Tablas de Supabase involucradas
+
+- `public.ventas`
+- `public.ventas_pagos`
+- `public.ventas_entregas`
+- `public.vehiculos`
+- `public.compras_vehiculos`
+- `public.vehiculo_gastos`
+- `public.caja_movimientos`
+- `public.comisiones`
+- `public.comision_liquidaciones`
+- `public.gestoria_tramites`
+- `public.gestoria_presupuestos`
+- `public.recordatorios`
+- `public.leads`
+- `public.conversaciones`
+
+### Decisiones técnicas
+
+- Se evitó usar `select("*")` y se conservaron las columnas acotadas que cada pantalla necesita.
+- La paginación se ejecuta en Server Components y no expone datos adicionales al navegador.
+- El resultado operativo mensual e histórico se calcula sobre ingresos y egresos reales de `caja_movimientos`; no se vuelve a sumar el precio total de la venta ni a restar compras/comisiones ya reflejadas en caja.
+- No se modificó el schema, RLS, RPCs ni reglas de negocio.
+- `npm run build` finalizó correctamente sin errores TypeScript ni de compilación.
+
 ## Rediseño detalle WhatsApp tipo inbox
 
 ### Qué se rediseñó

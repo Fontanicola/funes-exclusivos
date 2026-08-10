@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleados, mockGestoriaPresupuestos, mockGestoriaTramites } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { GestoriaKanban } from "@/components/gestoria/gestoria-kanban";
 
 export const metadata: Metadata = {
@@ -157,19 +158,19 @@ export default async function GestoriaPage() {
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
     const [tramitesResult, presupuestosResult, gestoresResult] = await Promise.all([
-      supabase
+      fetchAllSupabaseRows((from, to) => supabase
         .from("gestoria_tramites")
         .select(
           "id,tipo,estado,titulo,descripcion,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,fecha_inicio,fecha_vencimiento,fecha_finalizacion,etapa,gestion_tipo,fecha_envio,fecha_firma,costo_final_transferencia,costo_final_moneda,presupuesto_confirmado,cat_estado,cat_fecha,documentacion_fisica_estado,documentacion_fisica_fecha,escribania_estado,escribania_fecha_retiro,transferencia_registral_estado,transferencia_registral_fecha,retiro_documentacion_cliente_estado,retiro_documentacion_cliente_fecha,transferencia_municipal_estado,transferencia_municipal_fecha,seguimiento_comentarios,documentos,observaciones,created_at,vehiculo:vehiculos!gestoria_tramites_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio),venta:ventas!gestoria_tramites_venta_id_fkey(id,fecha_venta,cliente_nombre),responsable:empleados!gestoria_tramites_responsable_id_fkey(id,nombre,email,rol)"
         )
         .order("fecha_vencimiento", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false })
-        .limit(200),
-      supabase
+        .range(from, to)),
+      fetchAllSupabaseRows((from, to) => supabase
         .from("gestoria_presupuestos")
         .select("id,tramite_id,estado,total,moneda,fecha")
         .order("fecha", { ascending: false, nullsFirst: false })
-        .limit(200),
+        .range(from, to)),
       supabase
         .from("empleados")
         .select("id,nombre,email,rol")

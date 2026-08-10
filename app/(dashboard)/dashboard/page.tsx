@@ -21,6 +21,7 @@ import {
   mockComprasVehiculos,
 } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { buildDashboardMetrics } from "@/lib/dashboard-metrics";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { PnlSummary } from "@/components/dashboard/pnl-summary";
@@ -43,19 +44,21 @@ type QueryResult<T> = {
 
 type RawRelation<T> = T | T[] | null;
 
-const DASHBOARD_LIMIT = 200;
-const DASHBOARD_COMPACT_LIMIT = 100;
-
 function normalizeSingleRelation<T>(value: RawRelation<T>) {
   if (Array.isArray(value)) return value[0] ?? null;
   return value ?? null;
 }
 
 async function safeSelect<T>(
-  promise: PromiseLike<{ data: T[] | null; error: unknown }>
+  query:
+    | PromiseLike<{ data: T[] | null; error: unknown }>
+    | ((from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>)
 ): Promise<QueryResult<T>> {
   try {
-    const result = await promise;
+    const result =
+      typeof query === "function"
+        ? await fetchAllSupabaseRows(query)
+        : await query;
     if (result.error) {
       console.error("Dashboard query failed", result.error);
       return { data: [], error: result.error };
@@ -111,125 +114,125 @@ async function loadDashboardData() {
     recordatoriosResult,
   ] = await Promise.all([
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("vehiculos")
         .select(
           "id,estado,precio_venta,precio_contado,precio_permuta,precio_moneda,costo_adquisicion,costo_reposicion,costo_moneda,catalogo_publicado,catalogo_destacado,estado_preparacion,precio_infoauto_actual,fotos,created_at"
         )
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("ventas")
         .select(
           "id,vehiculo_id,lead_id,vendedor_id,fecha_venta,precio_venta,moneda,estado,monto_permuta,costo_historico,costo_reposicion,precio_infoauto,info_historica_compra,margen_reposicion,margen_historico,rotacion_dias,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,created_at,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,costo_adquisicion,costo_moneda,costo_reposicion,precio_venta,precio_moneda),lead:leads!ventas_lead_id_fkey(id,nombre,origen,estado)"
         )
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("ventas_entregas")
         .select("id,venta_id,estado,fecha_entrega,created_at")
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("vehiculo_gastos")
         .select("id,vehiculo_id,tipo,monto,moneda,fecha,detalle,created_at")
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("vehiculo_documentos")
         .select(
           "id,vehiculo_id,tipo,estado,titulo,descripcion,archivo_path,archivo_nombre,archivo_mime_type,archivo_size_bytes,fecha_emision,fecha_vencimiento,observaciones,created_at,vehiculo:vehiculos!vehiculo_documentos_vehiculo_id_fkey(id,marca,modelo,dominio,estado,estado_preparacion,fotos)"
         )
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("compras_vehiculos")
         .select("id,vehiculo_id,proveedor_id,fecha,nro_operacion,precio_compra,precio_boleto,moneda,diferencia_b,deuda_pendiente,observaciones,created_at")
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("caja_movimientos")
         .select("id,tipo,origen,compra_id,venta_id,venta_pago_id,comision_liquidacion_id,monto,moneda,fecha,medio,cuenta,concepto,created_at")
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("comisiones")
         .select("id,venta_id,vendedor_id,monto_comision,moneda,estado,fecha_generada,fecha_pago,created_at")
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_COMPACT_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("comision_liquidaciones")
         .select("id,vendedor_id,periodo,estado,moneda,neto_a_cobrar,fecha_pago,fecha_cierre,created_at")
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_COMPACT_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("leads")
         .select("id,estado,origen,vendedor_id,proximo_contacto,created_at")
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("empleados")
         .select("id,nombre,email,rol,activo")
         .order("nombre", { ascending: true })
-        .limit(DASHBOARD_COMPACT_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("gestoria_tramites")
         .select("id,estado,fecha_vencimiento,created_at")
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("gestoria_presupuestos")
         .select("id,estado,fecha,total,moneda,created_at")
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_COMPACT_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("whatsapp_instancias")
         .select("id,estado,last_sync_at,created_at,empleado:empleados!whatsapp_instancias_empleado_id_fkey(id,nombre,email,rol)")
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_COMPACT_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("conversaciones")
         .select(
           "id,estado,interes_compra,ia_interes_compra,ia_estado,ia_resumen,ia_score,ia_proximo_paso,ia_procesado_at,requiere_atencion,unread_count,created_at,vendedor_id"
         )
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
     safeSelect(
-      supabase
+      (from, to) => supabase
         .from("recordatorios")
         .select("id,tipo,estado,prioridad,titulo,descripcion,fecha_vencimiento,fecha_completado,fecha_pospuesto,asignado_a,lead_id,conversacion_id,venta_id,entrega_id,tramite_id,vehiculo_id,comision_liquidacion_id,origen_automatico,created_at,updated_at")
         .order("fecha_vencimiento", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false })
-        .limit(DASHBOARD_LIMIT)
+        .range(from, to)
     ),
   ]);
 

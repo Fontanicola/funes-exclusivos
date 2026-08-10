@@ -8,6 +8,7 @@ import {
   mockProveedores,
 } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CajaMovimientoForm } from "@/components/caja/caja-movimiento-form";
 import { CajaMovimientosTable } from "@/components/caja/caja-movimientos-table";
 import { CajaSummary } from "@/components/caja/caja-summary";
@@ -229,12 +230,14 @@ export default async function CajaPage() {
         data: { user },
       },
     ] = await Promise.all([
-      supabase
-        .from("caja_movimientos")
-        .select("id,tipo,origen,compra_id,venta_id,venta_pago_id,comision_liquidacion_id,monto,moneda,fecha,medio,concepto,detalle_1,detalle_2,detalle_3,periodo,cuenta,observaciones,created_at,proveedor:proveedores(id,nombre,categoria),activo:activos(id,tipo,nombre),compra:compras_vehiculos!caja_movimientos_compra_id_fkey(id,nro_operacion,fecha,vehiculo:vehiculos!compras_vehiculos_vehiculo_id_fkey(id,marca,modelo,dominio),proveedor:proveedores!compras_vehiculos_proveedor_id_fkey(id,nombre)),venta:ventas!caja_movimientos_venta_id_fkey(id,cliente_nombre,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio)),liquidacion:comision_liquidaciones!caja_movimientos_comision_liquidacion_id_fkey(id,periodo,neto_a_cobrar,vendedor:empleados!comision_liquidaciones_vendedor_id_fkey(id,nombre,email))")
-        .order("fecha", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(150),
+      fetchAllSupabaseRows((from, to) =>
+        supabase
+          .from("caja_movimientos")
+          .select("id,tipo,origen,compra_id,venta_id,venta_pago_id,comision_liquidacion_id,monto,moneda,fecha,medio,concepto,detalle_1,detalle_2,detalle_3,periodo,cuenta,observaciones,created_at,proveedor:proveedores(id,nombre,categoria),activo:activos(id,tipo,nombre),compra:compras_vehiculos!caja_movimientos_compra_id_fkey(id,nro_operacion,fecha,vehiculo:vehiculos!compras_vehiculos_vehiculo_id_fkey(id,marca,modelo,dominio),proveedor:proveedores!compras_vehiculos_proveedor_id_fkey(id,nombre)),venta:ventas!caja_movimientos_venta_id_fkey(id,cliente_nombre,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio)),liquidacion:comision_liquidaciones!caja_movimientos_comision_liquidacion_id_fkey(id,periodo,neto_a_cobrar,vendedor:empleados!comision_liquidaciones_vendedor_id_fkey(id,nombre,email))")
+          .order("fecha", { ascending: false })
+          .order("created_at", { ascending: false })
+          .range(from, to)
+      ),
       supabase
         .from("proveedores")
         .select("id,nombre,categoria")

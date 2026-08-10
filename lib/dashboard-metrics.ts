@@ -631,18 +631,15 @@ function buildMonthlySeries(
           ? bucket.sales.USD
           : bucket.sales.other[currency] ?? 0;
       const income = normalizeCurrency(currency) === "ARS"
-        ? bucket.cashIncome.ARS + bucket.sales.ARS
+        ? bucket.cashIncome.ARS
         : normalizeCurrency(currency) === "USD"
-          ? bucket.cashIncome.USD + bucket.sales.USD
-          : (bucket.cashIncome.other[currency] ?? 0) + (bucket.sales.other[currency] ?? 0);
+          ? bucket.cashIncome.USD
+          : bucket.cashIncome.other[currency] ?? 0;
       const expense = normalizeCurrency(currency) === "ARS"
-        ? bucket.cashExpense.ARS + bucket.purchases.ARS + bucket.commissionsPaid.ARS + bucket.otherExpenses.ARS
+        ? bucket.cashExpense.ARS
         : normalizeCurrency(currency) === "USD"
-          ? bucket.cashExpense.USD + bucket.purchases.USD + bucket.commissionsPaid.USD + bucket.otherExpenses.USD
-          : (bucket.cashExpense.other[currency] ?? 0) +
-            (bucket.purchases.other[currency] ?? 0) +
-            (bucket.commissionsPaid.other[currency] ?? 0) +
-            (bucket.otherExpenses.other[currency] ?? 0);
+          ? bucket.cashExpense.USD
+          : bucket.cashExpense.other[currency] ?? 0;
 
       return {
         monthKey: key,
@@ -769,10 +766,9 @@ export function buildDashboardMetrics(input: DashboardMetricsInput): DashboardMe
     "moneda"
   );
   const otherExpenses = cloneCurrencyTotals(vehicleExpenses);
-  const grossIncome = createEmptyCurrencyTotals();
-  addTotals(grossIncome, salesAmount);
-  addTotals(grossIncome, cashIncome);
-  const operatingResult = subtractTotals(grossIncome, cashExpense, purchases, commissionsPaid, otherExpenses);
+  // Caja ya contiene los egresos automáticos de compras y comisiones.
+  // Usar caja real una sola vez evita duplicar esos movimientos en el P&L.
+  const operatingResult = subtractTotals(cashIncome, cashExpense);
 
   const months = getLastMonths(12);
   const monthBuckets = buildMonthBuckets();

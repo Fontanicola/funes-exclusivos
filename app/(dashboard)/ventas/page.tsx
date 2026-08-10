@@ -5,6 +5,7 @@ import { canManageSales, canViewMargins } from "@/lib/auth/permissions";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleado, mockVentas } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { VentasTable } from "@/components/ventas/ventas-table";
 
 export const metadata: Metadata = {
@@ -188,23 +189,29 @@ export default async function VentasPage() {
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
     const [
-      { data },
+      ventasResult,
       {
         data: { user },
       },
     ] = await Promise.all([
-      supabase
-        .from("ventas")
-        .select(
-          "id,fecha_venta,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,precio_venta,moneda,metodo_pago,estado,monto_permuta,precio_infoauto,info_historica_compra,costo_reposicion,costo_historico,margen_reposicion,margen_historico,rotacion_dias,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,created_at,vehiculo_id,lead_id,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio,fotos),vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email,rol),lead:leads!ventas_lead_id_fkey(id,nombre,telefono,origen,estado)"
-        )
-        .order("fecha_venta", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(150),
+      fetchAllSupabaseRows((from, to) =>
+        supabase
+          .from("ventas")
+          .select(
+            "id,fecha_venta,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,precio_venta,moneda,metodo_pago,estado,monto_permuta,precio_infoauto,info_historica_compra,costo_reposicion,costo_historico,margen_reposicion,margen_historico,rotacion_dias,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,created_at,vehiculo_id,lead_id,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio,fotos),vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email,rol),lead:leads!ventas_lead_id_fkey(id,nombre,telefono,origen,estado)"
+          )
+          .order("fecha_venta", { ascending: false })
+          .order("created_at", { ascending: false })
+          .range(from, to)
+      ),
       supabase.auth.getUser(),
     ]);
 
-    const baseVentas = ((data ?? []) as RawVenta[]).map((venta) => ({
+    if (ventasResult.error) {
+      console.error("Ventas query failed", ventasResult.error);
+    }
+
+    const baseVentas = ((ventasResult.data ?? []) as RawVenta[]).map((venta) => ({
       ...venta,
       vehiculo: normalizeSingleRelation(venta.vehiculo),
       vendedor: normalizeSingleRelation(venta.vendedor),

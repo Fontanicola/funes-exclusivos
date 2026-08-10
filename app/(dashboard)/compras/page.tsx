@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockComprasVehiculos } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CompraKpis } from "@/components/compras/compra-kpis";
 import { ComprasTable } from "@/components/compras/compras-table";
 
@@ -64,16 +65,18 @@ export default async function ComprasPage() {
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
-    const { data } = await supabase
-      .from("compras_vehiculos")
-      .select(
-        "id,vehiculo_id,proveedor_id,fecha,nro_operacion,precio_compra,precio_boleto,moneda,diferencia_b,deuda_pendiente,observaciones,created_at,vehiculo:vehiculos!compras_vehiculos_vehiculo_id_fkey(id,marca,modelo,version,anio,color,km,dominio,estado,costo_adquisicion,costo_moneda,fecha_compra,nro_operacion),proveedor:proveedores!compras_vehiculos_proveedor_id_fkey(id,nombre,categoria,telefono)"
-      )
-      .order("fecha", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(150);
+    const comprasResult = await fetchAllSupabaseRows((from, to) =>
+      supabase
+        .from("compras_vehiculos")
+        .select(
+          "id,vehiculo_id,proveedor_id,fecha,nro_operacion,precio_compra,precio_boleto,moneda,diferencia_b,deuda_pendiente,observaciones,created_at,vehiculo:vehiculos!compras_vehiculos_vehiculo_id_fkey(id,marca,modelo,version,anio,color,km,dominio,estado,costo_adquisicion,costo_moneda,fecha_compra,nro_operacion),proveedor:proveedores!compras_vehiculos_proveedor_id_fkey(id,nombre,categoria,telefono)"
+        )
+        .order("fecha", { ascending: false })
+        .order("created_at", { ascending: false })
+        .range(from, to)
+    );
 
-    compras = ((data ?? []) as RawCompra[]).map((compra) => ({
+    compras = ((comprasResult.data ?? []) as RawCompra[]).map((compra) => ({
       ...compra,
       vehiculo: normalizeSingleRelation(compra.vehiculo),
       proveedor: normalizeSingleRelation(compra.proveedor),

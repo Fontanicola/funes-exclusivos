@@ -7,6 +7,7 @@ import {
   mockVentasPagos,
 } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { PendientesEntregaTable } from "@/components/ventas/pendientes-entrega-table";
 
 export const metadata: Metadata = {
@@ -96,14 +97,14 @@ export default async function PendientesEntregaPage() {
     })) as Entrega[];
   } else {
     const supabase = createSupabaseServerClient();
-    const entregasResult = await supabase
+    const entregasResult = await fetchAllSupabaseRows((from, to) => supabase
       .from("ventas_entregas")
       .select(
         "id,venta_id,estado,fecha_entrega,status_informe_vu,usado_credito,usado_informe_dominio,usado_multas,usado_patentes,usado_observaciones,observaciones,created_at,updated_at,venta:ventas!ventas_entregas_venta_id_fkey(id,fecha_venta,cliente_nombre,cliente_telefono,cliente_email,cliente_documento,precio_venta,moneda,metodo_pago,monto_permuta,saldo_preventa,saldo_efectivo,importe_gestoria,importe_escribania,resultado_operativo,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio),vehiculo_recibido:vehiculos!ventas_vehiculo_recibido_id_fkey(id,marca,modelo,version,anio,dominio),vendedor:empleados!ventas_vendedor_id_fkey(id,nombre,email))"
       )
       .order("fecha_entrega", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false })
-      .limit(150);
+      .range(from, to));
 
     const saleIds = ((entregasResult.data ?? []) as Array<{ venta_id: string | null }>).map((item) => item.venta_id).filter(Boolean) as string[];
     const pagosResult = saleIds.length
