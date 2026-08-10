@@ -1536,6 +1536,40 @@
 - Se validó que las filas incrementales no tengan nulos en campos obligatorios críticos.
 - Se corrigió el mapeo de pagos con `tipo = credito`: el tipo se conserva como crédito, pero `medio` se guarda como `otro` para respetar el enum `caja_medio`.
 
+## Login visual con imagen institucional
+
+### Qué se mejoró
+
+- Se rediseñó `/login` con layout de dos columnas en desktop:
+  - imagen institucional a la izquierda,
+  - formulario de acceso a la derecha.
+- En mobile se prioriza el formulario y se oculta la imagen para mantener velocidad y foco.
+- Se mantuvo el color principal bordó corporativo y una estética blanca, compacta y premium.
+- Se eliminó el box/borde que contenía el formulario para que el login se vea más integrado y menos encerrado.
+- Se agregó la imagen como fondo global suavemente difuminado, con una capa blanca translúcida sobre el lado del formulario.
+- Se simplificó el copy visible a: `Accedé a la plataforma con tu usuario de Funes Exclusivos`.
+- Se agregó una microfirma `Powered by Blyndtek` con enlace a `https://blyndtek.com`.
+
+### Paths modificados
+
+- `app/login/page.tsx`
+- `public/login-hero-porsche.png`
+- `public/blyndtek-logo-text.svg`
+- `DOCUMENTACION.md`
+
+### Decisiones visuales tomadas
+
+- La imagen se sirve desde `public/login-hero-porsche.png` para evitar depender de una ruta temporal del sistema.
+- Se agregó un overlay oscuro sutil sobre la imagen para mejorar legibilidad del copy institucional.
+- Se mantuvo el formulario sin datos técnicos visibles y con una sola acción primaria.
+- El lado derecho usa `bg-white/78` y `backdrop-blur-md` para dejar ver parte de los colores de fondo sin perder legibilidad.
+- Se quitó el título interno `Ingresar al panel` y el rótulo `Acceso privado` para reducir ruido visual.
+- El crédito de Blyndtek queda como firma secundaria con baja opacidad para no competir con la marca Funes ni con el formulario.
+
+### Validación
+
+- `npm run build` ejecutado correctamente después del cambio.
+
 ## Migración operativa Funes desde CSV
 
 ### Qué se construyó
