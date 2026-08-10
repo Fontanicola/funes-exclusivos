@@ -52,8 +52,6 @@ export default function LoginPage({
               Entrar al dashboard
             </Link>
           </div>
-
-          <PoweredByBlyndtek />
         </div>
       </LoginLayout>
     );
@@ -70,8 +68,6 @@ export default function LoginPage({
         <div className="mt-8">
           <LoginForm initialErrorMessage={errorMessage} />
         </div>
-
-        <PoweredByBlyndtek />
       </div>
     </LoginLayout>
   );
@@ -90,8 +86,9 @@ function LoginLayout({ children }: { children: ReactNode }) {
       />
       <div className="absolute inset-0 -z-10 bg-white/35" />
       <LoginHero />
-      <section className="flex min-h-screen items-center justify-center bg-white/78 px-6 py-10 backdrop-blur-md lg:px-12">
+      <section className="relative flex min-h-screen items-center justify-center bg-white/78 px-6 py-14 pb-24 backdrop-blur-md lg:px-12">
         {children}
+        <PoweredByBlyndtek />
       </section>
     </main>
   );
@@ -145,7 +142,7 @@ function PoweredByBlyndtek() {
       href="https://blyndtek.com"
       target="_blank"
       rel="noopener noreferrer"
-      className="mt-10 inline-flex items-center gap-2 text-xs text-[#6B7280] opacity-70 transition hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#D8A1B2] focus:ring-offset-2"
+      className="absolute bottom-6 right-6 inline-flex items-center gap-2 text-xs text-[#6B7280] opacity-70 transition hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#D8A1B2] focus:ring-offset-2 lg:bottom-8 lg:right-10"
       aria-label="Powered by Blyndtek"
     >
       <span>Powered by</span>
