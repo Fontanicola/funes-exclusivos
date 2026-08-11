@@ -8,6 +8,7 @@ import { EmpleadoStatusBadge } from "./empleado-status-badge";
 import { EmpleadoEditForm } from "./empleado-edit-form";
 import { EmpleadoDeleteButton } from "./empleado-delete-button";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Employee = {
   id: string;
@@ -131,6 +132,7 @@ export function EmpleadosTable({
               ) : null}
             </div>
 
+            <AdvancedFilters>
             <select
               value={roleFilter}
               onChange={(event) => setRoleFilter(event.target.value as (typeof roleOptions)[number])}
@@ -151,6 +153,7 @@ export function EmpleadosTable({
               <option value="active">Activos</option>
               <option value="inactive">Inactivos</option>
             </select>
+            </AdvancedFilters>
           </div>
           <p className="text-xs text-[#6B7280]">
             Mostrando {filtered.length} de {empleados.length}

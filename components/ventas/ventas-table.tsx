@@ -7,6 +7,7 @@ import { canViewMargins } from "@/lib/auth/permissions";
 import { PaymentMethodBadge } from "./payment-method-badge";
 import { VentaStatusBadge } from "./venta-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Venta = {
   id: string;
@@ -215,6 +216,7 @@ export function VentasTable({
             ) : null}
           </div>
 
+          <AdvancedFilters>
           <div className="relative min-w-[180px] flex-1 sm:flex-none">
             <select
               value={methodFilter}
@@ -241,6 +243,7 @@ export function VentasTable({
               <option value="anulada">Anulada</option>
             </select>
           </div>
+          </AdvancedFilters>
         </div>
           <p className="text-xs text-[#6B7280]">
             Mostrando {visibleVentas.length} de {filteredVentas.length}

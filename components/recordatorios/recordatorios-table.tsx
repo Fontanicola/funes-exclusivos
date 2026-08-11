@@ -301,6 +301,7 @@ export function RecordatoriosTable({
             ) : null}
           </div>
 
+          <AdvancedFilters>
           <div className="min-w-[180px] flex-1 sm:flex-none">
             <select
               value={statusFilter}
@@ -328,7 +329,6 @@ export function RecordatoriosTable({
               <option value="soon">Próximos 7 días</option>
             </select>
           </div>
-          <AdvancedFilters>
             <div className="min-w-[180px] flex-1 sm:flex-none">
               <select
                 value={priorityFilter}

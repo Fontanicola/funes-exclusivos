@@ -10,6 +10,7 @@ import {
 import { VehiculoDocumentoStatusBadge } from "./vehiculo-documento-status-badge";
 import { VehiculoDocumentoTypeBadge } from "./vehiculo-documento-type-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Relation = {
   id: string;
@@ -379,6 +380,7 @@ export function VehiculoDocumentosTable({
             />
           </div>
 
+          <AdvancedFilters>
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
@@ -404,6 +406,7 @@ export function VehiculoDocumentosTable({
               </option>
             ))}
           </select>
+          </AdvancedFilters>
         </div>
       </div>
 

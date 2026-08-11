@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { PresupuestoStatusBadge } from "./presupuesto-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Presupuesto = {
   id: string;
@@ -149,6 +150,7 @@ export function PresupuestosTable({ presupuestos }: { presupuestos: Presupuesto[
             ) : null}
           </div>
 
+          <AdvancedFilters>
           <select
             value={stateFilter}
             onChange={(event) => setStateFilter(event.target.value as (typeof states)[number])}
@@ -172,6 +174,7 @@ export function PresupuestosTable({ presupuestos }: { presupuestos: Presupuesto[
             <option value="ARS">ARS</option>
             <option value="USD">USD</option>
           </select>
+          </AdvancedFilters>
         </div>
         <p className="text-xs text-[#6B7280]">
           Mostrando {visiblePresupuestos.length} de {filtered.length}

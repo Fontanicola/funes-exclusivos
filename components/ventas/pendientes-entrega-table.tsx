@@ -4,6 +4,7 @@ import { Fragment, useMemo, useState } from "react";
 import { Edit3, Search, SlidersHorizontal, X } from "lucide-react";
 import { EntregaStatusBadge } from "./entrega-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 import { EntregaEditForm } from "./entrega-edit-form";
 
 type Pagos = Array<Record<string, any>>;
@@ -234,6 +235,7 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
             ) : null}
           </div>
 
+          <AdvancedFilters>
           <div className="relative min-w-[190px] flex-1 sm:flex-none">
             <select
               value={statusFilter}
@@ -263,6 +265,7 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
             <SlidersHorizontal className="h-4 w-4" />
             Con usado recibido
           </button>
+          </AdvancedFilters>
 
           <button
             type="button"

@@ -2,9 +2,10 @@
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { VehiculoStatusBadge } from "@/components/inventario/vehiculo-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Compra = {
   id: string;
@@ -148,6 +149,7 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
             ) : null}
             </div>
 
+            <AdvancedFilters>
             <div className="min-w-[180px] flex-1 sm:flex-none">
             <select
               value={currencyFilter}
@@ -170,9 +172,9 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
                 : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]",
             ].join(" ")}
           >
-            <SlidersHorizontal className="h-4 w-4" />
             Con deuda
             </button>
+            </AdvancedFilters>
           </div>
           <p className="text-xs text-[#6B7280]">
             Mostrando {visibleCompras.length} de {filteredCompras.length}

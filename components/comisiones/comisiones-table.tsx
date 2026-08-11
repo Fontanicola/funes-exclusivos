@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { ComisionStatusBadge } from "./comision-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Comision = {
   id: string;
@@ -142,6 +143,7 @@ export function ComisionesTable({ comisiones, toolbarAction }: { comisiones: Com
             ) : null}
             </div>
 
+            <AdvancedFilters>
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
@@ -163,6 +165,7 @@ export function ComisionesTable({ comisiones, toolbarAction }: { comisiones: Com
               <option value="ARS">ARS</option>
               <option value="USD">USD</option>
             </select>
+            </AdvancedFilters>
           </div>
           <p className="text-xs text-[#6B7280]">
             Mostrando {visibleComisiones.length} de {filtered.length}

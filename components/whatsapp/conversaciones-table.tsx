@@ -246,6 +246,7 @@ export function ConversacionesTable({
             ) : null}
           </div>
 
+          <AdvancedFilters>
           <select
             value={sellerFilter}
             onChange={(event) => setSellerFilter(event.target.value)}
@@ -271,7 +272,6 @@ export function ConversacionesTable({
             <option value="archivada">Archivada</option>
           </select>
 
-          <AdvancedFilters>
             <select
               value={instanceFilter}
               onChange={(event) => setInstanceFilter(event.target.value)}

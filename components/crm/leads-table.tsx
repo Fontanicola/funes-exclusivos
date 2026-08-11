@@ -7,6 +7,7 @@ import { Search, X } from "lucide-react";
 import { LeadOriginBadge } from "./lead-origin-badge";
 import { LeadStatusBadge } from "./lead-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Lead = {
   id: string;
@@ -148,6 +149,7 @@ export function LeadsTable({ leads, toolbarAction }: { leads: Lead[]; toolbarAct
             ) : null}
             </div>
 
+            <AdvancedFilters>
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
@@ -177,6 +179,7 @@ export function LeadsTable({ leads, toolbarAction }: { leads: Lead[]; toolbarAct
               <option value="presencial">Presencial</option>
               <option value="otro">Otro</option>
             </select>
+            </AdvancedFilters>
           </div>
           <p className="text-xs text-[#6B7280]">
             Mostrando {visibleLeads.length} de {filtered.length}

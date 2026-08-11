@@ -4,6 +4,7 @@ import { Fragment, useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
 import { CajaTipoBadge } from "./caja-tipo-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Proveedor = {
   id: string;
@@ -250,6 +251,7 @@ export function CajaMovimientosTable({ movimientos }: { movimientos: Movimiento[
               className="h-10 min-w-[220px] flex-1 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
               placeholder="Buscar por referencia, concepto o tercero"
             />
+            <AdvancedFilters>
             <select
               value={tipoFilter}
               onChange={(event) => setTipoFilter(event.target.value)}
@@ -280,6 +282,7 @@ export function CajaMovimientosTable({ movimientos }: { movimientos: Movimiento[
               <option value="comision">Comisión</option>
               <option value="ajuste">Ajuste</option>
             </select>
+            </AdvancedFilters>
           </div>
           <p className="text-xs text-[#6B7280]">
             Mostrando {visibleMovimientos.length} de {filtered.length}

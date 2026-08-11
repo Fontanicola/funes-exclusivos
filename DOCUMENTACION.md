@@ -1461,6 +1461,36 @@
 
 - `npm run build` ejecutado correctamente.
 
+## Filtros y desplegables
+
+### Qué se mejoró
+
+- Se unificó la flecha de los campos desplegables con un margen interno consistente para que no quede pegada al borde derecho.
+- Los filtros secundarios de las tablas ahora se agrupan en un único control `Más filtros` con ícono, manteniendo visible el buscador y las acciones principales.
+- Se aplicó el patrón a Compras, Ventas, Rentabilidad, Caja, CRM, WhatsApp, Gestoría, Presupuestos, Recordatorios, Comisiones, Empleados, entregas pendientes, documentos de vehículos y catálogo público.
+
+### Paths modificados
+
+- `app/globals.css`
+- `components/compras/compras-table.tsx`
+- `components/ventas/ventas-table.tsx`
+- `components/ventas/renta-table.tsx`
+- `components/ventas/pendientes-entrega-table.tsx`
+- `components/caja/caja-movimientos-table.tsx`
+- `components/crm/leads-table.tsx`
+- `components/whatsapp/conversaciones-table.tsx`
+- `components/gestoria/gestoria-table.tsx`
+- `components/gestoria/presupuestos-table.tsx`
+- `components/recordatorios/recordatorios-table.tsx`
+- `components/comisiones/comisiones-table.tsx`
+- `components/empleados/empleados-table.tsx`
+- `components/inventario/vehiculo-documentos-table.tsx`
+- `components/catalogo-publico/catalogo-filters.tsx`
+
+### Validación
+
+- `npm run build` ejecutado correctamente después de los cambios.
+
 ## Paginación global de listados
 
 ### Qué se implementó

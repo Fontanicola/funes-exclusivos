@@ -277,6 +277,7 @@ export function RentaTable({
             ) : null}
           </div>
 
+          <AdvancedFilters>
           <div className="relative min-w-[180px] flex-1 sm:flex-none">
             <select
               value={sellerFilter}
@@ -306,7 +307,6 @@ export function RentaTable({
               <option value="sin_datos">Sin datos</option>
             </select>
           </div>
-          <AdvancedFilters>
             <div className="relative min-w-[170px] flex-1 sm:flex-none">
               <select
                 value={paymentFilter}

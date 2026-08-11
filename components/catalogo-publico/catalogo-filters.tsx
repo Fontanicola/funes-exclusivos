@@ -1,6 +1,7 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 function inputClassName() {
   return "h-11 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]";
@@ -68,6 +69,7 @@ export function CatalogoFilters({
           className={`${inputClassName()} min-w-[220px] flex-1`}
         />
 
+        <AdvancedFilters label="Filtros">
         <select value={marca} onChange={(event) => setMarca(event.target.value)} className={`${selectClassName()} min-w-[180px]`}> 
           <option value="">Todas las marcas</option>
           {marcas.map((item) => (
@@ -131,7 +133,8 @@ export function CatalogoFilters({
           >
             Solo destacados
           </button>
-        </div>
+          </div>
+        </AdvancedFilters>
       </div>
     </section>
   );

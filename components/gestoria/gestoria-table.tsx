@@ -6,6 +6,7 @@ import { Search, X } from "lucide-react";
 import { GestoriaStatusBadge } from "./gestoria-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { GestoriaTypeBadge } from "./gestoria-type-badge";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type GestoriaTramite = {
   id: string;
@@ -166,6 +167,7 @@ export function GestoriaTable({ tramites, toolbarAction }: { tramites: GestoriaT
             ) : null}
             </div>
 
+            <AdvancedFilters>
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as (typeof statuses)[number])}
@@ -195,6 +197,7 @@ export function GestoriaTable({ tramites, toolbarAction }: { tramites: GestoriaT
               <option value="patente">Patente</option>
               <option value="otro">Otro</option>
             </select>
+            </AdvancedFilters>
           </div>
           <p className="text-xs text-[#6B7280]">
             Mostrando {visibleTramites.length} de {filtered.length}
