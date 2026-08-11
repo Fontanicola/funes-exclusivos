@@ -3,6 +3,7 @@
 import { Fragment, useMemo, useState } from "react";
 import { Edit3, Search, SlidersHorizontal, X } from "lucide-react";
 import { EntregaStatusBadge } from "./entrega-status-badge";
+import { PaginationControls } from "@/components/common/pagination-controls";
 import { EntregaEditForm } from "./entrega-edit-form";
 
 type Pagos = Array<Record<string, any>>;
@@ -164,7 +165,8 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
   const [withUsedFilter, setWithUsedFilter] = useState(false);
   const [withPendingBalanceFilter, setWithPendingBalanceFilter] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
-  const MAX_VISIBLE_ROWS = 200;
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
 
   const filteredEntregas = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -203,8 +205,9 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
     });
   }, [query, statusFilter, withPendingBalanceFilter, withUsedFilter, entregas]);
 
-  const visibleEntregas = filteredEntregas.slice(0, MAX_VISIBLE_ROWS);
-  const hasMoreRows = filteredEntregas.length > MAX_VISIBLE_ROWS;
+  const totalPages = Math.max(1, Math.ceil(filteredEntregas.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleEntregas = filteredEntregas.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
@@ -436,11 +439,7 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
         </table>
       </div>
 
-      {hasMoreRows ? (
-        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
-          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
-        </div>
-      ) : null}
+      <PaginationControls page={currentPage} totalItems={filteredEntregas.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </section>
   );
 }

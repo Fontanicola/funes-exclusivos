@@ -3,6 +3,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleados } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmpleadosTable } from "@/components/empleados/empleados-table";
+import { EmpleadoCreateForm } from "@/components/empleados/empleado-create-form";
 
 export const metadata: Metadata = {
   title: "Empleados | Funes Exclusivos",
@@ -111,6 +112,7 @@ export default async function EmpleadosPage() {
         Desde esta pantalla se gestiona el equipo, sus roles y el estado operativo dentro del sistema.
       </div>
 
+      <EmpleadoCreateForm />
       <EmpleadosTable empleados={empleados} currentUserId={currentUserId} />
     </section>
   );

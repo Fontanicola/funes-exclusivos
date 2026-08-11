@@ -1418,6 +1418,71 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Paginación global de listados
+
+### Qué se implementó
+
+- Se estableció una paginación uniforme de **10 registros por página** para los listados operativos del sistema.
+- La paginación se aplica después de los filtros, por lo que cada búsqueda o combinación de filtros muestra sus propios resultados paginados.
+- Se agregó un control común con rango visible, página actual, total de páginas y navegación anterior/siguiente.
+- También se paginaron las columnas de las vistas tipo tablero de CRM y Gestoría, sin ocultar registros adicionales.
+
+### Paths agregados/modificados
+
+- `components/common/pagination-controls.tsx`
+- `components/comisiones/liquidaciones-table.tsx`
+- Tablas de Inventario, Compras, Ventas, Rentabilidad, Caja, Comisiones, CRM, Gestoría, WhatsApp, Recordatorios, Empleados, Catálogo y Documentos.
+- `app/(dashboard)/comisiones/liquidaciones/page.tsx`
+- `app/(dashboard)/crm/page.tsx`
+- `app/(dashboard)/comisiones/page.tsx`
+- `app/(dashboard)/whatsapp/page.tsx`
+- `app/(dashboard)/whatsapp/conexiones/page.tsx`
+- `app/(dashboard)/dashboard/catalogo/page.tsx`
+- `app/catalogo/page.tsx`
+
+### Decisiones técnicas
+
+- Las consultas históricas que tenían límites fijos de 100, 150 o 200 registros ahora recuperan todas las páginas mediante `fetchAllSupabaseRows`, manteniendo la información completa antes de paginar visualmente.
+- Los límites de 100 que permanecen en Inventario y Caja corresponden únicamente a opciones de selección de proveedores/activos, no a listados visibles; se mantienen para evitar selects operativos desproporcionados.
+- No se paginaron gráficos, KPIs, alertas ni listas estáticas de opciones porque no son listados históricos ni generan render masivo.
+- Se mantuvo el modo demo y no se modificó el schema ni la lógica de negocio.
+
+### Validación
+
+- `npm run build` ejecutado correctamente después de los cambios.
+
+## Alta de usuarios desde Empleados
+
+### Qué se construyó
+
+- Se agregó el formulario `Nuevo usuario` dentro de `/empleados`.
+- Permite cargar email, contraseña inicial, nombre, teléfono, rol, cargo, fecha de ingreso, comisión default y notas internas.
+- La alta crea el usuario en Supabase Auth y su perfil operativo en `empleados`.
+- Se agregó validación de permisos: solo usuarios admin activos pueden crear empleados.
+- Se mantienen validaciones para evitar emails duplicados, roles inválidos y contraseñas menores a 8 caracteres.
+- Si falla la creación del perfil, se elimina el usuario Auth recién creado para evitar accesos sin perfil operativo.
+
+### Paths modificados
+
+- `app/(dashboard)/empleados/actions.ts`
+- `app/(dashboard)/empleados/page.tsx`
+- `components/empleados/empleado-create-form.tsx`
+
+### Tablas y servicios involucrados
+
+- `auth.users` mediante Supabase Auth Admin API.
+- `public.empleados`.
+
+### Decisiones técnicas
+
+- Se utiliza `createSupabaseAdminClient` únicamente en esta Server Action administrativa, después de validar sesión, usuario activo y rol admin.
+- El usuario se crea con email confirmado para que pueda ingresar inmediatamente con las credenciales entregadas por el administrador.
+- El modo demo conserva su comportamiento y muestra un mensaje sin crear datos reales.
+
+### Validación
+
+- `npm run build` ejecutado correctamente después de la implementación.
+
 ## Auditoría de datos y completitud del Dashboard
 
 ### Qué se revisó y corrigió

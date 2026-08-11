@@ -1,3 +1,8 @@
+"use client";
+
+import { useState } from "react";
+import { PaginationControls } from "@/components/common/pagination-controls";
+
 type Message = {
   id: string;
   body: string | null;
@@ -9,6 +14,8 @@ type Message = {
   sent_at: string | null;
   created_at: string | null;
 };
+
+const PAGE_SIZE = 10;
 
 function formatDateTime(value: string | null) {
   if (!value) return "—";
@@ -62,6 +69,11 @@ export function MessagesList({
   lastMessagePreview?: string | null;
   hasRecentActivity?: boolean;
 }) {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(messages.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleMessages = messages.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
       <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] px-4 py-3">
@@ -77,7 +89,7 @@ export function MessagesList({
 
       <div className="max-h-[74vh] space-y-3 overflow-y-auto bg-[#FAFAFA] p-4">
         {messages.length ? (
-          messages.map((message) => {
+          visibleMessages.map((message) => {
             const isOutgoing = getDirection(message) === "saliente";
             const typeLabel = getTypeLabel(message.message_type ?? message.tipo ?? null);
             const body = message.body?.trim() || getFallbackBody(message.message_type ?? message.tipo ?? null);
@@ -128,6 +140,12 @@ export function MessagesList({
           </div>
         )}
       </div>
+      <PaginationControls
+        page={currentPage}
+        totalItems={messages.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
     </section>
   );
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockCatalogoConfig, mockVehiculos } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CatalogoSettingsForm } from "@/components/catalogo/catalogo-settings-form";
 import { CatalogoVehiculosTable } from "@/components/catalogo/catalogo-vehiculos-table";
 
@@ -89,15 +90,17 @@ export default async function CatalogoPage() {
         )
         .eq("id", true)
         .maybeSingle<CatalogoConfig>(),
-      supabase
-        .from("vehiculos")
-        .select(
-          "id,marca,modelo,version,anio,color,km,dominio,precio_venta,precio_moneda,estado,fotos,catalogo_publicado,catalogo_destacado,catalogo_titulo,catalogo_descripcion,catalogo_orden,created_at"
-        )
-        .order("catalogo_destacado", { ascending: false, nullsFirst: false })
-        .order("catalogo_orden", { ascending: true, nullsFirst: false })
-        .order("created_at", { ascending: false })
-        .limit(200),
+      fetchAllSupabaseRows((from, to) =>
+        supabase
+          .from("vehiculos")
+          .select(
+            "id,marca,modelo,version,anio,color,km,dominio,precio_venta,precio_moneda,estado,fotos,catalogo_publicado,catalogo_destacado,catalogo_titulo,catalogo_descripcion,catalogo_orden,created_at"
+          )
+          .order("catalogo_destacado", { ascending: false, nullsFirst: false })
+          .order("catalogo_orden", { ascending: true, nullsFirst: false })
+          .order("created_at", { ascending: false })
+          .range(from, to)
+      ),
     ]);
 
     config = configResult.data ?? config;

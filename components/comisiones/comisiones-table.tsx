@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { ComisionStatusBadge } from "./comision-status-badge";
+import { PaginationControls } from "@/components/common/pagination-controls";
 
 type Comision = {
   id: string;
@@ -84,7 +85,8 @@ export function ComisionesTable({ comisiones, toolbarAction }: { comisiones: Com
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
   const [currencyFilter, setCurrencyFilter] = useState<(typeof currencies)[number]>("");
-  const MAX_VISIBLE_ROWS = 200;
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -110,8 +112,9 @@ export function ComisionesTable({ comisiones, toolbarAction }: { comisiones: Com
     });
   }, [comisiones, currencyFilter, query, statusFilter]);
 
-  const visibleComisiones = filtered.slice(0, MAX_VISIBLE_ROWS);
-  const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleComisiones = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
@@ -242,11 +245,7 @@ export function ComisionesTable({ comisiones, toolbarAction }: { comisiones: Com
         </table>
       </div>
 
-      {hasMoreRows ? (
-        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
-          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
-        </div>
-      ) : null}
+      <PaginationControls page={currentPage} totalItems={filtered.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </section>
   );
 }

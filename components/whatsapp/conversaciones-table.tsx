@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
 import { ConversacionInterestBadge } from "./conversacion-interest-badge";
+import { PaginationControls } from "@/components/common/pagination-controls";
 import { ConversacionStatusBadge } from "./conversacion-status-badge";
 
 type Conversation = {
@@ -158,7 +159,8 @@ export function ConversacionesTable({
   const [interestFilter, setInterestFilter] = useState<(typeof interests)[number]>("");
   const [aiFilter, setAiFilter] = useState<(typeof aiFilters)[number]>("");
   const [onlyAttention, setOnlyAttention] = useState(false);
-  const MAX_VISIBLE_ROWS = 200;
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
 
   const instanceOptions = useMemo(() => {
     const options = new Map<string, string>();
@@ -202,8 +204,9 @@ export function ConversacionesTable({
     });
   }, [aiFilter, conversaciones, interestFilter, instanceFilter, onlyAttention, query, sellerFilter, statusFilter]);
 
-  const visibleConversations = filtered.slice(0, MAX_VISIBLE_ROWS);
-  const hasMoreRows = filtered.length > MAX_VISIBLE_ROWS;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleConversations = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
@@ -420,11 +423,7 @@ export function ConversacionesTable({
         </table>
       </div>
 
-      {hasMoreRows ? (
-        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
-          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
-        </div>
-      ) : null}
+      <PaginationControls page={currentPage} totalItems={filtered.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </section>
   );
 }

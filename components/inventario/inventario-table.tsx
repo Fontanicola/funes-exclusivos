@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { Eye, PencilLine, Search, SlidersHorizontal, X } from "lucide-react";
 import { canManageInventory, canViewCosts } from "@/lib/auth/permissions";
 import { VehiculoStatusBadge } from "./vehiculo-status-badge";
+import { PaginationControls } from "@/components/common/pagination-controls";
 
 type Vehiculo = {
   id: string;
@@ -125,7 +126,8 @@ export function InventarioTable({
 }) {
   const [query, setQuery] = useState("");
   const [onlyStock, setOnlyStock] = useState(false);
-  const MAX_VISIBLE_ROWS = 200;
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
   const showCosts = canViewCosts(role);
   const showPreparation = canManageInventory(role);
 
@@ -154,8 +156,9 @@ export function InventarioTable({
     });
   }, [onlyStock, query, vehiculos]);
 
-  const visibleVehiculos = filteredVehiculos.slice(0, MAX_VISIBLE_ROWS);
-  const hasMoreRows = filteredVehiculos.length > MAX_VISIBLE_ROWS;
+  const totalPages = Math.max(1, Math.ceil(filteredVehiculos.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleVehiculos = filteredVehiculos.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
@@ -397,11 +400,7 @@ export function InventarioTable({
         </table>
       </div>
 
-      {hasMoreRows ? (
-        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
-          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
-        </div>
-      ) : null}
+      <PaginationControls page={currentPage} totalItems={filteredVehiculos.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </section>
   );
 }

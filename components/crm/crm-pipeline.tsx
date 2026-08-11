@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { PaginationControls } from "@/components/common/pagination-controls";
 
 type Lead = {
   id: string;
@@ -39,6 +41,8 @@ type PipelineEstado = {
   activo: boolean | null;
 };
 
+const PAGE_SIZE = 10;
+
 function getSellerName(lead: Lead) {
   return lead.vendedor?.nombre ?? "Sin vendedor";
 }
@@ -55,6 +59,7 @@ export function CrmPipeline({
   leads: Lead[];
   pipelineEstados: PipelineEstado[];
 }) {
+  const [pages, setPages] = useState<Record<string, number>>({});
   const states = pipelineEstados.length
     ? pipelineEstados
     : [
@@ -82,6 +87,9 @@ export function CrmPipeline({
           .sort((left, right) => left.orden - right.orden)
           .map((state) => {
             const stateLeads = leads.filter((lead) => lead.estado === state.slug);
+            const totalPages = Math.max(1, Math.ceil(stateLeads.length / PAGE_SIZE));
+            const currentPage = Math.min(pages[state.id] ?? 1, totalPages);
+            const visibleLeads = stateLeads.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
             return (
               <div key={state.id} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
@@ -97,7 +105,7 @@ export function CrmPipeline({
 
                 <div className="mt-3 space-y-3">
                   {stateLeads.length ? (
-                    stateLeads.map((lead) => (
+                    visibleLeads.map((lead) => (
                       <Link
                         key={lead.id}
                         href={`/crm/${lead.id}`}
@@ -123,6 +131,14 @@ export function CrmPipeline({
                     </div>
                   )}
                 </div>
+                <PaginationControls
+                  page={currentPage}
+                  totalItems={stateLeads.length}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={(nextPage) =>
+                    setPages((current) => ({ ...current, [state.id]: nextPage }))
+                  }
+                />
               </div>
             );
           })}

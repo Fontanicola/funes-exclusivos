@@ -11,6 +11,7 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 import { updateVehiculoCatalogoAction } from "@/app/(dashboard)/catalogo/actions";
 import { CatalogoStatusBadge } from "./catalogo-status-badge";
+import { PaginationControls } from "@/components/common/pagination-controls";
 
 type Vehiculo = {
   id: string;
@@ -45,6 +46,7 @@ const publicationFilters = [
   { value: "publicado", label: "Publicados" },
   { value: "no_publicado", label: "No publicados" },
 ] as const;
+const PAGE_SIZE = 10;
 
 function FieldLabel({
   children,
@@ -345,6 +347,7 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
   const [query, setQuery] = useState("");
   const [publicationFilter, setPublicationFilter] = useState<(typeof publicationFilters)[number]["value"]>("");
   const [onlyStock, setOnlyStock] = useState(false);
+  const [page, setPage] = useState(1);
 
   const filteredVehiculos = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -359,6 +362,10 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
       return getSearchableText(vehicle).includes(normalizedQuery);
     });
   }, [onlyStock, publicationFilter, query, vehiculos]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredVehiculos.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleVehiculos = filteredVehiculos.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
@@ -435,7 +442,7 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
             {filteredVehiculos.length ? (
-              filteredVehiculos.map((vehicle) => (
+              visibleVehiculos.map((vehicle) => (
                 <CatalogoRow key={vehicle.id} vehicle={vehicle} />
               ))
             ) : (
@@ -448,6 +455,13 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
           </tbody>
         </table>
       </div>
+
+      <PaginationControls
+        page={currentPage}
+        totalItems={filteredVehiculos.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
     </section>
   );
 }

@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockConversaciones, mockWhatsappInstancias } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { ConversacionesTable } from "@/components/whatsapp/conversaciones-table";
 import { WhatsappConnectionAlert } from "@/components/whatsapp/whatsapp-connection-alert";
 import { WhatsappInstancesGrid } from "@/components/whatsapp/whatsapp-instances-grid";
@@ -187,22 +188,26 @@ export default async function WhatsappPage() {
 
     const [currentEmployeeResult, instancesResult, conversationsResult] = await Promise.all([
       currentEmployeeQuery,
-      supabase
-        .from("whatsapp_instancias")
-        .select(
-          "id,empleado_id,provider,instance_name,estado,telefono_conectado,nombre_perfil,qr_code,qr_base64,qr_expires_at,last_connection_at,last_disconnection_at,last_sync_at,last_error,activo,created_at,empleado:empleados!whatsapp_instancias_empleado_id_fkey(id,nombre,email,rol)"
-        )
-        .eq("activo", true)
-        .order("created_at", { ascending: true })
-        .limit(100),
-      supabase
-        .from("conversaciones")
-        .select(
-          "id,whatsapp_instancia_id,lead_id,vendedor_id,vehiculo_interes_id,canal,estado,contacto_nombre,contacto_telefono,contacto_numero_normalizado,contacto_email,ultimo_mensaje_at,last_message_preview,mensajes_count,unread_count,resumen_ia,interes_compra,ia_estado,ia_resumen,ia_interes_compra,ia_score,ia_intencion,ia_proximo_paso,ia_procesado_at,ia_modelo,ia_error,intencion_detectada,proxima_accion_sugerida,requiere_atencion,created_at,instancia:whatsapp_instancias!conversaciones_whatsapp_instancia_id_fkey(id,instance_name,estado,telefono_conectado),lead:leads!conversaciones_lead_id_fkey(id,nombre,telefono,email,estado,origen),vendedor:empleados!conversaciones_vendedor_id_fkey(id,nombre,email,rol),vehiculo:vehiculos!conversaciones_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio)"
-        )
-      .order("ultimo_mensaje_at", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false })
-      .limit(100),
+      fetchAllSupabaseRows((from, to) =>
+        supabase
+          .from("whatsapp_instancias")
+          .select(
+            "id,empleado_id,provider,instance_name,estado,telefono_conectado,nombre_perfil,qr_code,qr_base64,qr_expires_at,last_connection_at,last_disconnection_at,last_sync_at,last_error,activo,created_at,empleado:empleados!whatsapp_instancias_empleado_id_fkey(id,nombre,email,rol)"
+          )
+          .eq("activo", true)
+          .order("created_at", { ascending: true })
+          .range(from, to)
+      ),
+      fetchAllSupabaseRows((from, to) =>
+        supabase
+          .from("conversaciones")
+          .select(
+            "id,whatsapp_instancia_id,lead_id,vendedor_id,vehiculo_interes_id,canal,estado,contacto_nombre,contacto_telefono,contacto_numero_normalizado,contacto_email,ultimo_mensaje_at,last_message_preview,mensajes_count,unread_count,resumen_ia,interes_compra,ia_estado,ia_resumen,ia_interes_compra,ia_score,ia_intencion,ia_proximo_paso,ia_procesado_at,ia_modelo,ia_error,intencion_detectada,proxima_accion_sugerida,requiere_atencion,created_at,instancia:whatsapp_instancias!conversaciones_whatsapp_instancia_id_fkey(id,instance_name,estado,telefono_conectado),lead:leads!conversaciones_lead_id_fkey(id,nombre,telefono,email,estado,origen),vendedor:empleados!conversaciones_vendedor_id_fkey(id,nombre,email,rol),vehiculo:vehiculos!conversaciones_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio)"
+          )
+          .order("ultimo_mensaje_at", { ascending: false, nullsFirst: false })
+          .order("created_at", { ascending: false })
+          .range(from, to)
+      ),
     ]);
 
     const currentEmployee = currentEmployeeResult.data;

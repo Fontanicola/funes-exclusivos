@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import { CalendarDays, CheckCircle2, Circle, FileText, Search, Send, UserRound } from "lucide-react";
 import { updateGestoriaOperacionFormAction } from "@/app/(dashboard)/gestoria/actions";
 import { GestoriaStatusBadge } from "./gestoria-status-badge";
+import { PaginationControls } from "@/components/common/pagination-controls";
 
 type Employee = {
   id: string;
@@ -95,6 +96,8 @@ const stages = [
     description: "Operaciones cerradas y documentación retirada.",
   },
 ] as const;
+
+const PAGE_SIZE = 10;
 
 const milestoneOptions = [
   { value: "pendiente", label: "Pendiente" },
@@ -450,6 +453,7 @@ export function GestoriaKanban({
   const [gestorFilter, setGestorFilter] = useState("");
   const [gestionFilter, setGestionFilter] = useState("");
   const [onlyPendingBudget, setOnlyPendingBudget] = useState(false);
+  const [stagePages, setStagePages] = useState<Record<string, number>>({});
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -540,6 +544,9 @@ export function GestoriaKanban({
         <div className="grid gap-4 p-4 xl:grid-cols-4">
           {stages.map((stage) => {
             const stageItems = filtered.filter((tramite) => (tramite.etapa ?? "presupuesto") === stage.key);
+            const totalPages = Math.max(1, Math.ceil(stageItems.length / PAGE_SIZE));
+            const currentPage = Math.min(stagePages[stage.key] ?? 1, totalPages);
+            const visibleStageItems = stageItems.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
             return (
               <section key={stage.key} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA]">
@@ -556,7 +563,7 @@ export function GestoriaKanban({
                 </div>
                 <div className="space-y-3 p-3">
                   {stageItems.length ? (
-                    stageItems.map((tramite) => (
+                    visibleStageItems.map((tramite) => (
                       <OperationCard key={tramite.id} tramite={tramite} gestores={gestores} />
                     ))
                   ) : (
@@ -565,6 +572,14 @@ export function GestoriaKanban({
                     </div>
                   )}
                 </div>
+                <PaginationControls
+                  page={currentPage}
+                  totalItems={stageItems.length}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={(nextPage) =>
+                    setStagePages((current) => ({ ...current, [stage.key]: nextPage }))
+                  }
+                />
               </section>
             );
           })}

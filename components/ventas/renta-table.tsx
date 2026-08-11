@@ -9,6 +9,7 @@ import {
 } from "@/lib/renta-metrics";
 import { PaymentMethodBadge } from "./payment-method-badge";
 import { RentaMarginBadge } from "./renta-margin-badge";
+import { PaginationControls } from "@/components/common/pagination-controls";
 
 const paymentMethods = ["", "transferencia", "efectivo", "dolares", "pesos", "permuta"] as const;
 const deliveryFilters = ["", "pendiente", "en_proceso", "observada", "entregada"] as const;
@@ -205,7 +206,8 @@ export function RentaTable({
   const [paymentFilter, setPaymentFilter] = useState<(typeof paymentMethods)[number]>("");
   const [deliveryFilter, setDeliveryFilter] = useState<(typeof deliveryFilters)[number]>("");
   const [resultFilter, setResultFilter] = useState<(typeof resultFilters)[number]>("");
-  const MAX_VISIBLE_ROWS = 200;
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
 
   const sellerOptions = useMemo(() => {
     const options = new Map<string, string>();
@@ -246,8 +248,9 @@ export function RentaTable({
     });
   }, [deliveryFilter, paymentFilter, query, resultFilter, rows, sellerFilter]);
 
-  const visibleRows = filteredRows.slice(0, MAX_VISIBLE_ROWS);
-  const hasMoreRows = filteredRows.length > MAX_VISIBLE_ROWS;
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleRows = filteredRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
@@ -459,11 +462,7 @@ export function RentaTable({
         </table>
       </div>
 
-      {hasMoreRows ? (
-        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
-          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
-        </div>
-      ) : null}
+      <PaginationControls page={currentPage} totalItems={filteredRows.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </section>
   );
 }

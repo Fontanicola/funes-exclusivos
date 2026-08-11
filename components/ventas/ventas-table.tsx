@@ -6,6 +6,7 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { canViewMargins } from "@/lib/auth/permissions";
 import { PaymentMethodBadge } from "./payment-method-badge";
 import { VentaStatusBadge } from "./venta-status-badge";
+import { PaginationControls } from "@/components/common/pagination-controls";
 
 type Venta = {
   id: string;
@@ -149,7 +150,8 @@ export function VentasTable({
   const [query, setQuery] = useState("");
   const [methodFilter, setMethodFilter] = useState<(typeof paymentMethods)[number]>("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
-  const MAX_VISIBLE_ROWS = 200;
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
   const showMargins = canViewMargins(role);
 
   const filteredVentas = useMemo(() => {
@@ -183,8 +185,9 @@ export function VentasTable({
     });
   }, [methodFilter, query, statusFilter, ventas]);
 
-  const visibleVentas = filteredVentas.slice(0, MAX_VISIBLE_ROWS);
-  const hasMoreRows = filteredVentas.length > MAX_VISIBLE_ROWS;
+  const totalPages = Math.max(1, Math.ceil(filteredVentas.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleVentas = filteredVentas.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
@@ -374,11 +377,7 @@ export function VentasTable({
         </table>
       </div>
 
-      {hasMoreRows ? (
-        <div className="border-t border-[#E5E7EB] px-4 py-3 text-xs text-[#6B7280]">
-          Mostrando los primeros {MAX_VISIBLE_ROWS} resultados. Afiná filtros para ver el resto.
-        </div>
-      ) : null}
+      <PaginationControls page={currentPage} totalItems={filteredVentas.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </section>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockCatalogoConfig, mockVehiculos } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CatalogoHeader } from "@/components/catalogo-publico/catalogo-header";
 import { CatalogoVehicleGrid } from "@/components/catalogo-publico/catalogo-vehicle-grid";
 import { CatalogoEmptyState } from "@/components/catalogo-publico/catalogo-empty-state";
@@ -64,17 +65,19 @@ async function loadCatalogoPublico() {
       )
       .eq("id", true)
       .maybeSingle<CatalogoConfig>(),
-    supabase
-      .from("vehiculos")
-      .select(
-        "id,marca,modelo,version,anio,color,km,dominio,precio_venta,precio_contado,precio_permuta,precio_moneda,precio_infoauto_actual,estado,fotos,descripcion,catalogo_titulo,catalogo_descripcion,catalogo_destacado,catalogo_orden,created_at"
-      )
-      .eq("estado", "en_stock")
-      .eq("catalogo_publicado", true)
-      .order("catalogo_destacado", { ascending: false, nullsFirst: false })
-      .order("catalogo_orden", { ascending: true, nullsFirst: false })
-      .order("created_at", { ascending: false })
-      .limit(200),
+    fetchAllSupabaseRows((from, to) =>
+      supabase
+        .from("vehiculos")
+        .select(
+          "id,marca,modelo,version,anio,color,km,dominio,precio_venta,precio_contado,precio_permuta,precio_moneda,precio_infoauto_actual,estado,fotos,descripcion,catalogo_titulo,catalogo_descripcion,catalogo_destacado,catalogo_orden,created_at"
+        )
+        .eq("estado", "en_stock")
+        .eq("catalogo_publicado", true)
+        .order("catalogo_destacado", { ascending: false, nullsFirst: false })
+        .order("catalogo_orden", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .range(from, to)
+    ),
   ]);
 
   return {

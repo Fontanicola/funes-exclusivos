@@ -6,6 +6,7 @@ import { Search, X } from "lucide-react";
 import { EmpleadoRoleBadge } from "./empleado-role-badge";
 import { EmpleadoStatusBadge } from "./empleado-status-badge";
 import { EmpleadoEditForm } from "./empleado-edit-form";
+import { PaginationControls } from "@/components/common/pagination-controls";
 
 type Employee = {
   id: string;
@@ -23,6 +24,7 @@ type Employee = {
 
 const roleOptions = ["", "admin", "vendedor", "gestor"] as const;
 const statusOptions = ["all", "active", "inactive"] as const;
+const PAGE_SIZE = 10;
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -85,6 +87,7 @@ export function EmpleadosTable({
   const [roleFilter, setRoleFilter] = useState<(typeof roleOptions)[number]>("");
   const [statusFilter, setStatusFilter] = useState<(typeof statusOptions)[number]>("all");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -97,6 +100,10 @@ export function EmpleadosTable({
       return getSearchableText(employee).includes(normalizedQuery);
     });
   }, [empleados, query, roleFilter, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleEmployees = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
@@ -167,7 +174,7 @@ export function EmpleadosTable({
 
           <tbody>
             {filtered.length ? (
-              filtered.map((employee) => {
+              visibleEmployees.map((employee) => {
                 const isEditing = editingId === employee.id;
 
                 return (
@@ -238,6 +245,13 @@ export function EmpleadosTable({
           </tbody>
         </table>
       </div>
+
+      <PaginationControls
+        page={currentPage}
+        totalItems={filtered.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
     </section>
   );
 }

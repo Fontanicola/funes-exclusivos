@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockLeads, mockPipelineEstados } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CrmPipeline } from "@/components/crm/crm-pipeline";
 import { LeadsTable } from "@/components/crm/leads-table";
 
@@ -134,13 +135,15 @@ export default async function CrmPage() {
         .select("id,slug,nombre,orden,activo")
         .eq("activo", true)
         .order("orden"),
-      supabase
-        .from("leads")
-        .select(
-          "id,nombre,telefono,email,origen,estado,presupuesto_min,presupuesto_max,presupuesto_moneda,nivel_interes,proximo_contacto,created_at,vehiculo:vehiculos!leads_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio),vendedor:empleados!leads_vendedor_id_fkey(id,nombre,email,rol)"
-        )
-        .order("created_at", { ascending: false })
-        .limit(200),
+      fetchAllSupabaseRows((from, to) =>
+        supabase
+          .from("leads")
+          .select(
+            "id,nombre,telefono,email,origen,estado,presupuesto_min,presupuesto_max,presupuesto_moneda,nivel_interes,proximo_contacto,created_at,vehiculo:vehiculos!leads_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio),vendedor:empleados!leads_vendedor_id_fkey(id,nombre,email,rol)"
+          )
+          .order("created_at", { ascending: false })
+          .range(from, to)
+      ),
     ]);
 
     pipelineEstados = (pipelineResult.data ?? []) as PipelineEstado[];

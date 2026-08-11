@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockComisionLiquidaciones } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
+import { LiquidacionesTable } from "@/components/comisiones/liquidaciones-table";
 
 export const metadata: Metadata = {
   title: "Liquidaciones de comisión | Funes Exclusivos",
@@ -83,12 +85,15 @@ export default async function LiquidacionesPage() {
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
-    const { data } = await supabase
-      .from("comision_liquidaciones")
-      .select(
-        "id,periodo,estado,moneda,neto_a_cobrar,fecha_pago,fecha_cierre,created_at,vendedor:empleados!comision_liquidaciones_vendedor_id_fkey(id,nombre,email,rol)"
-      )
-      .order("created_at", { ascending: false });
+    const { data } = await fetchAllSupabaseRows((from, to) =>
+      supabase
+        .from("comision_liquidaciones")
+        .select(
+          "id,periodo,estado,moneda,neto_a_cobrar,fecha_pago,fecha_cierre,created_at,vendedor:empleados!comision_liquidaciones_vendedor_id_fkey(id,nombre,email,rol)"
+        )
+        .order("created_at", { ascending: false })
+        .range(from, to)
+    );
 
     liquidaciones = ((data ?? []) as unknown as RawLiquidacion[]).map((item) => ({
       ...item,
@@ -114,68 +119,7 @@ export default async function LiquidacionesPage() {
         ) : null}
       </header>
 
-      <div className="overflow-hidden rounded-md border border-[#E5E7EB] bg-white">
-        <div className="border-b border-[#E5E7EB] px-5 py-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-base font-semibold text-[#111827]">Listado</h2>
-              <p className="text-sm text-[#6B7280]">Neto pendiente, pagado o cerrado por período.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-[#E5E7EB] text-left text-sm">
-            <thead className="bg-[#FAFAFA] text-xs uppercase tracking-[0.14em] text-[#6B7280]">
-              <tr>
-                <th className="px-5 py-3 font-medium">Período</th>
-                <th className="px-5 py-3 font-medium">Vendedor</th>
-                <th className="px-5 py-3 font-medium">Neto</th>
-                <th className="px-5 py-3 font-medium">Estado</th>
-                <th className="px-5 py-3 font-medium">Pago</th>
-                <th className="px-5 py-3 font-medium">Acción</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E7EB] bg-white">
-              {liquidaciones.length ? (
-                liquidaciones.map((liquidacion) => (
-                  <tr key={liquidacion.id} className="transition hover:bg-[#F9FAFB]">
-                    <td className="whitespace-nowrap px-5 py-4 text-[#111827]">{formatPeriod(liquidacion.periodo)}</td>
-                    <td className="px-5 py-4">
-                      <div className="space-y-1">
-                        <p className="font-medium text-[#111827]">{liquidacion.vendedor?.nombre ?? "—"}</p>
-                        <p className="text-xs text-[#6B7280]">{liquidacion.periodo ?? "Sin periodo"}</p>
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-4 font-medium text-[#111827]">{formatMoney(liquidacion.neto_a_cobrar, liquidacion.moneda)}</td>
-                    <td className="px-5 py-4">
-                      <LiquidacionStatusBadge status={liquidacion.estado} />
-                    </td>
-                    <td className="px-5 py-4 text-[#111827]">
-                      <div className="space-y-1">
-                        <p>{liquidacion.fecha_pago ? "Pagada" : "Pendiente"}</p>
-                        <p className="text-xs text-[#6B7280]">{liquidacion.fecha_pago ?? liquidacion.fecha_cierre ?? "—"}</p>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <Link href={`/comisiones/liquidaciones/${liquidacion.id}`} className="inline-flex items-center gap-1 text-sm font-medium text-[#8A1538] underline decoration-[#D8A1B2] underline-offset-4 transition hover:text-[#6F102D]">
-                        Ver
-                        <ChevronRight className="h-4 w-4" />
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="px-5 py-16 text-center text-sm text-[#6B7280]">
-                    No hay liquidaciones cargadas.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <LiquidacionesTable liquidaciones={liquidaciones} />
     </section>
   );
 }

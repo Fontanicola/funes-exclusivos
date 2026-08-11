@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { isDemoMode } from "@/lib/demo-mode";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 type ActionState = {
   error?: string;
@@ -112,6 +113,110 @@ export async function updateEmpleadoAction(
 
   if (error) {
     return { error: "No pudimos guardar los cambios del empleado." };
+  }
+
+  revalidatePath("/empleados");
+  return { success: true };
+}
+
+export async function createEmpleadoAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  if (isDemoMode) {
+    return { error: "Modo demo activo: conectá el entorno real para crear usuarios." };
+  }
+
+  const auth = await getAuthUser();
+  if ("error" in auth) return { error: auth.error };
+
+  if (!(await isAdmin(auth.supabase, auth.user.id))) {
+    return { error: "No tenés permisos para crear empleados." };
+  }
+
+  const email = toStringValue(formData.get("email")).toLowerCase();
+  const password = toStringValue(formData.get("password"));
+  const nombre = toStringValue(formData.get("nombre"));
+  const telefono = toStringValue(formData.get("telefono")) || null;
+  const rol = toStringValue(formData.get("rol"));
+  const cargo = toStringValue(formData.get("cargo")) || null;
+  const fechaIngreso = toStringValue(formData.get("fecha_ingreso")) || null;
+  const comisionDefault = toNumberValue(formData.get("comision_default_porcentaje"));
+  const notas = toStringValue(formData.get("notas")) || null;
+
+  if (!email || !email.includes("@")) {
+    return { error: "Ingresá un email válido." };
+  }
+  if (password.length < 8) {
+    return { error: "La contraseña debe tener al menos 8 caracteres." };
+  }
+  if (!nombre) return { error: "El nombre es obligatorio." };
+  if (!["admin", "vendedor", "gestor"].includes(rol)) {
+    return { error: "El rol seleccionado no es válido." };
+  }
+  if (comisionDefault == null || comisionDefault < 0) {
+    return { error: "La comisión default debe ser un número válido mayor o igual a 0." };
+  }
+
+  const { data: existingEmployee } = await auth.supabase
+    .from("empleados")
+    .select("id")
+    .ilike("email", email)
+    .maybeSingle<{ id: string }>();
+
+  if (existingEmployee) {
+    return { error: "Ya existe un empleado con ese email." };
+  }
+
+  let createdUserId: string | null = null;
+
+  try {
+    const admin = createSupabaseAdminClient();
+    const { data: createdUser, error: createUserError } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { nombre, rol },
+    });
+
+    if (createUserError || !createdUser.user) {
+      const message = createUserError?.message?.toLowerCase() ?? "";
+      if (message.includes("already") || message.includes("registered")) {
+        return { error: "Ya existe un usuario con ese email." };
+      }
+      return { error: "No pudimos crear el usuario. Revisá el email y la contraseña." };
+    }
+
+    createdUserId = createdUser.user.id;
+
+    const { error: employeeError } = await admin.from("empleados").insert({
+      id: createdUserId,
+      email,
+      nombre,
+      telefono,
+      rol,
+      activo: true,
+      cargo,
+      fecha_ingreso: fechaIngreso,
+      comision_default_porcentaje: comisionDefault,
+      notas,
+    });
+
+    if (employeeError) {
+      await admin.auth.admin.deleteUser(createdUserId);
+      return { error: "El usuario se creó, pero no pudimos guardar su perfil operativo." };
+    }
+  } catch (error) {
+    if (createdUserId) {
+      try {
+        await createSupabaseAdminClient().auth.admin.deleteUser(createdUserId);
+      } catch {
+        // Avoid exposing infrastructure details in the form response.
+      }
+    }
+
+    console.error("createEmpleadoAction failed", error);
+    return { error: "No pudimos crear el empleado. Revisá la configuración del entorno." };
   }
 
   revalidatePath("/empleados");

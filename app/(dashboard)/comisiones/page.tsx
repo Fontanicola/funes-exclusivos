@@ -5,6 +5,7 @@ import { canManageCommissions } from "@/lib/auth/permissions";
 import { mockEmpleado } from "@/lib/mock-data";
 import { mockComisiones } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { ComisionesComparativa } from "@/components/comisiones/comisiones-comparativa";
 import { ComisionesTable } from "@/components/comisiones/comisiones-table";
 
@@ -142,14 +143,16 @@ export default async function ComisionesPage() {
         data: { user },
       },
     ] = await Promise.all([
-      supabase
-      .from("comisiones")
-      .select(
-        "id,venta_id,vendedor_id,base_comision,porcentaje,monto_comision,moneda,estado,fecha_generada,fecha_pago,observaciones,created_at,vendedor:empleados!comisiones_vendedor_id_fkey(id,nombre,email,rol),venta:ventas!comisiones_venta_id_fkey(id,fecha_venta,cliente_nombre,precio_venta,moneda,metodo_pago,estado,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio))"
-      )
-      .order("fecha_generada", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(150),
+      fetchAllSupabaseRows((from, to) =>
+        supabase
+          .from("comisiones")
+          .select(
+            "id,venta_id,vendedor_id,base_comision,porcentaje,monto_comision,moneda,estado,fecha_generada,fecha_pago,observaciones,created_at,vendedor:empleados!comisiones_vendedor_id_fkey(id,nombre,email,rol),venta:ventas!comisiones_venta_id_fkey(id,fecha_venta,cliente_nombre,precio_venta,moneda,metodo_pago,estado,vehiculo:vehiculos!ventas_vehiculo_id_fkey(id,marca,modelo,version,anio,dominio))"
+          )
+          .order("fecha_generada", { ascending: false })
+          .order("created_at", { ascending: false })
+          .range(from, to)
+      ),
       supabase.auth.getUser(),
     ]);
 

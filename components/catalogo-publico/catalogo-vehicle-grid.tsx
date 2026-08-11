@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { CatalogoEmptyState } from "./catalogo-empty-state";
 import { CatalogoFilters, type CatalogoSortValue } from "./catalogo-filters";
 import { CatalogoVehicleCard } from "./catalogo-vehicle-card";
+import { PaginationControls } from "@/components/common/pagination-controls";
 
 type Vehiculo = {
   id: string;
@@ -35,6 +36,8 @@ type CatalogoConfig = {
   mostrar_km: boolean | null;
   mostrar_dominio: boolean | null;
 };
+
+const PAGE_SIZE = 10;
 
 function getSearchableText(vehicle: Vehiculo) {
   return [vehicle.marca, vehicle.modelo, vehicle.version, vehicle.color, vehicle.anio]
@@ -87,6 +90,7 @@ export function CatalogoVehicleGrid({
   const [maxPrice, setMaxPrice] = useState("");
   const [onlyFeatured, setOnlyFeatured] = useState(false);
   const [sortBy, setSortBy] = useState<CatalogoSortValue>("featured");
+  const [page, setPage] = useState(1);
 
   const marcas = useMemo(
     () =>
@@ -120,6 +124,10 @@ export function CatalogoVehicleGrid({
       })
       .sort((a, b) => compareBySort(a, b, sortBy));
   }, [anio, marca, maxPrice, minPrice, onlyFeatured, query, sortBy, vehiculos]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleVehicles = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   if (!vehiculos.length) {
     return (
@@ -157,18 +165,26 @@ export function CatalogoVehicleGrid({
       />
 
       {filtered.length ? (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((vehicle) => (
-            <CatalogoVehicleCard
-              key={vehicle.id}
-              vehicle={vehicle}
-              mostrarPrecios={Boolean(config.mostrar_precios)}
-              mostrarKm={Boolean(config.mostrar_km)}
-              mostrarDominio={Boolean(config.mostrar_dominio)}
-              whatsappContacto={config.whatsapp_contacto}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {visibleVehicles.map((vehicle) => (
+              <CatalogoVehicleCard
+                key={vehicle.id}
+                vehicle={vehicle}
+                mostrarPrecios={Boolean(config.mostrar_precios)}
+                mostrarKm={Boolean(config.mostrar_km)}
+                mostrarDominio={Boolean(config.mostrar_dominio)}
+                whatsappContacto={config.whatsapp_contacto}
+              />
+            ))}
+          </div>
+          <PaginationControls
+            page={currentPage}
+            totalItems={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
+        </>
       ) : (
         <CatalogoEmptyState
           title="No hay vehículos publicados en este momento"
