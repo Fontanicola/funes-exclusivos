@@ -1491,6 +1491,13 @@
 
 - `npm run build` ejecutado correctamente después de los cambios.
 
+## Tooltip en gráficos mensuales
+
+- El gráfico de P&L mensual ahora muestra un tooltip al pasar el mouse sobre cada mes.
+- El detalle incluye ingresos, egresos, resultado y cantidad de ventas de ese período, respetando la moneda de la serie.
+- También se puede abrir con foco de teclado para mantener una interacción accesible.
+- No se agregaron dependencias; se resolvió con CSS y el componente existente.
+
 ## Paginación global de listados
 
 ### Qué se implementó

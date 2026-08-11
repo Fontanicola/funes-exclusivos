@@ -1,3 +1,5 @@
+"use client";
+
 import type { MonthlyPnlPoint } from "@/lib/dashboard-metrics";
 import { DashboardChartCard } from "@/components/dashboard/dashboard-chart-card";
 
@@ -13,6 +15,14 @@ function currencyLabel(currency: string) {
   if (currency === "USD") return "US$";
   if (currency === "ARS") return "$";
   return currency;
+}
+
+function formatAmount(value: number, currency: string) {
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: currency === "USD" ? "USD" : "ARS",
+    maximumFractionDigits: 0,
+  }).format(value).replace("US$", "US$").replace("ARS", "$");
 }
 
 function toneClass(kind: "income" | "expense" | "result") {
@@ -78,7 +88,21 @@ export function MonthlyPnlChart({ seriesByCurrency, className = "", compact = fa
                     const resultHeight = Math.max(12, (Math.abs(point.result) / max) * 140);
 
                     return (
-                      <div key={point.monthKey} className="flex flex-1 flex-col items-center gap-2">
+                      <div
+                        key={point.monthKey}
+                        className="group relative flex flex-1 cursor-default flex-col items-center gap-2 rounded-md px-1 py-1 outline-none focus-visible:ring-2 focus-visible:ring-[#8A1538]"
+                        tabIndex={0}
+                        aria-label={`${point.label}: ingresos ${formatAmount(point.income, currency)}, egresos ${formatAmount(point.expense, currency)}, resultado ${formatAmount(point.result, currency)}, ${point.salesCount} ventas`}
+                      >
+                        <div className="pointer-events-none absolute bottom-[74px] left-1/2 z-10 hidden w-52 -translate-x-1/2 rounded-md border border-[#E5E7EB] bg-white p-3 text-left shadow-lg group-hover:block group-focus-within:block">
+                          <p className="text-xs font-semibold text-[#111827]">{point.label}</p>
+                          <div className="mt-2 space-y-1 text-xs text-[#6B7280]">
+                            <p className="flex items-center justify-between gap-3"><span>Ingresos</span><strong className="font-medium text-emerald-700">{formatAmount(point.income, currency)}</strong></p>
+                            <p className="flex items-center justify-between gap-3"><span>Egresos</span><strong className="font-medium text-rose-700">{formatAmount(point.expense, currency)}</strong></p>
+                            <p className="flex items-center justify-between gap-3"><span>Resultado</span><strong className="font-medium text-slate-700">{formatAmount(point.result, currency)}</strong></p>
+                            <p className="border-t border-[#E5E7EB] pt-1 text-[#111827]">{point.salesCount} ventas</p>
+                          </div>
+                        </div>
                         <div className="flex h-[160px] items-end gap-1.5">
                           <Bar height={incomeHeight} tone="income" />
                           <Bar height={expenseHeight} tone="expense" />
