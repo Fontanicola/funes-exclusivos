@@ -1483,6 +1483,28 @@
 
 - `npm run build` ejecutado correctamente después de la implementación.
 
+## Eliminación de usuarios desde Empleados
+
+### Qué se construyó
+
+- Se agregó la acción `Eliminar` en la tabla de `/empleados`.
+- La acción pide confirmación antes de ejecutarse.
+- Solo está disponible para administradores activos.
+- El usuario administrador logueado no puede eliminarse a sí mismo.
+- Se elimina el perfil operativo de `empleados` y el acceso correspondiente de Supabase Auth.
+- Si existen referencias operativas que impiden borrar el perfil, la acción se detiene antes de quitar el acceso.
+- Si falla la eliminación del acceso Auth, se intenta restaurar el perfil operativo para evitar un estado parcial.
+
+### Paths modificados
+
+- `app/(dashboard)/empleados/actions.ts`
+- `components/empleados/empleados-table.tsx`
+- `components/empleados/empleado-delete-button.tsx`
+
+### Validación
+
+- `npm run build` ejecutado correctamente después de la implementación.
+
 ### Ajuste posterior: perfil creado por trigger
 
 - Se corrigió el alta para usar `upsert` sobre `empleados` con conflicto por `id`.

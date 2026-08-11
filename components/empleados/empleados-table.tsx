@@ -6,6 +6,7 @@ import { Search, X } from "lucide-react";
 import { EmpleadoRoleBadge } from "./empleado-role-badge";
 import { EmpleadoStatusBadge } from "./empleado-status-badge";
 import { EmpleadoEditForm } from "./empleado-edit-form";
+import { EmpleadoDeleteButton } from "./empleado-delete-button";
 import { PaginationControls } from "@/components/common/pagination-controls";
 
 type Employee = {
@@ -212,13 +213,21 @@ export function EmpleadosTable({
                         {formatDate(employee.fecha_ingreso)}
                       </td>
                       <td className="border-b border-[#E5E7EB] px-4 py-4">
-                        <button
-                          type="button"
-                          onClick={() => setEditingId((current) => (current === employee.id ? null : employee.id))}
-                          className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-                        >
-                          {isEditing ? "Cerrar" : "Editar"}
-                        </button>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setEditingId((current) => (current === employee.id ? null : employee.id))}
+                            className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+                          >
+                            {isEditing ? "Cerrar" : "Editar"}
+                          </button>
+                          {currentUserId !== employee.id ? (
+                            <EmpleadoDeleteButton
+                              employeeId={employee.id}
+                              employeeName={employee.nombre ?? employee.email}
+                            />
+                          ) : null}
+                        </div>
                       </td>
                     </tr>
                     {isEditing ? (

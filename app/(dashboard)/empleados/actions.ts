@@ -228,3 +228,64 @@ export async function createEmpleadoAction(
   revalidatePath("/empleados");
   return { success: true };
 }
+
+export async function deleteEmpleadoAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  if (isDemoMode) {
+    return { error: "Modo demo activo: conectá el entorno real para eliminar usuarios." };
+  }
+
+  const auth = await getAuthUser();
+  if ("error" in auth) return { error: auth.error };
+
+  if (!(await isAdmin(auth.supabase, auth.user.id))) {
+    return { error: "No tenés permisos para eliminar empleados." };
+  }
+
+  const id = toStringValue(formData.get("id"));
+  if (!id) return { error: "El empleado es obligatorio." };
+  if (id === auth.user.id) return { error: "No podés eliminar tu propio usuario." };
+
+  const admin = createSupabaseAdminClient();
+  const { data: employee } = await admin
+    .from("empleados")
+    .select("id,email,nombre,telefono,avatar_url,rol,activo,cargo,fecha_ingreso,comision_default_porcentaje,notas")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!employee) return { error: "El empleado ya no existe." };
+
+  const { error: profileError } = await admin.from("empleados").delete().eq("id", id);
+  if (profileError) {
+    console.error("deleteEmpleadoAction profile delete failed", {
+      code: profileError.code,
+      message: profileError.message,
+      details: profileError.details,
+      hint: profileError.hint,
+    });
+    return { error: "No pudimos eliminar el perfil. Puede tener información operativa vinculada." };
+  }
+
+  const { error: authError } = await admin.auth.admin.deleteUser(id);
+  if (authError) {
+    console.error("deleteEmpleadoAction auth delete failed", {
+      code: authError.code,
+      message: authError.message,
+    });
+
+    const { error: restoreError } = await admin.from("empleados").upsert(employee, { onConflict: "id" });
+    if (restoreError) {
+      console.error("deleteEmpleadoAction profile restore failed", {
+        code: restoreError.code,
+        message: restoreError.message,
+      });
+    }
+
+    return { error: "No pudimos eliminar el acceso del usuario. No se realizaron cambios." };
+  }
+
+  revalidatePath("/empleados");
+  return { success: true };
+}
