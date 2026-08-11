@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
+import { useMemo } from "react";
+import { ArrowRight } from "lucide-react";
 import { LeadStatusBadge } from "@/components/crm/lead-status-badge";
 import { LeadConvertSaleForm } from "@/components/crm/lead-convert-sale-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 type Lead = {
   id: string;
@@ -96,7 +97,6 @@ export function LeadDetail({
   vehicles: Vehicle[];
   sellers: Seller[];
 }) {
-  const [showConversionForm, setShowConversionForm] = useState(false);
   const warning = useMemo(() => getLeadWarning(lead.estado), [lead.estado]);
   const hasSale = Boolean(sale);
 
@@ -138,23 +138,14 @@ export function LeadDetail({
               <ArrowRight className="h-4 w-4" />
             </Link>
           ) : (
-            <button
-              type="button"
-              onClick={() => setShowConversionForm((value) => !value)}
-              className="inline-flex h-10 items-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
+            <DataEntryModal
+              triggerLabel="Convertir en venta"
+              title="Convertir lead en venta"
+              description="Completá los datos de la operación para registrar la venta y sus integraciones automáticas."
+              size="wide"
             >
-              {showConversionForm ? (
-                <>
-                  Ocultar conversión
-                  <ChevronUp className="h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Convertir en venta
-                  <ChevronDown className="h-4 w-4" />
-                </>
-              )}
-            </button>
+              <LeadConvertSaleForm lead={lead} vehicles={vehicles} sellers={sellers} />
+            </DataEntryModal>
           )}
         </div>
       </div>
@@ -184,10 +175,6 @@ export function LeadDetail({
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-        </div>
-      ) : showConversionForm ? (
-        <div className="mt-5">
-          <LeadConvertSaleForm lead={lead} vehicles={vehicles} sellers={sellers} />
         </div>
       ) : (
         <div className="mt-5 rounded-md border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-4 py-6 text-sm text-[#6B7280]">

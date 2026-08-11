@@ -4,6 +4,7 @@ import { mockConfiguracionGeneral } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ConfiguracionGeneralForm } from "@/components/configuracion/configuracion-general-form";
 import { ConfiguracionSummary } from "@/components/configuracion/configuracion-summary";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Configuración | Funes Exclusivos",
@@ -75,7 +76,13 @@ export default async function ConfiguracionPage() {
       </header>
 
       <div className="space-y-6">
-        <ConfiguracionGeneralForm config={config} />
+        <DataEntryModal
+          triggerLabel="Editar configuración"
+          title="Configuración general"
+          description="Actualizá los datos de empresa y parámetros operativos."
+        >
+          <ConfiguracionGeneralForm config={config} />
+        </DataEntryModal>
         <ConfiguracionSummary config={config} />
       </div>
     </section>

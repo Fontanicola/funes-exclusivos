@@ -4,6 +4,7 @@ import { mockEmpleados } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmpleadosTable } from "@/components/empleados/empleados-table";
 import { EmpleadoCreateForm } from "@/components/empleados/empleado-create-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Empleados | Funes Exclusivos",
@@ -112,7 +113,13 @@ export default async function EmpleadosPage() {
         Desde esta pantalla se gestiona el equipo, sus roles y el estado operativo dentro del sistema.
       </div>
 
-      <EmpleadoCreateForm />
+      <DataEntryModal
+        triggerLabel="Nuevo usuario"
+        title="Nuevo usuario"
+        description="Creá el acceso y asigná el rol operativo dentro de Funes Exclusivos."
+      >
+        <EmpleadoCreateForm />
+      </DataEntryModal>
       <EmpleadosTable empleados={empleados} currentUserId={currentUserId} />
     </section>
   );

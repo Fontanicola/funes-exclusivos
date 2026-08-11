@@ -5,6 +5,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockVehiculos } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VentaForm } from "@/components/ventas/venta-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Nueva venta | Funes Exclusivos",
@@ -69,7 +70,13 @@ export default async function NuevaVentaPage() {
         ) : null}
       </header>
 
-      <VentaForm vehiculos={vehiculos} />
+      <DataEntryModal
+        triggerLabel="Registrar venta"
+        title="Nueva venta"
+        description="Cargá la operación y sus pagos iniciales."
+      >
+        <VentaForm vehiculos={vehiculos} />
+      </DataEntryModal>
     </section>
   );
 }

@@ -9,6 +9,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VehiculoDetail } from "@/components/inventario/vehiculo-detail";
 import { VehiculoDocumentoForm } from "@/components/inventario/vehiculo-documento-form";
 import { VehiculoDocumentosTable } from "@/components/inventario/vehiculo-documentos-table";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const dynamic = "force-dynamic";
 
@@ -278,7 +279,13 @@ export default async function VehiculoDetailPage({ params }: PageProps) {
 
       <div className="space-y-6">
         {data.canManageDocuments ? (
-          <VehiculoDocumentoForm vehiculoId={data.vehiculo.id} />
+          <DataEntryModal
+            triggerLabel="Agregar documento"
+            title="Nuevo documento del vehículo"
+            description="Cargá títulos, comprobantes y documentación operativa."
+          >
+            <VehiculoDocumentoForm vehiculoId={data.vehiculo.id} />
+          </DataEntryModal>
         ) : (
           <section className="rounded-md border border-[#E5E7EB] bg-white p-5">
             <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-5 text-sm text-[#6B7280]">

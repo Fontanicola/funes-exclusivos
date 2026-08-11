@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CatalogoSettingsForm } from "@/components/catalogo/catalogo-settings-form";
 import { CatalogoVehiculosTable } from "@/components/catalogo/catalogo-vehiculos-table";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Catálogo | Funes Exclusivos",
@@ -156,7 +157,13 @@ export default async function CatalogoPage() {
       </div>
 
       <div className="space-y-6">
-        <CatalogoSettingsForm config={config} />
+        <DataEntryModal
+          triggerLabel="Editar configuración del catálogo"
+          title="Configuración del catálogo"
+          description="Definí cómo se presenta la vidriera pública."
+        >
+          <CatalogoSettingsForm config={config} />
+        </DataEntryModal>
         <CatalogoVehiculosTable vehiculos={vehiculos} />
       </div>
     </section>

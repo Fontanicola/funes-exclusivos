@@ -5,6 +5,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockProveedores } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompraForm } from "@/components/compras/compra-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Nueva compra | Funes Exclusivos",
@@ -57,7 +58,13 @@ export default async function NuevaCompraPage() {
         ) : null}
       </header>
 
-      <CompraForm proveedores={proveedores} />
+      <DataEntryModal
+        triggerLabel="Cargar compra"
+        title="Nueva compra"
+        description="Registrá la compra y el ingreso de la unidad al inventario."
+      >
+        <CompraForm proveedores={proveedores} />
+      </DataEntryModal>
     </section>
   );
 }

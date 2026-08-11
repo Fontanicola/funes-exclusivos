@@ -1418,6 +1418,49 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Cargas de datos en modales
+
+### Qué se implementó
+
+- Se incorporó un patrón reutilizable de modal para mantener las pantallas operativas más limpias y mostrar los formularios solo cuando el usuario decide cargar o editar datos.
+- Las altas principales ahora se abren desde un botón: vehículos, compras, ventas, leads, trámites, presupuestos, caja, recordatorios, documentos, conexiones de WhatsApp, usuarios, configuración y catálogo.
+- También se modalizaron cargas secundarias de conversión de lead, ítems de presupuesto, pago de liquidaciones, seguimiento de conversaciones y edición de vehículos.
+- Los formularios y Server Actions existentes se conservaron sin cambios de negocio, schema ni permisos.
+- Las acciones rápidas de tablas, como completar, cambiar estados o eliminar un ítem, se mantuvieron contextuales para no agregar pasos innecesarios a la operación diaria.
+
+### Paths creados/modificados
+
+- `components/common/data-entry-modal.tsx`
+- `app/(dashboard)/inventario/nuevo/page.tsx`
+- `app/(dashboard)/inventario/[id]/editar/page.tsx`
+- `app/(dashboard)/inventario/[id]/page.tsx`
+- `app/(dashboard)/compras/nueva/page.tsx`
+- `app/(dashboard)/ventas/nueva/page.tsx`
+- `app/(dashboard)/crm/nuevo/page.tsx`
+- `app/(dashboard)/crm/[id]/page.tsx`
+- `app/(dashboard)/gestoria/nuevo/page.tsx`
+- `app/(dashboard)/gestoria/presupuestos/nuevo/page.tsx`
+- `app/(dashboard)/caja/page.tsx`
+- `app/(dashboard)/recordatorios/page.tsx`
+- `app/(dashboard)/whatsapp/conexiones/page.tsx`
+- `app/(dashboard)/empleados/page.tsx`
+- `app/(dashboard)/configuracion/page.tsx`
+- `app/(dashboard)/dashboard/catalogo/page.tsx`
+- `components/crm/lead-detail.tsx`
+- `components/gestoria/presupuesto-detail.tsx`
+- `components/comisiones/liquidacion-detail.tsx`
+- `components/whatsapp/conversacion-detail.tsx`
+
+### Decisiones técnicas
+
+- El modal es un componente cliente liviano, sin dependencias nuevas, con cierre por botón, tecla Escape y click fuera del contenido.
+- Se bloquea el scroll del documento mientras el modal está abierto y se limita la altura interna para que los formularios largos sigan siendo utilizables.
+- La apertura se resuelve en las páginas o detalles que ya conocen el contexto, evitando duplicar formularios o crear rutas nuevas.
+
+### Validación
+
+- `npm run build` ejecutado correctamente.
+
 ## Paginación global de listados
 
 ### Qué se implementó

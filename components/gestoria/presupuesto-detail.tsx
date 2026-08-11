@@ -5,6 +5,7 @@ import { deleteGestoriaPresupuestoItemAction, updateGestoriaPresupuestoEstadoAct
 import { PresupuestoItemTypeBadge } from "./presupuesto-item-type-badge";
 import { PresupuestoStatusBadge } from "./presupuesto-status-badge";
 import { PresupuestoItemForm } from "./presupuesto-item-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 type Presupuesto = {
   id: string;
@@ -238,7 +239,13 @@ export function PresupuestoDetail({
             </div>
           </article>
 
-          <PresupuestoItemForm presupuestoId={presupuesto.id} />
+          <DataEntryModal
+            triggerLabel="Agregar ítem"
+            title="Agregar ítem al presupuesto"
+            description="Cargá un nuevo concepto y su importe para actualizar el presupuesto."
+          >
+            <PresupuestoItemForm presupuestoId={presupuesto.id} />
+          </DataEntryModal>
         </aside>
       </div>
     </section>

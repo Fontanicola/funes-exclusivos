@@ -2,6 +2,7 @@
 
 import { AiSummaryCard } from "./ai-summary-card";
 import { ConversationFollowUpForm } from "./conversation-follow-up-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 type Conversation = {
   id: string;
@@ -86,7 +87,13 @@ export function ConversacionDetail({ conversation }: { conversation: Conversatio
 
       <AiSummaryCard conversation={conversation} />
 
-      <ConversationFollowUpForm conversation={conversation} />
+      <DataEntryModal
+        triggerLabel="Editar seguimiento"
+        title="Seguimiento comercial"
+        description="Actualizá el estado y la próxima acción de esta conversación."
+      >
+        <ConversationFollowUpForm conversation={conversation} />
+      </DataEntryModal>
     </aside>
   );
 }

@@ -10,6 +10,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleado, mockProveedores } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VehiculoForm } from "@/components/inventario/vehiculo-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 type PageProps = {
   params: {
@@ -93,46 +94,53 @@ export default async function EditarVehiculoPage({ params }: PageProps) {
         </div>
       </header>
 
-      <VehiculoForm
-        mode="edit"
-        proveedores={proveedores}
-        role={currentRole}
-        vehiculo={{
-          id: vehiculo.id,
-          marca: vehiculo.marca,
-          modelo: vehiculo.modelo,
-          version: vehiculo.version,
-          anio: vehiculo.anio,
-          color: vehiculo.color,
-          km: vehiculo.km,
-          dominio: vehiculo.dominio,
-          costo_adquisicion: vehiculo.costo_adquisicion,
-          costo_moneda: vehiculo.costo_moneda,
-          precio_venta: vehiculo.precio_venta,
-          precio_moneda: vehiculo.precio_moneda,
-          estado: vehiculo.estado,
-          motor: vehiculo.motor,
-          ubicacion: vehiculo.ubicacion,
-          nro_operacion: vehiculo.nro_operacion,
-          proveedor_id: vehiculo.proveedor_id,
-          fecha_compra: vehiculo.fecha_compra,
-          precio_infoauto_compra: vehiculo.precio_infoauto_compra,
-          precio_infoauto_actual: vehiculo.precio_infoauto_actual,
-          precio_infoauto_anterior: vehiculo.precio_infoauto_anterior,
-          precio_permuta: vehiculo.precio_permuta,
-          precio_contado: vehiculo.precio_contado,
-          costo_reposicion: vehiculo.costo_reposicion,
-          estado_preparacion: vehiculo.estado_preparacion,
-          chapero: vehiculo.chapero,
-          preparacion_comentarios: vehiculo.preparacion_comentarios,
-          publicado_mercadolibre: vehiculo.publicado_mercadolibre,
-          publicado_rodados_google: vehiculo.publicado_rodados_google,
-          fotos,
-          fecha_ingreso: vehiculo.fecha_ingreso,
-          descripcion: vehiculo.descripcion ?? null,
-          observaciones: vehiculo.observaciones ?? null,
-        }}
-      />
+      <DataEntryModal
+        triggerLabel="Editar vehículo"
+        title="Editar vehículo"
+        description="Actualizá los datos comerciales, operativos y de publicación de la unidad."
+        size="wide"
+      >
+        <VehiculoForm
+          mode="edit"
+          proveedores={proveedores}
+          role={currentRole}
+          vehiculo={{
+            id: vehiculo.id,
+            marca: vehiculo.marca,
+            modelo: vehiculo.modelo,
+            version: vehiculo.version,
+            anio: vehiculo.anio,
+            color: vehiculo.color,
+            km: vehiculo.km,
+            dominio: vehiculo.dominio,
+            costo_adquisicion: vehiculo.costo_adquisicion,
+            costo_moneda: vehiculo.costo_moneda,
+            precio_venta: vehiculo.precio_venta,
+            precio_moneda: vehiculo.precio_moneda,
+            estado: vehiculo.estado,
+            motor: vehiculo.motor,
+            ubicacion: vehiculo.ubicacion,
+            nro_operacion: vehiculo.nro_operacion,
+            proveedor_id: vehiculo.proveedor_id,
+            fecha_compra: vehiculo.fecha_compra,
+            precio_infoauto_compra: vehiculo.precio_infoauto_compra,
+            precio_infoauto_actual: vehiculo.precio_infoauto_actual,
+            precio_infoauto_anterior: vehiculo.precio_infoauto_anterior,
+            precio_permuta: vehiculo.precio_permuta,
+            precio_contado: vehiculo.precio_contado,
+            costo_reposicion: vehiculo.costo_reposicion,
+            estado_preparacion: vehiculo.estado_preparacion,
+            chapero: vehiculo.chapero,
+            preparacion_comentarios: vehiculo.preparacion_comentarios,
+            publicado_mercadolibre: vehiculo.publicado_mercadolibre,
+            publicado_rodados_google: vehiculo.publicado_rodados_google,
+            fotos,
+            fecha_ingreso: vehiculo.fecha_ingreso,
+            descripcion: vehiculo.descripcion ?? null,
+            observaciones: vehiculo.observaciones ?? null,
+          }}
+        />
+      </DataEntryModal>
     </section>
   );
 }

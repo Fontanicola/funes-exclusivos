@@ -11,6 +11,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CajaMovimientoForm } from "@/components/caja/caja-movimiento-form";
 import { CajaMovimientosTable } from "@/components/caja/caja-movimientos-table";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { CajaSummary } from "@/components/caja/caja-summary";
 
 export const metadata: Metadata = {
@@ -300,7 +301,13 @@ export default async function CajaPage() {
       <div className="space-y-6">
         <div>
           {canManageCaja(currentRole) ? (
-            <CajaMovimientoForm proveedores={proveedores} activos={activos} role={currentRole} />
+            <DataEntryModal
+              triggerLabel="Cargar movimiento"
+              title="Nuevo movimiento de caja"
+              description="Registrá un ingreso o egreso manual."
+            >
+              <CajaMovimientoForm proveedores={proveedores} activos={activos} role={currentRole} />
+            </DataEntryModal>
           ) : (
             <section className="rounded-md border border-[#E5E7EB] bg-white p-4">
               <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-5 text-sm text-[#6B7280]">

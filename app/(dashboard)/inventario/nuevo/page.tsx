@@ -5,6 +5,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockProveedores } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VehiculoForm } from "@/components/inventario/vehiculo-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Nuevo vehículo | Funes Exclusivos",
@@ -58,7 +59,13 @@ export default async function NuevoVehiculoPage() {
         ) : null}
       </header>
 
-      <VehiculoForm mode="create" proveedores={proveedores} />
+      <DataEntryModal
+        triggerLabel="Cargar vehículo"
+        title="Nuevo vehículo"
+        description="Completá los datos de la unidad para incorporarla al inventario."
+      >
+        <VehiculoForm mode="create" proveedores={proveedores} />
+      </DataEntryModal>
     </section>
   );
 }

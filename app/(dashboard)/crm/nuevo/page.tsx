@@ -4,6 +4,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleado, mockVehiculos, mockLeads } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { LeadForm } from "@/components/crm/lead-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Nuevo lead | Funes Exclusivos",
@@ -76,7 +77,13 @@ export default async function NewLeadPage() {
         </Link>
       </div>
 
-      <LeadForm vehicles={vehicles} employees={employees} />
+      <DataEntryModal
+        triggerLabel="Cargar lead"
+        title="Nuevo lead"
+        description="Registrá un contacto y su oportunidad comercial."
+      >
+        <LeadForm vehicles={vehicles} employees={employees} />
+      </DataEntryModal>
     </section>
   );
 }

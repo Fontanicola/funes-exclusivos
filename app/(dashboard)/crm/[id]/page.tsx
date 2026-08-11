@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { LeadDetail } from "@/components/crm/lead-detail";
 import { LeadInteractionForm } from "@/components/crm/lead-interaction-form";
 import { LeadInteractionsTimeline } from "@/components/crm/lead-interactions-timeline";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { LeadOriginBadge } from "@/components/crm/lead-origin-badge";
 import { LeadStatusBadge } from "@/components/crm/lead-status-badge";
 
@@ -334,7 +335,13 @@ export default async function LeadDetailPage({
         </div>
 
         <div className="space-y-6">
-          <LeadInteractionForm leadId={lead.id} />
+          <DataEntryModal
+            triggerLabel="Registrar interacción"
+            title="Nueva interacción"
+            description="Sumá una nota o contacto al seguimiento del lead."
+          >
+            <LeadInteractionForm leadId={lead.id} />
+          </DataEntryModal>
           <LeadInteractionsTimeline interactions={interactions} />
         </div>
       </div>

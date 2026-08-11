@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { WhatsappInstanceCreateForm } from "@/components/whatsapp/whatsapp-instance-create-form";
 import { WhatsappInstancesGrid } from "@/components/whatsapp/whatsapp-instances-grid";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Conexiones WhatsApp | Funes Exclusivos",
@@ -167,7 +168,13 @@ export default async function WhatsappConnectionsPage() {
 
       <div className="space-y-6">
         <div>
-          <WhatsappInstanceCreateForm employees={employees} />
+          <DataEntryModal
+            triggerLabel="Agregar conexión"
+            title="Nueva conexión de WhatsApp"
+            description="Seleccioná el vendedor para generar su conexión."
+          >
+            <WhatsappInstanceCreateForm employees={employees} />
+          </DataEntryModal>
           {!canManageAll && currentEmployee ? (
             <p className="mt-3 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-xs leading-5 text-[#6B7280]">
               Estás viendo solo tu instancia. La conexión se crea y administra para {currentEmployee.nombre ?? currentEmployee.email ?? "tu usuario"}.

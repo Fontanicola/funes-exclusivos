@@ -9,6 +9,7 @@ import {
 } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { GestoriaForm } from "@/components/gestoria/gestoria-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Nuevo trámite | Funes Exclusivos",
@@ -130,7 +131,13 @@ export default async function NuevoGestoriaPage() {
         ) : null}
       </header>
 
-      <GestoriaForm vehicles={vehicles} ventas={ventas} responsables={responsables} />
+      <DataEntryModal
+        triggerLabel="Cargar trámite"
+        title="Nuevo trámite"
+        description="Registrá el seguimiento de la operación de gestoría."
+      >
+        <GestoriaForm vehicles={vehicles} ventas={ventas} responsables={responsables} />
+      </DataEntryModal>
     </section>
   );
 }

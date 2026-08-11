@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useFormState } from "react-dom";
 import { updateLiquidacionEstadoAction } from "@/app/(dashboard)/comisiones/liquidaciones/actions";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 type Liquidacion = {
   id: string;
@@ -117,23 +117,10 @@ function StatusButton({ liquidacionId, estado, label, disabled }: { liquidacionI
 
 function PaymentForm({ liquidacion }: { liquidacion: Liquidacion }) {
   const [state, formAction] = useFormState(updateLiquidacionEstadoAction, initialState);
-  const [open, setOpen] = useState(false);
   const currentState = (liquidacion.estado ?? "borrador").toLowerCase();
 
   if (currentState === "pagada" || currentState === "anulada") {
     return null;
-  }
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex h-9 items-center justify-center rounded-md bg-[#8A1538] px-3.5 text-xs font-medium text-white transition hover:bg-[#6F102D]"
-      >
-        Marcar pagada
-      </button>
-    );
   }
 
   return (
@@ -172,13 +159,6 @@ function PaymentForm({ liquidacion }: { liquidacion: Liquidacion }) {
           className="inline-flex h-9 items-center justify-center rounded-md bg-[#8A1538] px-3.5 text-xs font-medium text-white transition hover:bg-[#6F102D]"
         >
           Confirmar pago
-        </button>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3.5 text-xs font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-        >
-          Cancelar
         </button>
       </div>
     </form>
@@ -259,7 +239,15 @@ export function LiquidacionDetail({ liquidacion }: { liquidacion: Liquidacion })
       </article>
 
       <div className="flex flex-wrap items-center gap-2">
-        {!locked ? <PaymentForm liquidacion={liquidacion} /> : null}
+        {!locked ? (
+          <DataEntryModal
+            triggerLabel="Marcar pagada"
+            title="Registrar pago de liquidación"
+            description="Completá el medio y la cuenta para generar el egreso correspondiente en Caja."
+          >
+            <PaymentForm liquidacion={liquidacion} />
+          </DataEntryModal>
+        ) : null}
         {!locked ? (
           <>
             <StatusButton liquidacionId={liquidacion.id} estado="cerrada" label="Cerrar" />

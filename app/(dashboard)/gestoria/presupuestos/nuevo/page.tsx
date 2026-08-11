@@ -8,6 +8,7 @@ import {
 } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PresupuestoForm } from "@/components/gestoria/presupuesto-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Nuevo presupuesto | Funes Exclusivos",
@@ -133,7 +134,13 @@ export default async function NuevoPresupuestoPage() {
         ) : null}
       </header>
 
-      <PresupuestoForm tramites={tramites} ventas={ventas} vehiculos={vehiculos} />
+      <DataEntryModal
+        triggerLabel="Cargar presupuesto"
+        title="Nuevo presupuesto"
+        description="Cargá una estimación de costos de gestoría."
+      >
+        <PresupuestoForm tramites={tramites} ventas={ventas} vehiculos={vehiculos} />
+      </DataEntryModal>
     </section>
   );
 }

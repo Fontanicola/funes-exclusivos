@@ -5,6 +5,7 @@ import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { mockEmpleados, mockRecordatorios, mockEmpleado } from "@/lib/mock-data";
 import { RecordatorioForm } from "@/components/recordatorios/recordatorio-form";
 import { RecordatoriosTable } from "@/components/recordatorios/recordatorios-table";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 
 export const dynamic = "force-dynamic";
@@ -282,10 +283,16 @@ export default async function RecordatoriosPage() {
       </div>
 
       <div className="space-y-6">
-        <RecordatorioForm
-          employees={assignableEmployees.length ? assignableEmployees : employees}
-          defaultAsignadoId={currentEmployeeId}
-        />
+        <DataEntryModal
+          triggerLabel="Crear recordatorio"
+          title="Nuevo recordatorio"
+          description="Cargá un seguimiento, vencimiento o alerta operativa."
+        >
+          <RecordatorioForm
+            employees={assignableEmployees.length ? assignableEmployees : employees}
+            defaultAsignadoId={currentEmployeeId}
+          />
+        </DataEntryModal>
         <RecordatoriosTable
           recordatorios={recordatorios}
           employees={assignableEmployees.length ? assignableEmployees : employees}
