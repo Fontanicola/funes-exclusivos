@@ -1483,6 +1483,13 @@
 
 - `npm run build` ejecutado correctamente después de la implementación.
 
+### Ajuste posterior: perfil creado por trigger
+
+- Se corrigió el alta para usar `upsert` sobre `empleados` con conflicto por `id`.
+- Esto permite completar correctamente el perfil cuando Supabase crea automáticamente una fila de `empleados` al registrar el usuario Auth mediante un trigger.
+- Si la operación falla, el error detallado queda únicamente en logs server-side y se elimina el usuario Auth recién creado para evitar registros incompletos.
+- `npm run build` volvió a ejecutarse correctamente.
+
 ## Auditoría de datos y completitud del Dashboard
 
 ### Qué se revisó y corrigió

@@ -189,7 +189,7 @@ export async function createEmpleadoAction(
 
     createdUserId = createdUser.user.id;
 
-    const { error: employeeError } = await admin.from("empleados").insert({
+    const { error: employeeError } = await admin.from("empleados").upsert({
       id: createdUserId,
       email,
       nombre,
@@ -200,11 +200,17 @@ export async function createEmpleadoAction(
       fecha_ingreso: fechaIngreso,
       comision_default_porcentaje: comisionDefault,
       notas,
-    });
+    }, { onConflict: "id" });
 
     if (employeeError) {
+      console.error("createEmpleadoAction profile upsert failed", {
+        code: employeeError.code,
+        message: employeeError.message,
+        details: employeeError.details,
+        hint: employeeError.hint,
+      });
       await admin.auth.admin.deleteUser(createdUserId);
-      return { error: "El usuario se creó, pero no pudimos guardar su perfil operativo." };
+      return { error: "El usuario se creó, pero no pudimos completar su perfil operativo." };
     }
   } catch (error) {
     if (createdUserId) {
