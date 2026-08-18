@@ -469,12 +469,13 @@ export function VehiculoForm({
           </div>
           <div className="space-y-2">
             <FieldLabel htmlFor="estado_preparacion">Estado preparación</FieldLabel>
-            <Input
+            <Select
               id="estado_preparacion"
               name="estado_preparacion"
-              placeholder="Pendiente / en proceso / listo"
-              defaultValue={vehiculo?.estado_preparacion ?? ""}
-            />
+              defaultValue={vehiculo?.estado_preparacion ?? "sin_preparar"}
+            >
+              <option value="sin_preparar">Sin preparar</option>
+            </Select>
           </div>
           <div className="space-y-2">
             <FieldLabel htmlFor="chapero">Chapero</FieldLabel>

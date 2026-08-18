@@ -1418,6 +1418,117 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Carga incremental de comisiones Robinson
+
+Se preparó una carga incremental a partir de `comisiones robinson.csv`: 88 comisiones por un total de ARS 18.136.120, distribuidas en 19 períodos mensuales entre enero de 2025 y julio de 2026. La migración también crea las liquidaciones mensuales cerradas asociadas, sin duplicar registros existentes.
+
+### Archivo generado
+
+- `generated/funes-migration/comisiones-robinson-2026-08-18.sql`
+
+### Tablas involucradas
+
+- `public.comisiones`
+- `public.comision_liquidaciones`
+- `public.ventas`
+- `public.vehiculos`
+- `public.empleados`
+
+### Decisiones técnicas
+
+- El vendedor se resuelve por nombre, buscando un empleado activo cuyo nombre contenga `Robinson`.
+- Las ventas y vehículos existentes se vinculan por dominio normalizado.
+- Solo se crean vehículos o ventas históricas de soporte cuando no existe una coincidencia utilizable.
+- Los identificadores son determinísticos y los inserts usan `ON CONFLICT DO NOTHING`, por lo que el script puede repetirse sin duplicar esta carga.
+- La ejecución sobre Supabase queda deliberadamente separada: el archivo debe correrse desde el SQL Editor o una conexión directa a la base.
+
+## Vinculación automática de vehículo de interés desde WhatsApp
+
+Se mejoró el flujo de WhatsApp para detectar cuándo un lead menciona un vehículo y vincularlo con `leads.vehiculo_interes_id` y `conversaciones.vehiculo_interes_id`. Los mensajes entrantes ahora intentan resolver menciones explícitas contra unidades en stock o consignación, incluyendo dominio, modelo, marca y combinaciones de ambos.
+
+### Paths modificados
+
+- `lib/whatsapp/vehicle-interest.ts`
+- `lib/ai/conversation-summary.ts`
+- `app/api/evolution/webhook/route.ts`
+- `app/(dashboard)/whatsapp/actions.ts`
+
+### Decisiones técnicas
+
+- El webhook usa una coincidencia determinística y conservadora para no asignar vehículos por palabras genéricas.
+- El resumen IA recibe una lista acotada del inventario disponible y devuelve el `vehiculo_id` exacto cuando identifica una unidad.
+- Una selección manual existente no se pisa automáticamente.
+- Cuando el lead no tiene vehículo de interés, la vinculación se propaga también desde la conversación.
+- La generación del resumen IA continúa siendo manual desde la UI; no se agregaron llamadas automáticas a OpenAI por cada mensaje.
+
+### Tablas involucradas
+
+- `public.vehiculos`
+- `public.leads`
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+
+### Validación
+
+- `npm run build` ejecutado correctamente.
+
+## Bandeja de WhatsApp tipo inbox
+
+Se reemplazó el listado tabular principal de WhatsApp por una bandeja operativa de dos paneles: contactos y conversaciones a la izquierda, y el hilo completo de mensajes de la conversación seleccionada a la derecha. Se conservaron la búsqueda, el filtro de estado, la atención pendiente, los estados e intereses, el acceso a Conexiones y las acciones existentes de atención y resumen IA.
+
+### Paths modificados o creados
+
+- `app/(dashboard)/whatsapp/page.tsx`
+- `components/whatsapp/whatsapp-inbox.tsx`
+- `components/whatsapp/messages-list.tsx`
+
+### Decisiones técnicas
+
+- La página carga los mensajes asociados a las conversaciones visibles y los agrupa por conversación para evitar que el detalle dependa de navegar a otra ruta.
+- El panel del chat muestra el historial sin paginar dentro de un contenedor con scroll, mientras que la ruta de detalle mantiene su paginación existente.
+- Se mantienen los permisos aplicados por el servidor para que cada vendedor vea solamente sus conversaciones.
+- La grilla de instancias queda disponible desde `Conexiones`, evitando que ocupe espacio en la bandeja diaria.
+
+### Validación
+
+- `npx tsc --noEmit` ejecutado correctamente.
+- `npm run build` no pudo finalizar por un error del filesystem al limpiar una carpeta generada dentro de `.next` (`Unknown system error -70`), sin errores TypeScript reportados.
+
+## Saldos operativos en Caja
+
+Se incorporó una vista de saldos acumulados en Caja, separada del resumen mensual. El cálculo toma ingresos y egresos históricos cargados, mantiene ARS y USD separados y muestra cuentas operativas identificables como `Efectivo`, `Banco Santander` y `Cta. cte. Gestoría`.
+
+### Paths modificados
+
+- `app/(dashboard)/caja/page.tsx`
+- `components/caja/caja-summary.tsx`
+
+### Decisiones técnicas
+
+- Los saldos se calculan como ingresos menos egresos, sin conversión de moneda.
+- La cuenta se determina priorizando `cuenta` y complementando con `medio`.
+- Medios no reconocidos se agrupan como `Otros medios` para no ocultar movimientos.
+- El resumen mensual existente se mantiene separado para distinguir actividad del período y saldo acumulado.
+
+### Validación
+
+- `npm run build` ejecutado correctamente.
+
+## Corrección de edición de inventario
+
+Se corrigió el error genérico que impedía guardar cambios en vehículos desde edición. La causa principal era que, para roles que no visualizan costos internos, el formulario omitía esos campos pero la acción intentaba validarlos y podía sobrescribirlos con valores vacíos. Ahora se preservan los datos internos existentes y se mantienen los campos comerciales editables.
+
+También se normalizó el estado de preparación al valor válido del esquema (`sin_preparar`), se corrigió la lectura de decimales en inputs numéricos y se agregaron logs server-side seguros junto con mensajes específicos para errores de campos obligatorios o valores inválidos.
+
+### Paths modificados
+
+- `app/(dashboard)/inventario/actions.ts`
+- `components/inventario/vehiculo-form.tsx`
+
+### Validación
+
+- `npm run build` ejecutado correctamente.
+
 ## Cargas de datos en modales
 
 ### Qué se implementó

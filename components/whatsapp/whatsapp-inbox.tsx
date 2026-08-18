@@ -1,0 +1,264 @@
+"use client";
+
+import Link from "next/link";
+import { Search, MessageCircle, UserRound } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ConversacionInterestBadge } from "./conversacion-interest-badge";
+import { ConversacionStatusBadge } from "./conversacion-status-badge";
+import { ConversationHeaderActions } from "./conversation-header-actions";
+import { MessagesList } from "./messages-list";
+
+type Conversation = {
+  id: string;
+  contacto_nombre: string | null;
+  contacto_telefono: string | null;
+  estado: string | null;
+  lead_id: string | null;
+  vendedor_id: string | null;
+  unread_count: number | null;
+  requiere_atencion: boolean | null;
+  ultimo_mensaje_at: string | null;
+  last_message_preview: string | null;
+  interes_compra: string | null;
+  ia_interes_compra: string | null;
+  ia_resumen: string | null;
+  vehiculo: {
+    marca: string | null;
+    modelo: string | null;
+    version: string | null;
+    anio: number | null;
+    dominio: string | null;
+  } | null;
+  lead: {
+    nombre: string | null;
+    estado: string | null;
+  } | null;
+  vendedor: {
+    id: string;
+    nombre: string | null;
+  } | null;
+};
+
+type Message = {
+  id: string;
+  body: string | null;
+  message_type?: string | null;
+  direccion?: string | null;
+  sent_at: string | null;
+  created_at: string | null;
+};
+
+function formatTime(value: string | null) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("es-AR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).format(date);
+}
+
+function contactName(conversation: Conversation) {
+  return conversation.contacto_nombre || conversation.lead?.nombre || conversation.contacto_telefono || "Sin nombre";
+}
+
+function vehicleName(conversation: Conversation) {
+  if (!conversation.vehiculo) return null;
+  return [conversation.vehiculo.marca, conversation.vehiculo.modelo].filter(Boolean).join(" ") || null;
+}
+
+export function WhatsappInbox({
+  conversaciones,
+  mensajes,
+}: {
+  conversaciones: Conversation[];
+  mensajes: Record<string, Message[]>;
+}) {
+  const [query, setQuery] = useState("");
+  const [onlyAttention, setOnlyAttention] = useState(false);
+  const [status, setStatus] = useState("");
+  const [selectedId, setSelectedId] = useState(conversaciones[0]?.id ?? null);
+
+  const filtered = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return conversaciones.filter((conversation) => {
+      if (onlyAttention && !conversation.requiere_atencion) return false;
+      if (status && conversation.estado !== status) return false;
+      if (!normalizedQuery) return true;
+
+      return [
+        contactName(conversation),
+        conversation.contacto_telefono,
+        conversation.lead?.nombre,
+        conversation.vendedor?.nombre,
+        conversation.last_message_preview,
+        vehicleName(conversation),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedQuery);
+    });
+  }, [conversaciones, onlyAttention, query, status]);
+
+  useEffect(() => {
+    if (!filtered.some((conversation) => conversation.id === selectedId)) {
+      setSelectedId(filtered[0]?.id ?? null);
+    }
+  }, [filtered, selectedId]);
+
+  const selected = conversaciones.find((conversation) => conversation.id === selectedId) ?? null;
+  const selectedMessages = selected ? mensajes[selected.id] ?? [] : [];
+
+  return (
+    <section className="overflow-hidden rounded-md border border-[#E5E7EB] bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
+      <div className="grid min-h-[680px] lg:grid-cols-[340px_minmax(0,1fr)]">
+        <aside className="border-b border-[#E5E7EB] bg-[#FCFCFC] lg:border-b-0 lg:border-r">
+          <div className="border-b border-[#E5E7EB] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold text-[#111827]">Conversaciones</h2>
+                <p className="mt-1 text-xs text-[#6B7280]">Contactos y seguimiento de WhatsApp</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href="/whatsapp/conexiones" className="text-xs font-medium text-[#8A1538] hover:underline">
+                  Conexiones
+                </Link>
+                <span className="rounded-full bg-[#F3F4F6] px-2 py-1 text-xs font-medium text-[#6B7280]">
+                  {filtered.length}
+                </span>
+              </div>
+            </div>
+
+            <div className="relative mt-4">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Buscar contacto"
+                className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-3 text-sm text-[#111827] outline-none focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
+              />
+            </div>
+
+            <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+              <select
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+                className="h-9 min-w-0 rounded-md border border-[#E5E7EB] bg-white px-2 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+              >
+                <option value="">Todos los estados</option>
+                <option value="abierta">Abiertas</option>
+                <option value="en_seguimiento">En seguimiento</option>
+                <option value="cerrada">Cerradas</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => setOnlyAttention((value) => !value)}
+                className={`h-9 rounded-md border px-3 text-xs font-medium transition ${
+                  onlyAttention
+                    ? "border-[#8A1538] bg-[#8A1538] text-white"
+                    : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]"
+                }`}
+              >
+                Atención
+              </button>
+            </div>
+          </div>
+
+          <div className="max-h-[590px] overflow-y-auto">
+            {filtered.length ? (
+              filtered.map((conversation) => {
+                const isSelected = conversation.id === selectedId;
+                const unread = conversation.unread_count ?? 0;
+
+                return (
+                  <button
+                    key={conversation.id}
+                    type="button"
+                    onClick={() => setSelectedId(conversation.id)}
+                    className={`w-full border-b border-[#E5E7EB] px-4 py-3 text-left transition ${
+                      isSelected ? "bg-[#FDF2F5]" : "bg-white hover:bg-[#F9FAFB]"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3E1E7] text-[#8A1538]">
+                        <UserRound className="h-4 w-4" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="truncate text-sm font-semibold text-[#111827]">{contactName(conversation)}</span>
+                          <span className="shrink-0 text-[10px] text-[#9CA3AF]">{formatTime(conversation.ultimo_mensaje_at)}</span>
+                        </span>
+                        <span className="mt-1 block truncate text-xs text-[#6B7280]">
+                          {conversation.last_message_preview || "Sin mensajes guardados"}
+                        </span>
+                        <span className="mt-2 flex flex-wrap items-center gap-1.5">
+                          {unread > 0 ? (
+                            <span className="rounded-full bg-[#8A1538] px-1.5 py-0.5 text-[10px] font-semibold text-white">{unread}</span>
+                          ) : null}
+                          {conversation.requiere_atencion ? <span className="text-[10px] font-medium text-[#92400E]">Requiere atención</span> : null}
+                          {vehicleName(conversation) ? <span className="truncate text-[10px] text-[#6B7280]">{vehicleName(conversation)}</span> : null}
+                        </span>
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+            ) : (
+              <div className="px-5 py-12 text-center">
+                <MessageCircle className="mx-auto h-8 w-8 text-[#CBD5E1]" />
+                <p className="mt-3 text-sm font-medium text-[#111827]">No hay conversaciones</p>
+                <p className="mt-1 text-xs leading-5 text-[#6B7280]">Probá cambiar la búsqueda o conectar WhatsApp.</p>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        <main className="min-w-0 bg-[#F8FAFC]">
+          {selected ? (
+            <>
+              <header className="border-b border-[#E5E7EB] bg-white px-5 py-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3E1E7] text-[#8A1538]">
+                      <UserRound className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="truncate text-base font-semibold text-[#111827]">{contactName(selected)}</h3>
+                      <p className="mt-0.5 text-xs text-[#6B7280]">{selected.contacto_telefono || "Sin teléfono"}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                        <ConversacionStatusBadge status={selected.estado} />
+                        <ConversacionInterestBadge interest={selected.ia_interes_compra ?? selected.interes_compra} />
+                        {selected.requiere_atencion ? <span className="rounded-full bg-[#FEF3C7] px-2 py-1 text-[10px] font-medium text-[#92400E]">Requiere atención</span> : null}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link href={`/whatsapp/${selected.id}`} className="inline-flex h-9 items-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] hover:bg-[#F9FAFB]">
+                      Ver ficha
+                    </Link>
+                    <ConversationHeaderActions conversationId={selected.id} hasSummary={Boolean(selected.ia_resumen)} />
+                  </div>
+                </div>
+              </header>
+
+              <div className="p-4 sm:p-5">
+                <MessagesList messages={selectedMessages} lastMessagePreview={selected.last_message_preview} hasRecentActivity={Boolean(selected.last_message_preview)} paginate={false} />
+              </div>
+            </>
+          ) : (
+            <div className="flex min-h-[680px] items-center justify-center px-6 text-center">
+              <div>
+                <MessageCircle className="mx-auto h-10 w-10 text-[#CBD5E1]" />
+                <h3 className="mt-4 text-base font-semibold text-[#111827]">Seleccioná una conversación</h3>
+                <p className="mt-1 text-sm text-[#6B7280]">Los mensajes completos aparecerán en este panel.</p>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </section>
+  );
+}

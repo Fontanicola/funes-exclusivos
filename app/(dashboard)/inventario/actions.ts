@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { canManageInventory } from "@/lib/auth/permissions";
+import { canManageInventory, canViewCosts } from "@/lib/auth/permissions";
 import { isDemoMode } from "@/lib/demo-mode";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -24,7 +24,12 @@ function toOptionalString(value: FormDataEntryValue | null) {
 function toOptionalNumber(value: FormDataEntryValue | null) {
   const raw = toOptionalString(value);
   if (!raw) return null;
-  const parsed = Number(raw.replace(/\./g, "").replace(",", "."));
+  // Inputs type=number send decimal points; accept comma decimals without
+  // corrupting values such as 1.5 into 15.
+  const normalized = raw.includes(",")
+    ? raw.replace(/\./g, "").replace(",", ".")
+    : raw;
+  const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
@@ -101,7 +106,7 @@ function collectVehicleData(formData: FormData) {
   const precioContado = toOptionalNumber(formData.get("precio_contado"));
   const costoReposicion = toOptionalNumber(formData.get("costo_reposicion"));
   const estado = toUpperTrimmed(formData.get("estado")).toLowerCase();
-  const estadoPreparacion = toOptionalString(formData.get("estado_preparacion"));
+  const estadoPreparacion = toOptionalString(formData.get("estado_preparacion")) || "sin_preparar";
   const chapero = toOptionalString(formData.get("chapero"));
   const preparacionComentarios = toOptionalString(formData.get("preparacion_comentarios"));
   const publicadoMercadolibre = toBoolean(formData.get("publicado_mercadolibre"));
@@ -338,7 +343,48 @@ export async function updateVehiculoAction(
     return { error: "No pudimos identificar el vehículo." };
   }
 
+  const { data: existingVehicle, error: existingVehicleError } = await supabase
+    .from("vehiculos")
+    .select(
+      "motor,ubicacion,nro_operacion,proveedor_id,fecha_compra,costo_adquisicion,costo_moneda,precio_infoauto_compra,precio_infoauto_actual,precio_infoauto_anterior,costo_reposicion"
+    )
+    .eq("id", id)
+    .maybeSingle<{
+      motor: string | null;
+      ubicacion: string | null;
+      nro_operacion: string | null;
+      proveedor_id: string | null;
+      fecha_compra: string | null;
+      costo_adquisicion: number | null;
+      costo_moneda: string | null;
+      precio_infoauto_compra: number | null;
+      precio_infoauto_actual: number | null;
+      precio_infoauto_anterior: number | null;
+      costo_reposicion: number | null;
+    }>();
+
+  if (existingVehicleError || !existingVehicle) {
+    return { error: "No encontramos el vehículo para actualizarlo." };
+  }
+
   const data = collectVehicleData(formData);
+
+  // Vendedores y gestores no reciben los campos internos en el formulario.
+  // Preservarlos evita validaciones incompletas y no borra costos existentes.
+  if (!canViewCosts(employee.rol)) {
+    data.motor = existingVehicle.motor ?? data.motor;
+    data.ubicacion = existingVehicle.ubicacion ?? data.ubicacion;
+    data.nroOperacion = existingVehicle.nro_operacion ?? data.nroOperacion;
+    data.proveedorId = existingVehicle.proveedor_id ?? data.proveedorId;
+    data.fechaCompra = existingVehicle.fecha_compra ?? data.fechaCompra;
+    data.costoAdquisicion = existingVehicle.costo_adquisicion ?? data.costoAdquisicion;
+    data.costoMoneda = (existingVehicle.costo_moneda ?? data.costoMoneda) || "ARS";
+    data.precioInfoautoCompra = existingVehicle.precio_infoauto_compra ?? data.precioInfoautoCompra;
+    data.precioInfoautoActual = existingVehicle.precio_infoauto_actual ?? data.precioInfoautoActual;
+    data.precioInfoautoAnterior = existingVehicle.precio_infoauto_anterior ?? data.precioInfoautoAnterior;
+    data.costoReposicion = existingVehicle.costo_reposicion ?? data.costoReposicion;
+  }
+
   const validationError = validateVehicleData(data);
 
   if (validationError) {
@@ -406,6 +452,22 @@ export async function updateVehiculoAction(
     .eq("id", id);
 
   if (updateError) {
+    console.error("[Inventario] update vehicle failed", {
+      vehicleId: id,
+      code: updateError.code,
+      message: updateError.message,
+      details: updateError.details,
+      hint: updateError.hint,
+    });
+
+    if (updateError.code === "23502") {
+      return { error: "Falta completar un dato obligatorio del vehículo." };
+    }
+
+    if (updateError.code === "23514" || updateError.code === "22P02") {
+      return { error: "Uno de los valores del vehículo no es válido. Revisá preparación, estado y precios." };
+    }
+
     return { error: "No pudimos guardar los cambios. Revisá los datos e intentá de nuevo." };
   }
 

@@ -64,15 +64,19 @@ export function MessagesList({
   messages,
   lastMessagePreview,
   hasRecentActivity,
+  paginate = true,
 }: {
   messages: Message[];
   lastMessagePreview?: string | null;
   hasRecentActivity?: boolean;
+  paginate?: boolean;
 }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(messages.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const visibleMessages = messages.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const visibleMessages = paginate
+    ? messages.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+    : messages;
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
@@ -140,12 +144,14 @@ export function MessagesList({
           </div>
         )}
       </div>
-      <PaginationControls
-        page={currentPage}
-        totalItems={messages.length}
-        pageSize={PAGE_SIZE}
-        onPageChange={setPage}
-      />
+      {paginate ? (
+        <PaginationControls
+          page={currentPage}
+          totalItems={messages.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+        />
+      ) : null}
     </section>
   );
 }

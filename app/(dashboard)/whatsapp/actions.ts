@@ -14,6 +14,11 @@ import {
   setEvolutionWebhook,
 } from "@/lib/evolution/client";
 import { summarizeWhatsappConversation } from "@/lib/ai/conversation-summary";
+import {
+  findVehicleInterestById,
+  findVehicleInterestMatch,
+  type VehicleInterestCandidate,
+} from "@/lib/whatsapp/vehicle-interest";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type ActionState = {
@@ -630,13 +635,14 @@ export async function generateConversationAiSummaryAction(
   const { data: conversation } = await auth.supabase
     .from("conversaciones")
     .select(
-      "id,lead_id,vendedor_id,contacto_nombre,contacto_telefono,contacto_email,estado,canal,resumen_ia,interes_compra,ia_estado,ia_resumen,ia_interes_compra,ia_score,ia_intencion,ia_proximo_paso,ia_procesado_at,ia_error,requiere_atencion,lead:leads!conversaciones_lead_id_fkey(id,nombre,telefono,email,estado,origen,nivel_interes),vendedor:empleados!conversaciones_vendedor_id_fkey(id,nombre,email,rol),vehiculo:vehiculos!conversaciones_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio)"
+      "id,lead_id,vendedor_id,vehiculo_interes_id,contacto_nombre,contacto_telefono,contacto_email,estado,canal,resumen_ia,interes_compra,ia_estado,ia_resumen,ia_interes_compra,ia_score,ia_intencion,ia_proximo_paso,ia_procesado_at,ia_error,requiere_atencion,lead:leads!conversaciones_lead_id_fkey(id,nombre,telefono,email,estado,origen,nivel_interes,vehiculo_interes_id),vendedor:empleados!conversaciones_vendedor_id_fkey(id,nombre,email,rol),vehiculo:vehiculos!conversaciones_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio)"
     )
     .eq("id", conversationId)
     .maybeSingle<{
       id: string;
       lead_id: string | null;
       vendedor_id: string | null;
+      vehiculo_interes_id: string | null;
       contacto_nombre: string | null;
       contacto_telefono: string | null;
       contacto_email: string | null;
@@ -661,6 +667,7 @@ export async function generateConversationAiSummaryAction(
         estado: string | null;
         origen: string | null;
         nivel_interes: number | null;
+        vehiculo_interes_id: string | null;
       } | null;
       vendedor: {
         id: string;
@@ -686,12 +693,23 @@ export async function generateConversationAiSummaryAction(
     return { error: "No tenés permisos para procesar esta conversación." };
   }
 
-  const { data: messages } = await auth.supabase
-    .from("conversacion_mensajes")
-    .select("id,conversacion_id,external_message_id,direccion,from_number,to_number,body,message_type,sent_at,created_at,raw_payload")
-    .eq("conversacion_id", conversationId)
-    .order("sent_at", { ascending: false, nullsFirst: false })
-    .limit(40);
+  const [messagesResult, vehiclesResult] = await Promise.all([
+    auth.supabase
+      .from("conversacion_mensajes")
+      .select("id,conversacion_id,external_message_id,direccion,from_number,to_number,body,message_type,sent_at,created_at,raw_payload")
+      .eq("conversacion_id", conversationId)
+      .order("sent_at", { ascending: false, nullsFirst: false })
+      .limit(40),
+    auth.supabase
+      .from("vehiculos")
+      .select("id,marca,modelo,version,anio,dominio,estado")
+      .in("estado", ["en_stock", "en_consignacion"])
+      .order("created_at", { ascending: false })
+      .limit(300),
+  ]);
+
+  const messages = messagesResult.data;
+  const vehicleCandidates = (vehiclesResult.data ?? []) as VehicleInterestCandidate[];
 
   const orderedMessages = [...(messages ?? [])].reverse();
 
@@ -713,8 +731,16 @@ export async function generateConversationAiSummaryAction(
   }
 
   try {
-    const summary = await summarizeWhatsappConversation(conversation, orderedMessages);
+    const summary = await summarizeWhatsappConversation(
+      { ...conversation, vehiculos_disponibles: vehicleCandidates },
+      orderedMessages
+    );
     const shouldEscalateLead = summary.interes_compra === "alto" && conversation.lead_id;
+    const aiVehicle = findVehicleInterestById(summary.vehiculo_id, vehicleCandidates);
+    const mentionedVehicle = summary.vehiculo_mencionado
+      ? findVehicleInterestMatch(summary.vehiculo_mencionado, vehicleCandidates)
+      : null;
+    const vehicleInterestId = aiVehicle?.id ?? mentionedVehicle?.id ?? conversation.vehiculo_interes_id;
 
     const updates: Record<string, unknown> = {
       ia_estado: "procesado",
@@ -731,6 +757,10 @@ export async function generateConversationAiSummaryAction(
       updated_by: auth.user.id,
     };
 
+    if (!conversation.vehiculo_interes_id && vehicleInterestId) {
+      updates.vehiculo_interes_id = vehicleInterestId;
+    }
+
     const { error: updateError } = await auth.supabase
       .from("conversaciones")
       .update(updates)
@@ -744,12 +774,17 @@ export async function generateConversationAiSummaryAction(
       const currentLeadLevel = conversation.lead?.nivel_interes ?? null;
       const nextLeadLevel = currentLeadLevel == null ? 5 : Math.max(currentLeadLevel, 5);
 
+      const leadUpdates: Record<string, unknown> = {
+        nivel_interes: nextLeadLevel,
+        updated_by: auth.user.id,
+      };
+      if (!conversation.lead?.vehiculo_interes_id && vehicleInterestId) {
+        leadUpdates.vehiculo_interes_id = vehicleInterestId;
+      }
+
       const { error: leadError } = await auth.supabase
         .from("leads")
-        .update({
-          nivel_interes: nextLeadLevel,
-          updated_by: auth.user.id,
-        })
+        .update(leadUpdates)
         .eq("id", conversation.lead_id);
 
       if (leadError) {
@@ -757,6 +792,22 @@ export async function generateConversationAiSummaryAction(
           conversationId,
           leadId: conversation.lead_id,
           error: leadError.message,
+        });
+      }
+    }
+
+    if (conversation.lead_id && !conversation.lead?.vehiculo_interes_id && vehicleInterestId && !shouldEscalateLead) {
+      const { error: leadVehicleError } = await auth.supabase
+        .from("leads")
+        .update({ vehiculo_interes_id: vehicleInterestId, updated_by: auth.user.id })
+        .eq("id", conversation.lead_id);
+
+      if (leadVehicleError) {
+        console.warn("[WhatsApp AI] no pudimos vincular el vehículo de interés al lead", {
+          conversationId,
+          leadId: conversation.lead_id,
+          vehicleId: vehicleInterestId,
+          error: leadVehicleError.message,
         });
       }
     }

@@ -133,6 +133,12 @@ type CurrencyTotal = {
   total: number;
 };
 
+type BalanceSummary = {
+  key: string;
+  label: string;
+  totals: CurrencyTotal[];
+};
+
 function formatAmountOnly(value: number) {
   return new Intl.NumberFormat("es-AR", {
     maximumFractionDigits: 0,
@@ -214,6 +220,60 @@ function aggregateIncomeByCurrency(movimientos: Movimiento[]) {
   return aggregateByCurrency(movimientos, "ingreso");
 }
 
+function normalizeAccount(value: string | null | undefined) {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function resolveBalanceBucket(movimiento: Movimiento) {
+  const account = normalizeAccount(movimiento.cuenta);
+  const medium = normalizeAccount(movimiento.medio);
+  const source = `${account} ${medium}`;
+
+  if (source.includes("cta_hab_sol") || source.includes("gestor") || source.includes("gestoria")) {
+    return { key: "gestoria", label: "Cta. cte. Gestoría" };
+  }
+
+  if (source.includes("banco_santander") || source.includes("santander")) {
+    return { key: "banco", label: "Banco Santander" };
+  }
+
+  if (source.includes("efectivo") || source.includes("caja")) {
+    return { key: "efectivo", label: "Efectivo" };
+  }
+
+  return { key: "otros", label: "Otros medios" };
+}
+
+function aggregateBalances(movimientos: Movimiento[]): BalanceSummary[] {
+  const groups = new Map<string, BalanceSummary>();
+
+  for (const movimiento of movimientos) {
+    if (!["ingreso", "egreso"].includes(movimiento.tipo ?? "")) continue;
+
+    const bucket = resolveBalanceBucket(movimiento);
+    const currency = (movimiento.moneda ?? "ARS").toUpperCase();
+    const group = groups.get(bucket.key) ?? { key: bucket.key, label: bucket.label, totals: [] };
+    const total = group.totals.find((item) => item.currency === currency);
+    const signedAmount = movimiento.tipo === "egreso" ? -resolveAmount(movimiento) : resolveAmount(movimiento);
+
+    if (total) {
+      total.total += signedAmount;
+    } else {
+      group.totals.push({ currency, total: signedAmount });
+    }
+
+    groups.set(bucket.key, group);
+  }
+
+  const order = ["efectivo", "banco", "gestoria", "otros"];
+  return Array.from(groups.values()).sort((left, right) => order.indexOf(left.key) - order.indexOf(right.key));
+}
+
 export default async function CajaPage() {
   let movimientos: Movimiento[] = mockCajaMovimientos as Movimiento[];
   let proveedores: Proveedor[] = mockProveedores as Proveedor[];
@@ -281,6 +341,7 @@ export default async function CajaPage() {
   const egresos = aggregateExpensesByCurrency(movimientos);
   const saldo = aggregateByCurrency(movimientos);
   const medios = aggregateByMedium(movimientos);
+  const saldos = aggregateBalances(movimientos);
 
   return (
     <section className="space-y-6">
@@ -296,6 +357,7 @@ export default async function CajaPage() {
         saldo={saldo}
         movimientosCount={movimientos.length}
         medios={medios}
+        saldos={saldos}
       />
 
       <div className="space-y-6">

@@ -9,6 +9,7 @@ import {
   normalizeQrPayload,
 } from "@/lib/evolution/payload-normalizer";
 import { persistConversationMessage } from "@/lib/whatsapp/conversations";
+import { findVehicleInterestMatch, type VehicleInterestCandidate } from "@/lib/whatsapp/vehicle-interest";
 import type { EvolutionWebhookPayload } from "@/lib/evolution/types";
 
 export const dynamic = "force-dynamic";
@@ -66,7 +67,7 @@ async function findLeadByPhone(
 
   const { data } = await supabase
     .from("leads")
-    .select("id,nombre,telefono,email,estado,origen,vendedor_id")
+    .select("id,nombre,telefono,email,estado,origen,vendedor_id,vehiculo_interes_id")
     .or(`telefono.ilike.%${phone}%,telefono.ilike.%${suffix8}%,telefono.ilike.%${suffix7}%`)
     .limit(25);
 
@@ -194,6 +195,20 @@ export async function POST(request: NextRequest) {
     const contactNumber = normalizePhone(fromNumber ?? toNumber);
     const contactName = normalized.contactName ?? contactNumber ?? "Sin nombre";
 
+    let vehicleInterestId: string | null = null;
+    if (isInboundMessage(normalized.direction) && normalized.body) {
+      const { data: vehicleCandidates } = await supabase
+        .from("vehiculos")
+        .select("id,marca,modelo,version,anio,dominio,estado")
+        .in("estado", ["en_stock", "en_consignacion"])
+        .limit(300);
+
+      vehicleInterestId = findVehicleInterestMatch(
+        normalized.body,
+        (vehicleCandidates ?? []) as VehicleInterestCandidate[]
+      )?.id ?? null;
+    }
+
     let lead = await findLeadByPhone(supabase, contactNumber);
 
     if (!lead && isInboundMessage(normalized.direction)) {
@@ -204,11 +219,12 @@ export async function POST(request: NextRequest) {
           telefono: contactNumber,
           origen: "whatsapp",
           estado: "nuevo",
+          vehiculo_interes_id: vehicleInterestId,
           vendedor_id: instance.empleado_id,
           created_by: instance.empleado_id,
           updated_by: instance.empleado_id,
         })
-        .select("id,nombre,telefono,email,estado,origen,vendedor_id")
+        .select("id,nombre,telefono,email,estado,origen,vendedor_id,vehiculo_interes_id")
         .maybeSingle();
 
       if (!leadError) {
@@ -221,25 +237,27 @@ export async function POST(request: NextRequest) {
     const byExternalChat = externalChatId
       ? supabase
           .from("conversaciones")
-          .select("id,lead_id,contacto_numero_normalizado")
+          .select("id,lead_id,vehiculo_interes_id,contacto_numero_normalizado")
           .eq("whatsapp_instancia_id", instance.id)
           .eq("external_chat_id", externalChatId)
-          .maybeSingle<{ id: string; lead_id: string | null; contacto_numero_normalizado: string | null }>()
+          .maybeSingle<{ id: string; lead_id: string | null; vehiculo_interes_id: string | null; contacto_numero_normalizado: string | null }>()
       : Promise.resolve({ data: null, error: null });
 
     const byNumber = contactNumber
       ? supabase
           .from("conversaciones")
-          .select("id,lead_id,contacto_numero_normalizado")
+          .select("id,lead_id,vehiculo_interes_id,contacto_numero_normalizado")
           .eq("whatsapp_instancia_id", instance.id)
           .eq("contacto_numero_normalizado", contactNumber)
-          .maybeSingle<{ id: string; lead_id: string | null; contacto_numero_normalizado: string | null }>()
+          .maybeSingle<{ id: string; lead_id: string | null; vehiculo_interes_id: string | null; contacto_numero_normalizado: string | null }>()
       : Promise.resolve({ data: null, error: null });
 
     const [externalChatResult, numberResult] = await Promise.all([byExternalChat, byNumber]);
     const conversation = (numberResult.data ?? externalChatResult.data) as
-      | { id: string; lead_id: string | null; contacto_numero_normalizado: string | null }
+      | { id: string; lead_id: string | null; vehiculo_interes_id: string | null; contacto_numero_normalizado: string | null }
       | null;
+
+    vehicleInterestId = vehicleInterestId ?? conversation?.vehiculo_interes_id ?? null;
 
     let conversationId = conversation?.id ?? null;
 
@@ -249,6 +267,7 @@ export async function POST(request: NextRequest) {
         .insert({
           whatsapp_instancia_id: instance.id,
           lead_id: lead?.id ?? null,
+          vehiculo_interes_id: vehicleInterestId,
           vendedor_id: instance.empleado_id,
           canal: "whatsapp",
           estado: "abierta",
@@ -272,14 +291,24 @@ export async function POST(request: NextRequest) {
       }
 
       conversationId = createdConversation.id;
-    } else if (lead?.id && !conversation?.lead_id) {
+    } else {
+      const conversationUpdates: Record<string, unknown> = {
+        updated_by: instance.empleado_id,
+      };
+      if (lead?.id && !conversation?.lead_id) conversationUpdates.lead_id = lead.id;
+      if (vehicleInterestId && !conversation?.vehiculo_interes_id) {
+        conversationUpdates.vehiculo_interes_id = vehicleInterestId;
+      }
+      if (Object.keys(conversationUpdates).length > 1) {
+        await supabase.from("conversaciones").update(conversationUpdates).eq("id", conversationId);
+      }
+    }
+
+    if (lead?.id && vehicleInterestId && !lead.vehiculo_interes_id) {
       await supabase
-        .from("conversaciones")
-        .update({
-          lead_id: lead.id,
-          updated_by: instance.empleado_id,
-        })
-        .eq("id", conversationId);
+        .from("leads")
+        .update({ vehiculo_interes_id: vehicleInterestId, updated_by: instance.empleado_id })
+        .eq("id", lead.id);
     }
 
     const { data: currentConversation } = await supabase

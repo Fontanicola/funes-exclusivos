@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Plus } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
-import { mockConversaciones, mockWhatsappInstancias } from "@/lib/mock-data";
+import { mockConversacionMensajes, mockConversaciones, mockWhatsappInstancias } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
-import { ConversacionesTable } from "@/components/whatsapp/conversaciones-table";
 import { WhatsappConnectionAlert } from "@/components/whatsapp/whatsapp-connection-alert";
-import { WhatsappInstancesGrid } from "@/components/whatsapp/whatsapp-instances-grid";
+import { WhatsappInbox } from "@/components/whatsapp/whatsapp-inbox";
 
 export const metadata: Metadata = {
   title: "WhatsApp | Funes Exclusivos",
@@ -101,6 +98,19 @@ type Conversation = {
   } | null;
 };
 
+type Message = {
+  id: string;
+  conversacion_id: string | null;
+  body: string | null;
+  message_type?: string | null;
+  direccion?: string | null;
+  tipo?: string | null;
+  direction?: string | null;
+  from_me?: boolean | null;
+  sent_at: string | null;
+  created_at: string | null;
+};
+
 type RawInstance = Omit<Instance, "empleado"> & {
   empleado: Instance["empleado"] | Instance["empleado"][] | null;
 };
@@ -170,6 +180,7 @@ function getHighInterestCount(conversations: Conversation[]) {
 export default async function WhatsappPage() {
   let instancias: Instance[] = mockWhatsappInstancias as Instance[];
   let conversaciones: Conversation[] = mockConversaciones as Conversation[];
+  let mensajesPorConversacion: Record<string, Message[]> = {};
   let canManageAll = true;
 
   if (!isDemoMode) {
@@ -230,6 +241,35 @@ export default async function WhatsappPage() {
       instancias = instancias.filter((instance) => instance.empleado_id === currentEmployee.id);
       conversaciones = conversaciones.filter((conversation) => conversation.vendedor_id === currentEmployee.id);
     }
+
+    const conversationIds = conversaciones.map((conversation) => conversation.id);
+    if (conversationIds.length) {
+      const messagesResult = await fetchAllSupabaseRows((from, to) =>
+        supabase
+          .from("conversacion_mensajes")
+          .select("id,conversacion_id,body,message_type,direccion,sent_at,created_at")
+          .in("conversacion_id", conversationIds)
+          .order("sent_at", { ascending: true, nullsFirst: false })
+          .order("created_at", { ascending: true })
+          .range(from, to)
+      );
+
+      for (const message of (messagesResult.data ?? []) as Message[]) {
+        if (!message.conversacion_id) continue;
+        mensajesPorConversacion[message.conversacion_id] = [
+          ...(mensajesPorConversacion[message.conversacion_id] ?? []),
+          message,
+        ];
+      }
+    }
+  } else {
+    for (const message of mockConversacionMensajes) {
+      if (!message.conversacion_id) continue;
+      mensajesPorConversacion[message.conversacion_id] = [
+        ...(mensajesPorConversacion[message.conversacion_id] ?? []),
+        message as Message,
+      ];
+    }
   }
 
   const problematicInstances = instancias.filter((instance) =>
@@ -253,18 +293,9 @@ export default async function WhatsappPage() {
         <KpiCard label="Interés alto" value={getHighInterestCount(conversaciones)} />
       </div>
 
-      <WhatsappInstancesGrid instancias={instancias} canManageAll={canManageAll} />
-      <ConversacionesTable
+      <WhatsappInbox
         conversaciones={conversaciones}
-        toolbarAction={
-          <Link
-            href="/whatsapp/conexiones"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
-          >
-            <Plus className="h-4 w-4" />
-            Conexiones
-          </Link>
-        }
+        mensajes={mensajesPorConversacion}
       />
     </section>
   );

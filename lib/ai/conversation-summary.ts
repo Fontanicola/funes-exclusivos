@@ -1,4 +1,5 @@
 import { createChatCompletion } from "./openai";
+import type { VehicleInterestCandidate } from "@/lib/whatsapp/vehicle-interest";
 
 type ConversationSummary = {
   resumen: string;
@@ -7,6 +8,8 @@ type ConversationSummary = {
   intencion: string;
   proximo_paso: string;
   requiere_atencion: boolean;
+  vehiculo_id: string | null;
+  vehiculo_mencionado: string | null;
 };
 
 type ConversationLike = {
@@ -33,6 +36,7 @@ type ConversationLike = {
     anio?: number | null;
     dominio?: string | null;
   } | null;
+  vehiculos_disponibles?: VehicleInterestCandidate[];
 };
 
 type MessageLike = {
@@ -67,6 +71,11 @@ function toSafeNumber(value: unknown) {
   return Number.isFinite(number) ? Math.max(0, Math.min(100, Math.round(number))) : 20;
 }
 
+function normalizeVehicleId(value: unknown, candidates: VehicleInterestCandidate[]) {
+  const id = typeof value === "string" ? value.trim() : "";
+  return id && candidates.some((candidate) => candidate.id === id) ? id : null;
+}
+
 function buildTranscript(messages: MessageLike[]) {
   return messages
     .slice(-40)
@@ -95,6 +104,7 @@ export async function summarizeWhatsappConversation(
     "- medio: consulta por modelo, características o condiciones, con interés real pero sin cierre.",
     "- bajo: interacción débil, exploratoria o fría.",
     "- sin_interes: spam, irrelevante o sin intención comercial.",
+    "Si el cliente pregunta o muestra interés por un vehículo del inventario, devolvé su vehiculo_id exacto usando la lista disponible. Si no hay coincidencia clara, devolvé vehiculo_id null.",
     "El campo score debe ser 0 a 100 y reflejar la intensidad comercial.",
     "El resumen debe ser breve, claro y no superar 700 caracteres.",
   ].join("\n");
@@ -131,6 +141,14 @@ export async function summarizeWhatsappConversation(
               dominio: conversation.vehiculo.dominio ?? null,
             }
           : null,
+        vehiculos_disponibles: (conversation.vehiculos_disponibles ?? []).map((vehicle) => ({
+          id: vehicle.id,
+          marca: vehicle.marca,
+          modelo: vehicle.modelo,
+          version: vehicle.version ?? null,
+          anio: vehicle.anio ?? null,
+          dominio: vehicle.dominio ?? null,
+        })),
       },
       transcript,
       expectedSchema: {
@@ -140,6 +158,8 @@ export async function summarizeWhatsappConversation(
         intencion: "string breve",
         proximo_paso: "string accionable",
         requiere_atencion: "boolean",
+        vehiculo_id: "string | null",
+        vehiculo_mencionado: "string | null",
       },
     },
     null,
@@ -164,6 +184,8 @@ export async function summarizeWhatsappConversation(
       intencion: String(parsed.intencion ?? "").trim() || "Sin intención detectada.",
       proximo_paso: String(parsed.proximo_paso ?? "").trim() || "Sin próximo paso sugerido.",
       requiere_atencion: Boolean(parsed.requiere_atencion),
+      vehiculo_id: normalizeVehicleId(parsed.vehiculo_id, conversation.vehiculos_disponibles ?? []),
+      vehiculo_mencionado: String(parsed.vehiculo_mencionado ?? "").trim().slice(0, 160) || null,
     };
   } catch (error) {
     const fallbackMessage = error instanceof Error ? error.message : "No pudimos procesar el resumen IA.";
@@ -176,6 +198,8 @@ export async function summarizeWhatsappConversation(
       intencion: "Sin intención detectada.",
       proximo_paso: "Revisar manualmente la conversación.",
       requiere_atencion: false,
+      vehiculo_id: null,
+      vehiculo_mencionado: null,
     };
   }
 }
