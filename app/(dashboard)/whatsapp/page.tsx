@@ -127,56 +127,6 @@ function normalizeSingleRelation<T>(value: T | T[] | null | undefined) {
   return value ?? null;
 }
 
-function formatCurrencyLabel(value: number | null, currency: string | null) {
-  if (value == null) return "—";
-  const isoCurrency = (currency ?? "").toLowerCase() === "usd" ? "USD" : "ARS";
-  const symbol = isoCurrency === "USD" ? "US$" : "$";
-  const formatted = new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: isoCurrency,
-    maximumFractionDigits: 0,
-  }).format(value);
-
-  return formatted.replace("US$", symbol).replace("$", symbol);
-}
-
-function KpiCard({
-  label,
-  value,
-  detail,
-}: {
-  label: string;
-  value: string | number;
-  detail?: string;
-}) {
-  return (
-    <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
-      <p className="text-sm font-medium text-[#6B7280]">{label}</p>
-      <p className="mt-3 text-2xl font-semibold tracking-tight text-[#111827]">{value}</p>
-      {detail ? <p className="mt-2 text-xs text-[#6B7280]">{detail}</p> : null}
-    </article>
-  );
-}
-
-function getConnectedCount(instances: Instance[]) {
-  return instances.filter((instance) => instance.estado === "conectado").length;
-}
-
-function getOpenConversationCount(conversations: Conversation[]) {
-  return conversations.filter((conversation) => ["abierta", "en_seguimiento"].includes(conversation.estado ?? "")).length;
-}
-
-function getAttentionCount(conversations: Conversation[]) {
-  return conversations.filter((conversation) => conversation.requiere_atencion).length;
-}
-
-function getHighInterestCount(conversations: Conversation[]) {
-  return conversations.filter((conversation) => {
-    const interest = (conversation.ia_interes_compra ?? conversation.interes_compra ?? "").toLowerCase();
-    return interest === "alto";
-  }).length;
-}
-
 export default async function WhatsappPage() {
   let instancias: Instance[] = mockWhatsappInstancias as Instance[];
   let conversaciones: Conversation[] = mockConversaciones as Conversation[];
@@ -285,13 +235,6 @@ export default async function WhatsappPage() {
       ) : null}
 
       <WhatsappConnectionAlert instancias={problematicInstances} />
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <KpiCard label="Instancias conectadas" value={getConnectedCount(instancias)} />
-        <KpiCard label="Conversaciones abiertas" value={getOpenConversationCount(conversaciones)} />
-        <KpiCard label="Requieren atención" value={getAttentionCount(conversaciones)} />
-        <KpiCard label="Interés alto" value={getHighInterestCount(conversaciones)} />
-      </div>
 
       <WhatsappInbox
         conversaciones={conversaciones}

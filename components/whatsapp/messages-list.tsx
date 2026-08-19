@@ -65,11 +65,13 @@ export function MessagesList({
   lastMessagePreview,
   hasRecentActivity,
   paginate = true,
+  showHeader = true,
 }: {
   messages: Message[];
   lastMessagePreview?: string | null;
   hasRecentActivity?: boolean;
   paginate?: boolean;
+  showHeader?: boolean;
 }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(messages.length / PAGE_SIZE));
@@ -80,16 +82,16 @@ export function MessagesList({
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
-      <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] px-4 py-3">
-        <div>
+      {showHeader ? (
+        <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] px-4 py-3">
           <h2 className="text-base font-semibold text-[#111827]">Mensajes</h2>
+          {messages.length ? (
+            <span className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
+              {messages.length} mensajes
+            </span>
+          ) : null}
         </div>
-        {messages.length ? (
-          <span className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
-            {messages.length} mensajes
-          </span>
-        ) : null}
-      </div>
+      ) : null}
 
       <div className="max-h-[74vh] space-y-3 overflow-y-auto bg-[#FAFAFA] p-4">
         {messages.length ? (

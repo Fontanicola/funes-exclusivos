@@ -1,11 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Sparkles, CheckCheck, RefreshCw } from "lucide-react";
+import { Sparkles, RefreshCw } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 import {
   generateConversationAiSummaryAction,
-  markConversationAsReadAction,
 } from "@/app/(dashboard)/whatsapp/actions";
 
 type ActionState = {
@@ -50,16 +49,10 @@ export function ConversationHeaderActions({
   conversationId: string;
   hasSummary: boolean;
 }) {
-  const [markState, markAction] = useFormState(markConversationAsReadAction, initialState);
   const [summaryState, summaryAction] = useFormState(generateConversationAiSummaryAction, initialState);
 
   return (
     <div className="flex flex-wrap items-start justify-end gap-2">
-      <form action={markAction}>
-        <input type="hidden" name="conversation_id" value={conversationId} />
-        <SubmitButton icon={<CheckCheck className="h-4 w-4" />}>Marcar como atendida</SubmitButton>
-      </form>
-
       <form action={summaryAction}>
         <input type="hidden" name="conversation_id" value={conversationId} />
         <SubmitButton icon={<Sparkles className="h-4 w-4" />} tone="primary">
@@ -67,9 +60,6 @@ export function ConversationHeaderActions({
         </SubmitButton>
       </form>
 
-      {markState.error ? (
-        <p className="w-full text-right text-xs text-[#6B7280]">{markState.error}</p>
-      ) : null}
       {summaryState.error ? (
         <p className="w-full text-right text-xs text-[#6B7280]">{summaryState.error}</p>
       ) : null}

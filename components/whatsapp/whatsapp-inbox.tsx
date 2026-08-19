@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { Search, MessageCircle, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { ConversacionInterestBadge } from "./conversacion-interest-badge";
-import { ConversacionStatusBadge } from "./conversacion-status-badge";
 import { ConversationHeaderActions } from "./conversation-header-actions";
+import { ConversacionDetail } from "./conversacion-detail";
 import { MessagesList } from "./messages-list";
 
 type Conversation = {
@@ -15,14 +16,26 @@ type Conversation = {
   estado: string | null;
   lead_id: string | null;
   vendedor_id: string | null;
+  contacto_email: string | null;
   unread_count: number | null;
   requiere_atencion: boolean | null;
   ultimo_mensaje_at: string | null;
   last_message_preview: string | null;
   interes_compra: string | null;
+  resumen_ia: string | null;
+  ia_estado: string | null;
   ia_interes_compra: string | null;
+  ia_score: number | null;
+  ia_intencion: string | null;
+  ia_proximo_paso: string | null;
+  ia_procesado_at: string | null;
+  ia_error: string | null;
+  vehiculo_interes_id: string | null;
+  intencion_detectada: string | null;
+  proxima_accion_sugerida: string | null;
   ia_resumen: string | null;
   vehiculo: {
+    id: string;
     marca: string | null;
     modelo: string | null;
     version: string | null;
@@ -30,8 +43,12 @@ type Conversation = {
     dominio: string | null;
   } | null;
   lead: {
+    id: string;
     nombre: string | null;
+    telefono: string | null;
+    email: string | null;
     estado: string | null;
+    origen: string | null;
   } | null;
   vendedor: {
     id: string;
@@ -76,16 +93,24 @@ export function WhatsappInbox({
   mensajes: Record<string, Message[]>;
 }) {
   const [query, setQuery] = useState("");
-  const [onlyAttention, setOnlyAttention] = useState(false);
-  const [status, setStatus] = useState("");
+  const [sellerId, setSellerId] = useState("");
   const [selectedId, setSelectedId] = useState(conversaciones[0]?.id ?? null);
+
+  const sellers = useMemo(
+    () =>
+      conversaciones
+        .map((conversation) => conversation.vendedor)
+        .filter((seller): seller is NonNullable<Conversation["vendedor"]> => Boolean(seller?.id))
+        .filter((seller, index, all) => all.findIndex((item) => item.id === seller.id) === index)
+        .sort((a, b) => (a.nombre ?? "").localeCompare(b.nombre ?? "", "es")),
+    [conversaciones]
+  );
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return conversaciones.filter((conversation) => {
-      if (onlyAttention && !conversation.requiere_atencion) return false;
-      if (status && conversation.estado !== status) return false;
+      if (sellerId && conversation.vendedor_id !== sellerId) return false;
       if (!normalizedQuery) return true;
 
       return [
@@ -101,7 +126,7 @@ export function WhatsappInbox({
         .toLowerCase()
         .includes(normalizedQuery);
     });
-  }, [conversaciones, onlyAttention, query, status]);
+  }, [conversaciones, query, sellerId]);
 
   useEffect(() => {
     if (!filtered.some((conversation) => conversation.id === selectedId)) {
@@ -120,7 +145,6 @@ export function WhatsappInbox({
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-base font-semibold text-[#111827]">Conversaciones</h2>
-                <p className="mt-1 text-xs text-[#6B7280]">Contactos y seguimiento de WhatsApp</p>
               </div>
               <div className="flex items-center gap-2">
                 <Link href="/whatsapp/conexiones" className="text-xs font-medium text-[#8A1538] hover:underline">
@@ -142,28 +166,19 @@ export function WhatsappInbox({
               />
             </div>
 
-            <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+            <div className="mt-2">
               <select
-                value={status}
-                onChange={(event) => setStatus(event.target.value)}
+                value={sellerId}
+                onChange={(event) => setSellerId(event.target.value)}
                 className="h-9 min-w-0 rounded-md border border-[#E5E7EB] bg-white px-2 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
               >
-                <option value="">Todos los estados</option>
-                <option value="abierta">Abiertas</option>
-                <option value="en_seguimiento">En seguimiento</option>
-                <option value="cerrada">Cerradas</option>
+                <option value="">Todos los vendedores</option>
+                {sellers.map((seller) => (
+                  <option key={seller.id} value={seller.id}>
+                    {seller.nombre ?? "Sin vendedor"}
+                  </option>
+                ))}
               </select>
-              <button
-                type="button"
-                onClick={() => setOnlyAttention((value) => !value)}
-                className={`h-9 rounded-md border px-3 text-xs font-medium transition ${
-                  onlyAttention
-                    ? "border-[#8A1538] bg-[#8A1538] text-white"
-                    : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]"
-                }`}
-              >
-                Atención
-              </button>
             </div>
           </div>
 
@@ -196,9 +211,12 @@ export function WhatsappInbox({
                         </span>
                         <span className="mt-2 flex flex-wrap items-center gap-1.5">
                           {unread > 0 ? (
-                            <span className="rounded-full bg-[#8A1538] px-1.5 py-0.5 text-[10px] font-semibold text-white">{unread}</span>
+                            <span
+                              className="h-2 w-2 rounded-full bg-[#8A1538]"
+                              aria-label="Hay mensajes sin responder"
+                              title="Hay mensajes sin responder"
+                            />
                           ) : null}
-                          {conversation.requiere_atencion ? <span className="text-[10px] font-medium text-[#92400E]">Requiere atención</span> : null}
                           {vehicleName(conversation) ? <span className="truncate text-[10px] text-[#6B7280]">{vehicleName(conversation)}</span> : null}
                         </span>
                       </span>
@@ -219,33 +237,37 @@ export function WhatsappInbox({
         <main className="min-w-0 bg-[#F8FAFC]">
           {selected ? (
             <>
-              <header className="border-b border-[#E5E7EB] bg-white px-5 py-4">
+              <header className="border-b border-[#E5E7EB] bg-white px-4 py-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3E1E7] text-[#8A1538]">
-                      <UserRound className="h-5 w-5" />
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3E1E7] text-[#8A1538]">
+                      <UserRound className="h-4 w-4" />
                     </span>
                     <div className="min-w-0">
                       <h3 className="truncate text-base font-semibold text-[#111827]">{contactName(selected)}</h3>
                       <p className="mt-0.5 text-xs text-[#6B7280]">{selected.contacto_telefono || "Sin teléfono"}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                        <ConversacionStatusBadge status={selected.estado} />
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                         <ConversacionInterestBadge interest={selected.ia_interes_compra ?? selected.interes_compra} />
-                        {selected.requiere_atencion ? <span className="rounded-full bg-[#FEF3C7] px-2 py-1 text-[10px] font-medium text-[#92400E]">Requiere atención</span> : null}
                       </div>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Link href={`/whatsapp/${selected.id}`} className="inline-flex h-9 items-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] hover:bg-[#F9FAFB]">
-                      Ver ficha
-                    </Link>
+                    <DataEntryModal
+                      triggerLabel="Ver ficha"
+                      title={contactName(selected)}
+                      description="Resumen de contacto, interés y seguimiento."
+                      size="wide"
+                      triggerClassName="inline-flex h-9 items-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] hover:bg-[#F9FAFB]"
+                    >
+                      <ConversacionDetail conversation={selected} />
+                    </DataEntryModal>
                     <ConversationHeaderActions conversationId={selected.id} hasSummary={Boolean(selected.ia_resumen)} />
                   </div>
                 </div>
               </header>
 
-              <div className="p-4 sm:p-5">
-                <MessagesList messages={selectedMessages} lastMessagePreview={selected.last_message_preview} hasRecentActivity={Boolean(selected.last_message_preview)} paginate={false} />
+              <div className="p-3 sm:p-4">
+                <MessagesList messages={selectedMessages} lastMessagePreview={selected.last_message_preview} hasRecentActivity={Boolean(selected.last_message_preview)} paginate={false} showHeader={false} />
               </div>
             </>
           ) : (

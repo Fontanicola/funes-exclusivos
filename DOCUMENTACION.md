@@ -1418,6 +1418,36 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Ajuste de bandeja WhatsApp
+
+### Qué se mejoró
+
+- Se eliminaron las cuatro tarjetas superiores de métricas para dar prioridad al inbox.
+- Se quitó el texto introductorio redundante del panel de conversaciones.
+- El filtro lateral ahora permite filtrar por vendedor en lugar de estado.
+- Se eliminó la acción visible `Marcar como atendida` y el estado de conversación del encabezado.
+- Los mensajes sin responder se identifican con un punto discreto, sin mostrar cantidades ni textos de atención.
+- `Ver ficha` ahora abre un modal dentro de WhatsApp con contacto, vehículo, resumen IA y seguimiento.
+- Se eliminó el encabezado interno repetido de `Mensajes` para compactar el hilo y alinearlo con el contacto.
+
+### Paths modificados
+
+- `app/(dashboard)/whatsapp/page.tsx`
+- `components/whatsapp/whatsapp-inbox.tsx`
+- `components/whatsapp/conversation-header-actions.tsx`
+- `components/whatsapp/messages-list.tsx`
+
+### Decisiones técnicas
+
+- Se mantuvieron las consultas, permisos y acciones existentes.
+- El modal reutiliza `ConversacionDetail` y `DataEntryModal`, evitando duplicar la información IA y de seguimiento.
+- El historial completo continúa cargándose en la bandeja; solo se ajustó su presentación.
+
+### Validación
+
+- `npx tsc --noEmit` ejecutado correctamente.
+- `npm run build` ejecutado correctamente.
+
 ## Carga incremental de comisiones Robinson
 
 Se preparó una carga incremental a partir de `comisiones robinson.csv`: 88 comisiones por un total de ARS 18.136.120, distribuidas en 19 períodos mensuales entre enero de 2025 y julio de 2026. La migración también crea las liquidaciones mensuales cerradas asociadas, sin duplicar registros existentes.
