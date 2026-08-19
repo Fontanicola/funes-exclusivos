@@ -3860,3 +3860,13 @@ Paths modificados: `components/peritajes/peritaje-workspace.tsx` y `components/p
 Tablas Supabase involucradas indirectamente: `peritajes`, `peritaje_items`, `peritaje_paneles`, `peritaje_reparaciones`, `peritaje_plantillas`, `peritaje_plantilla_secciones`, `peritaje_plantilla_items` y `vehiculos`. Validación: `npm run build` finalizado correctamente.
 
 Pendiente operativo: ejecutar `PERITAJES.sql` en Supabase si todavía no fue aplicado y validar el flujo con datos reales de una unidad.
+
+### Identidad visual real en catálogo público
+
+Se actualizó la jerarquía de `/catalogo` para que funcione como una vidriera comercial de Funes Exclusivos y no como una pantalla administrativa. La fachada real ahora sostiene el hero por defecto, el showroom acompaña el bloque institucional y el espacio interior refuerza la propuesta de atención personalizada. La portada cargada desde la configuración mantiene prioridad cuando existe.
+
+Paths modificados: `components/catalogo-publico/catalogo-public-site.tsx`, `public/catalogo/funes-fachada.jpg`, `public/catalogo/funes-showroom.png` y `public/catalogo/funes-espacio.png`.
+
+Se conservaron las reglas de publicación, filtros, paginación, contacto por WhatsApp y detalle de vehículo. No se expusieron datos internos ni se modificó el schema. Tablas y recursos involucrados: `catalogo_config`, `vehiculos`, `empleados` y Storage del catálogo.
+
+Decisión técnica: se usaron assets locales para asegurar disponibilidad en producción y evitar dependencias externas. La estructura visual prioriza impacto de marca, stock publicado, servicios, experiencia en showroom y contacto. Validación: `npm run build`.
