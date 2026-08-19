@@ -1418,6 +1418,24 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Ajuste visual del hilo de WhatsApp
+
+Se eliminó el contenedor interno adicional del hilo de mensajes dentro del inbox. Los mensajes ahora ocupan directamente el panel principal, conservando las burbujas de entrada y salida y el scroll interno del chat, sin modificar la persistencia ni la lógica de conversaciones.
+
+### Paths modificados
+
+- `components/whatsapp/messages-list.tsx`
+- `components/whatsapp/whatsapp-inbox.tsx`
+
+### Tablas involucradas
+
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+
+### Decisión técnica
+
+El componente de mensajes mantiene su borde cuando se usa en una vista independiente, pero se vuelve transparente y sin caja adicional cuando se renderiza dentro del inbox mediante `fillHeight`.
+
 ## Ajuste de Empleados y headers internos
 
 Se compactó la pantalla de Empleados eliminando el encabezado interno repetido y el bloque descriptivo que duplicaban la identificación de la sección ya presente en el header de plataforma. El botón `Nuevo usuario` ahora vive junto al buscador y al control de filtros de la tabla, reduciendo el espacio vertical y manteniendo la carga de usuarios en un modal. Los filtros de rol y estado continúan agrupados detrás de `Más filtros`.

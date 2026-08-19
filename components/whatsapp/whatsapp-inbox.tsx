@@ -286,7 +286,7 @@ export function WhatsappInbox({
                 </div>
               </header>
 
-              <div className="min-h-0 flex-1 overflow-hidden p-3 sm:p-4">
+              <div className="min-h-0 flex-1 overflow-hidden">
                 <MessagesList
                   messages={selectedMessages}
                   lastMessagePreview={selected.last_message_preview}

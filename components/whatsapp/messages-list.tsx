@@ -76,7 +76,12 @@ export function MessagesList({
     : messages;
 
   return (
-    <section className={["rounded-md border border-[#E5E7EB] bg-white", fillHeight ? "flex h-full min-h-0 flex-col" : ""].join(" ")}>
+    <section
+      className={[
+        "rounded-md",
+        fillHeight ? "flex h-full min-h-0 flex-col" : "border border-[#E5E7EB] bg-white",
+      ].join(" ")}
+    >
       {showHeader ? (
         <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] px-4 py-3">
           <h2 className="text-base font-semibold text-[#111827]">Mensajes</h2>
@@ -88,7 +93,12 @@ export function MessagesList({
         </div>
       ) : null}
 
-      <div className={["space-y-3 overflow-y-auto bg-[#FAFAFA] p-4", fillHeight ? "min-h-0 flex-1" : "max-h-[74vh]"].join(" ")}>
+      <div
+        className={[
+          "space-y-3 overflow-y-auto p-4",
+          fillHeight ? "min-h-0 flex-1 bg-transparent" : "max-h-[74vh] bg-[#FAFAFA]",
+        ].join(" ")}
+      >
         {messages.length ? (
           visibleMessages.map((message) => {
             const isOutgoing = getDirection(message) === "saliente";
