@@ -179,14 +179,13 @@ function getSearchableText(vehicle: Vehiculo) {
     .toLowerCase();
 }
 
-function CatalogoRow({
+function CatalogoCard({
   vehicle,
 }: {
   vehicle: Vehiculo;
 }) {
   const [state, formAction] = useFormState(updateVehiculoCatalogoAction, initialState);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const formId = `catalogo-vehiculo-${vehicle.id}`;
   const photoUrl = getPhotoUrl(vehicle.fotos);
   const initials = getInitials(vehicle.marca, vehicle.modelo);
 
@@ -201,156 +200,131 @@ function CatalogoRow({
   }, [state]);
 
   return (
-    <tr className="transition hover:bg-[#F9FAFB]">
-      <td className="px-4 py-4 align-top">
-        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md border border-[#E5E7EB] bg-[#FAFAFA]">
-          {photoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={photoUrl}
-              alt={`${vehicle.marca ?? "Vehículo"} ${vehicle.modelo ?? ""}`}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <span className="text-xs font-semibold tracking-[0.12em] text-[#6B7280]">
+    <article className="overflow-hidden rounded-md border border-[#E5E7EB] bg-white transition hover:border-[#D8A1B2]">
+      <div className="relative aspect-[16/9] overflow-hidden bg-[#F9FAFB]">
+        {photoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={photoUrl}
+            alt={`${vehicle.marca ?? "Vehículo"} ${vehicle.modelo ?? ""}`}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <span className="text-sm font-semibold tracking-[0.12em] text-[#9CA3AF]">
               {initials}
             </span>
-          )}
-        </div>
-      </td>
-      <td className="px-4 py-4 align-top">
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-[#111827]">{getVehicleTitle(vehicle)}</p>
-            {vehicle.catalogo_descripcion ? (
-              <p className="text-sm text-[#6B7280]">{vehicle.catalogo_descripcion}</p>
-            ) : null}
-            {getVehicleSubtitle(vehicle) ? (
-              <p className="text-xs text-[#6B7280]">{getVehicleSubtitle(vehicle)}</p>
-            ) : null}
-            {vehicle.estado !== "en_stock" ? (
-              <p className="text-xs font-medium text-[#6B7280]">No está en stock</p>
-            ) : null}
           </div>
-
-          <div className="grid gap-2">
-            <div className="space-y-1">
-              <FieldLabel htmlFor={`${formId}-titulo`}>Título público</FieldLabel>
-              <Input
-                id={`${formId}-titulo`}
-                name="catalogo_titulo"
-                form={formId}
-                defaultValue={vehicle.catalogo_titulo ?? ""}
-                placeholder={`${vehicle.marca ?? "Vehículo"} ${vehicle.modelo ?? ""}`.trim()}
-              />
-            </div>
-            <div className="space-y-1">
-              <FieldLabel htmlFor={`${formId}-descripcion`}>Descripción pública</FieldLabel>
-              <Textarea
-                id={`${formId}-descripcion`}
-                name="catalogo_descripcion"
-                form={formId}
-                defaultValue={vehicle.catalogo_descripcion ?? ""}
-                placeholder="Descripción visible en la web"
-              />
-            </div>
-          </div>
-        </div>
-      </td>
-      <td className="px-4 py-4 align-top">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-[#111827]">{vehicle.estado ?? "—"}</p>
-          <p className="text-xs text-[#6B7280]">{vehicle.estado_preparacion ?? "Sin preparar"}</p>
-        </div>
-      </td>
-      <td className="px-4 py-4 align-top">
-        <div className="space-y-3">
+        )}
+        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           <CatalogoStatusBadge
             status={vehicle.catalogo_publicado ? "publicado" : "no_publicado"}
           />
-          <label
-            htmlFor={`${formId}-publicado`}
-            className="flex items-center gap-2 text-sm text-[#111827]"
-          >
+          {vehicle.catalogo_destacado ? <CatalogoStatusBadge status="destacado" /> : null}
+        </div>
+      </div>
+
+      <form action={formAction} className="space-y-4 p-4">
+        <input type="hidden" name="vehiculo_id" value={vehicle.id} />
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1">
+            <p className="truncate text-base font-semibold text-[#111827]">{getVehicleTitle(vehicle)}</p>
+            {getVehicleSubtitle(vehicle) ? (
+              <p className="truncate text-xs text-[#6B7280]">{getVehicleSubtitle(vehicle)}</p>
+            ) : null}
+            {vehicle.estado !== "en_stock" ? (
+              <p className="text-xs font-medium text-[#B45309]">No está en stock</p>
+            ) : null}
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-sm font-semibold text-[#111827]">
+              {formatMoney(vehicle.precio_venta, vehicle.precio_moneda)}
+            </p>
+            <p className="text-xs text-[#6B7280]">{formatKm(vehicle.km)} km</p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between rounded-md bg-[#F9FAFB] px-3 py-2 text-xs">
+          <span className="text-[#6B7280]">Estado</span>
+          <span className="font-medium text-[#111827]">
+            {vehicle.estado ?? "—"} · {vehicle.estado_preparacion ?? "Sin preparar"}
+          </span>
+        </div>
+
+        <div className="grid gap-3">
+          <div className="space-y-1">
+            <FieldLabel htmlFor={`catalogo-${vehicle.id}-titulo`}>Título público</FieldLabel>
+            <Input
+              id={`catalogo-${vehicle.id}-titulo`}
+              name="catalogo_titulo"
+              defaultValue={vehicle.catalogo_titulo ?? ""}
+              placeholder={`${vehicle.marca ?? "Vehículo"} ${vehicle.modelo ?? ""}`.trim()}
+            />
+          </div>
+          <div className="space-y-1">
+            <FieldLabel htmlFor={`catalogo-${vehicle.id}-descripcion`}>Descripción pública</FieldLabel>
+            <Textarea
+              id={`catalogo-${vehicle.id}-descripcion`}
+              name="catalogo_descripcion"
+              defaultValue={vehicle.catalogo_descripcion ?? ""}
+              placeholder="Descripción visible en la web"
+            />
+          </div>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          <label className="flex items-center gap-2 rounded-md border border-[#E5E7EB] px-3 py-2 text-sm text-[#111827]">
             <input
-              id={`${formId}-publicado`}
               name="catalogo_publicado"
-              form={formId}
               type="checkbox"
               defaultChecked={Boolean(vehicle.catalogo_publicado)}
-              className="h-4 w-4 rounded border-[#D1D5DB] text-[#18181B] focus:ring-[#D1D5DB]"
+              className="h-4 w-4 rounded border-[#D1D5DB] text-[#8A1538] focus:ring-[#E9B8C6]"
             />
             Publicado
           </label>
-        </div>
-      </td>
-      <td className="px-4 py-4 align-top">
-        <div className="space-y-3">
-          {vehicle.catalogo_destacado ? (
-            <CatalogoStatusBadge status="destacado" />
-          ) : (
-            <span className="text-sm text-[#6B7280]">—</span>
-          )}
-          <label
-            htmlFor={`${formId}-destacado`}
-            className="flex items-center gap-2 text-sm text-[#111827]"
-          >
+          <label className="flex items-center gap-2 rounded-md border border-[#E5E7EB] px-3 py-2 text-sm text-[#111827]">
             <input
-              id={`${formId}-destacado`}
               name="catalogo_destacado"
-              form={formId}
               type="checkbox"
               defaultChecked={Boolean(vehicle.catalogo_destacado)}
-              className="h-4 w-4 rounded border-[#D1D5DB] text-[#18181B] focus:ring-[#D1D5DB]"
+              className="h-4 w-4 rounded border-[#D1D5DB] text-[#8A1538] focus:ring-[#E9B8C6]"
             />
             Destacado
           </label>
         </div>
-      </td>
-      <td className="px-4 py-4 align-top">
-        <div className="space-y-1">
-          <FieldLabel htmlFor={`${formId}-orden`}>Orden</FieldLabel>
-          <Input
-            id={`${formId}-orden`}
-            name="catalogo_orden"
-            form={formId}
-            type="number"
-            min="0"
-            step="1"
-            defaultValue={vehicle.catalogo_orden ?? ""}
-            className="max-w-[100px]"
-          />
-        </div>
-      </td>
-      <td className="px-4 py-4 align-top">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-[#111827]">{formatMoney(vehicle.precio_venta, vehicle.precio_moneda)}</p>
-          <p className="text-xs text-[#6B7280]">{formatKm(vehicle.km)} km</p>
-        </div>
-      </td>
-      <td className="px-4 py-4 align-top">
-        <div className="space-y-2">
-          <form id={formId} action={formAction} className="space-y-2">
-            <input type="hidden" name="vehiculo_id" value={vehicle.id} />
+
+        <div className="flex items-end gap-3">
+          <div className="w-28 space-y-1">
+            <FieldLabel htmlFor={`catalogo-${vehicle.id}-orden`}>Orden</FieldLabel>
+            <Input
+              id={`catalogo-${vehicle.id}-orden`}
+              name="catalogo_orden"
+              type="number"
+              min="0"
+              step="1"
+              defaultValue={vehicle.catalogo_orden ?? ""}
+            />
+          </div>
+          <div className="flex min-w-0 flex-1 flex-wrap justify-end gap-2">
             <SubmitButton />
-          </form>
-          {vehicle.catalogo_publicado ? (
-            <Link
-              href={`/catalogo/${vehicle.id}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-            >
-              Ver
-            </Link>
-          ) : null}
-          {state.error ? (
-            <p className="max-w-[180px] text-xs leading-5 text-[#B45309]">{state.error}</p>
-          ) : null}
-          {feedback ? <p className="text-xs text-[#6B7280]">{feedback}</p> : null}
+            {vehicle.catalogo_publicado ? (
+              <Link
+                href={`/catalogo/${vehicle.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+              >
+                Ver
+              </Link>
+            ) : null}
+          </div>
         </div>
-      </td>
-    </tr>
+
+        {state.error ? <p className="text-xs leading-5 text-[#B45309]">{state.error}</p> : null}
+        {feedback ? <p className="text-xs text-[#6B7280]">{feedback}</p> : null}
+      </form>
+    </article>
   );
 }
 
@@ -470,39 +444,21 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
           </AdvancedFilters>
         </div>
         <p className="text-xs text-[#6B7280]">
-          Mostrando {filteredVehiculos.length} de {vehiculos.length}
+          Mostrando {visibleVehiculos.length} de {filteredVehiculos.length}
         </p>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-[#E5E7EB]">
-          <thead className="bg-[#FAFAFA]">
-            <tr className="text-left text-xs font-medium uppercase tracking-[0.08em] text-[#6B7280]">
-              <th className="px-4 py-3">Foto</th>
-              <th className="px-4 py-3">Vehículo</th>
-              <th className="px-4 py-3">Estado inventario</th>
-              <th className="px-4 py-3">Publicación</th>
-              <th className="px-4 py-3">Destacado</th>
-              <th className="px-4 py-3">Orden</th>
-              <th className="px-4 py-3">Precio</th>
-              <th className="px-4 py-3">Acción</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#E5E7EB] bg-white">
-            {filteredVehiculos.length ? (
-              visibleVehiculos.map((vehicle) => (
-                <CatalogoRow key={vehicle.id} vehicle={vehicle} />
-              ))
-            ) : (
-              <tr>
-                <td colSpan={8} className="px-4 py-14 text-center text-sm text-[#6B7280]">
-                  No hay vehículos que coincidan con los filtros.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-3">
+        {filteredVehiculos.length ? (
+          visibleVehiculos.map((vehicle) => (
+            <CatalogoCard key={vehicle.id} vehicle={vehicle} />
+          ))
+        ) : (
+          <div className="rounded-md border border-dashed border-[#E5E7EB] px-4 py-14 text-center text-sm text-[#6B7280] md:col-span-2 xl:col-span-3">
+            No hay vehículos que coincidan con los filtros.
+          </div>
+        )}
       </div>
 
       <PaginationControls

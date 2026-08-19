@@ -219,6 +219,13 @@
 
 ## Integración automática de Nueva Venta con Caja y Comisiones
 
+## Cards internas de Catálogo
+
+- Se reemplazó la tabla extensa de vehículos de `dashboard/catalogo` por una grilla responsive de cards compactas.
+- Cada card conserva la edición de título y descripción pública, publicación, destacado, orden, guardado y acceso al detalle público.
+- Se incorporó la foto principal como elemento visual, con placeholder cuando no existe, y se mantuvieron filtros y paginación.
+- No se modificó el schema ni las acciones de Supabase; el cambio es exclusivamente de presentación en `components/catalogo/catalogo-vehiculos-table.tsx`.
+
 - Se integró el flujo de nueva venta para que, luego de `registrar_venta`, Next complete automáticamente los pasos operativos posteriores.
 - La acción de ventas ahora registra pagos iniciales con `ventas_pagos`, genera movimientos de `caja_movimientos` para pagos monetarios, asegura la entrega pendiente en `ventas_entregas` y llama `generar_comision_por_venta` con porcentaje tomado del vendedor o de `configuracion_general`.
 - El pago `usado` queda solo en `ventas_pagos` y no genera caja, porque representa una unidad recibida y no un ingreso líquido.
