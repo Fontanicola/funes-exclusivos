@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LogOut } from "lucide-react";
 import { logout } from "@/app/(dashboard)/actions";
-import { getRoleLabel } from "@/lib/auth/permissions";
 
 type Employee = {
   email: string;
@@ -84,12 +83,6 @@ export function UserMenu({
             <p className="truncate text-sm font-medium text-[#111827]">
               {employee.nombre ?? employee.email}
             </p>
-            <div className="mt-1 flex items-center gap-2">
-              <p className="truncate text-xs text-[#6B7280]">{employee.email}</p>
-              <span className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
-                {getRoleLabel(employee.rol)}
-              </span>
-            </div>
           </div>
           <ChevronDown
             className={[
@@ -108,17 +101,13 @@ export function UserMenu({
             "",
           ].join(" ")}
         >
-          <div className="space-y-1 border-b border-[#E5E7EB] pb-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9CA3AF]">
-              Sesión activa
-            </p>
-            <p className="text-sm font-medium text-[#111827]">
+          <div className="flex items-center gap-3 border-b border-[#E5E7EB] pb-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-[#F9FAFB] text-sm font-semibold text-[#111827]">
+              {initials}
+            </div>
+            <p className="truncate text-sm font-medium text-[#111827]">
               {employee.nombre ?? employee.email}
             </p>
-            <p className="text-xs text-[#6B7280]">{employee.email}</p>
-            <span className="inline-flex rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
-              {getRoleLabel(employee.rol)}
-            </span>
           </div>
 
           <form action={logout} className="pt-3">

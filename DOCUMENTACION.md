@@ -3567,3 +3567,19 @@ No hace falta ejecutar SQL. Si el proyecto tiene políticas de Storage que impid
 
 - `npm run build` ejecutado al cierre del rediseño.
 - Build finalizado correctamente sin errores.
+## Menú de perfil simplificado
+
+### Qué se mejoró
+- El menú de usuario ahora muestra únicamente la foto/placeholder de perfil y el nombre.
+- Se eliminaron del menú visible el email, el rol, la etiqueta administrativa y el texto de estado de sesión.
+- Se mantuvo la acción `Cerrar sesión`, además del cierre al hacer click afuera o presionar Escape.
+
+### Paths modificados
+- `components/dashboard/user-menu.tsx`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+- Ninguna.
+
+### Decisiones técnicas
+- Se conservaron los datos de empleado necesarios para permisos y logout, pero no se presentan como información secundaria en la interfaz.
