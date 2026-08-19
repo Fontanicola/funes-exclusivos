@@ -73,15 +73,8 @@ export function CrmPipeline({
       ];
 
   return (
-    <section className="rounded-md border border-[#E5E7EB] bg-white p-4">
-      <div className="space-y-1 border-b border-[#E5E7EB] pb-4">
-        <h2 className="text-base font-semibold text-[#111827]">Pipeline</h2>
-        <p className="text-sm text-[#6B7280]">
-          Vista comercial por estado, sin arrastrar tarjetas.
-        </p>
-      </div>
-
-      <div className="mt-4 grid gap-4 xl:grid-cols-7 lg:grid-cols-3 md:grid-cols-2">
+    <div className="min-w-0">
+      <div className="grid auto-cols-[240px] grid-flow-col gap-3 overflow-x-auto pb-2">
         {states
           .slice()
           .sort((left, right) => left.orden - right.orden)
@@ -92,8 +85,8 @@ export function CrmPipeline({
             const visibleLeads = stateLeads.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
             return (
-              <div key={state.id} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
-                <div className="flex items-center justify-between gap-2 border-b border-[#E5E7EB] pb-3">
+              <div key={state.id} className="flex h-[min(62vh,680px)] min-h-[420px] min-w-0 flex-col rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+                <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#E5E7EB] pb-3">
                   <div>
                     <p className="text-sm font-semibold text-[#111827]">{state.nombre}</p>
                     <p className="text-xs text-[#6B7280]">{stateLeads.length} leads</p>
@@ -103,7 +96,7 @@ export function CrmPipeline({
                   </span>
                 </div>
 
-                <div className="mt-3 space-y-3">
+                <div className="mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
                   {stateLeads.length ? (
                     visibleLeads.map((lead) => (
                       <Link
@@ -143,6 +136,6 @@ export function CrmPipeline({
             );
           })}
       </div>
-    </section>
+    </div>
   );
 }

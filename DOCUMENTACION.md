@@ -1958,6 +1958,26 @@ El cambio se realizó sobre el componente compartido `AdvancedFilters`, por lo q
 
 - `npm run build` finalizado correctamente.
 
+## Vistas de Pipeline CRM
+
+Se reorganizó el CRM para que el usuario pueda elegir entre vista de columnas y vista de tabla, sin mostrar ambas al mismo tiempo. Las columnas del pipeline ya no están contenidas dentro de una card grande: se presentan como etapas independientes, con scroll horizontal para recorrerlas y scroll vertical interno para revisar los leads de cada etapa sin alargar toda la página.
+
+### Paths modificados
+
+- `app/(dashboard)/crm/page.tsx`
+- `components/crm/crm-pipeline.tsx`
+- `components/crm/crm-views.tsx`
+
+### Decisiones técnicas
+
+- Se mantuvo la paginación existente de 10 leads por etapa.
+- El selector de vista es local al cliente y no cambia rutas ni consultas.
+- La vista tabla conserva sus filtros y acción de alta; la vista columnas conserva el acceso a `Nuevo lead` en la toolbar superior.
+
+### Validación
+
+- `npm run build` finalizado correctamente.
+
 ## Sistema de colores semánticos para etiquetas
 
 Se unificó el tratamiento visual de las etiquetas de estado para que comuniquen rápidamente la situación operativa: verde suave para estados positivos o activos, ámbar para estados pendientes o intermedios, rojo suave para estados negativos o anulados, azul para estados informativos/en curso y slate para estados neutros. También se incorporaron colores sutiles para roles, orígenes comerciales, interés de compra, conexión de WhatsApp y publicación de catálogo. Las etiquetas puramente descriptivas, como tipos de documento y medios de pago, se mantienen neutras para preservar la jerarquía visual.

@@ -5,8 +5,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockLeads, mockPipelineEstados } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
-import { CrmPipeline } from "@/components/crm/crm-pipeline";
-import { LeadsTable } from "@/components/crm/leads-table";
+import { CrmViews } from "@/components/crm/crm-views";
 
 export const metadata: Metadata = {
   title: "CRM | Funes Exclusivos",
@@ -189,10 +188,10 @@ export default async function CrmPage() {
         </article>
       </div>
 
-      <CrmPipeline leads={leads} pipelineEstados={pipelineEstados} />
-      <LeadsTable
+      <CrmViews
         leads={leads}
-        toolbarAction={
+        pipelineEstados={pipelineEstados}
+        newLeadAction={
           <Link
             href="/crm/nuevo"
             className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
