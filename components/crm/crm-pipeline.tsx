@@ -83,7 +83,7 @@ export function CrmPipeline({
 
   return (
     <div className="min-w-0">
-      <div className="overflow-x-auto pb-3">
+      <div className="overflow-x-auto overflow-y-hidden pb-3">
         <div className="flex min-w-max gap-4">
         {states
           .slice()
@@ -121,7 +121,7 @@ export function CrmPipeline({
                   });
                 }}
                 className={[
-                  "flex h-[calc(100vh-300px)] min-h-[560px] w-[300px] shrink-0 flex-col overflow-visible rounded-md border bg-[#FAFAFA] p-3 transition",
+                  "flex h-[calc(100vh-300px)] min-h-[560px] w-[300px] shrink-0 flex-col overflow-hidden rounded-md border bg-[#FAFAFA] p-3 transition",
                   draggedLeadId ? "border-[#D8A1B2]" : "border-[#E5E7EB]",
                 ].join(" ")}
               >

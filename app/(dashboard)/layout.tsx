@@ -47,7 +47,7 @@ export default async function DashboardLayout({
       <div className="min-h-screen bg-white text-[#111827]">
         <div className="flex min-h-screen">
           <Sidebar employee={mockEmpleado} />
-          <main className="min-w-0 flex-1">
+            <main className="min-w-0 flex-1 overflow-x-hidden">
             <BreadcrumbHeader pathname={pathname} />
             <SectionSubheader employee={mockEmpleado} />
             <div className="px-5 py-4">{children}</div>
@@ -94,7 +94,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-white text-[#111827]">
       <div className="flex min-h-screen">
         <Sidebar employee={employee} />
-        <main className="min-w-0 flex-1">
+        <main className="min-w-0 flex-1 overflow-x-hidden">
           <BreadcrumbHeader pathname={pathname} />
           <SectionSubheader employee={employee} />
           <div className="px-5 py-4">{children}</div>

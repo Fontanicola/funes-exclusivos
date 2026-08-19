@@ -3733,3 +3733,11 @@ Path creado: `components/dashboard/section-subheader.tsx`.
 Paths modificados: `components/dashboard/sidebar.tsx`, `app/(dashboard)/layout.tsx`.
 
 No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
+
+### Ajuste de scroll del CRM
+
+Se eliminó el overflow vertical accidental del carril general del pipeline. El desplazamiento horizontal queda limitado al carril de etapas y el vertical permanece dentro de cada columna, evitando que la sección genere un scroll interno adicional.
+
+Paths modificados: `components/crm/crm-pipeline.tsx`, `app/(dashboard)/layout.tsx`.
+
+No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
