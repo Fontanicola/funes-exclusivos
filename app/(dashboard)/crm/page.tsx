@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CrmViews } from "@/components/crm/crm-views";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { AnalyzeNewLeadsButton } from "@/components/crm/analyze-new-leads-button";
 
 export const metadata: Metadata = {
   title: "CRM | Funes Exclusivos",
@@ -199,6 +200,7 @@ export default async function CrmPage({ searchParams }: { searchParams?: { from?
       <CrmViews
         leads={leads}
         pipelineEstados={pipelineEstados}
+        aiAction={<AnalyzeNewLeadsButton />}
         newLeadAction={
           <Link
             href="/crm/nuevo"

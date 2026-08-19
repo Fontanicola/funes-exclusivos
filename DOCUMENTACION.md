@@ -1437,6 +1437,42 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Clasificación masiva de leads con IA
+
+### Qué se construyó
+
+- Se agregó la acción manual `Analizar nuevos con IA` en el pipeline de CRM.
+- La acción procesa únicamente leads en estado `nuevo`, en lotes de hasta 25 registros.
+- El análisis considera la actividad de WhatsApp, si el vendedor respondió, el vehículo de interés y señales comerciales como precio, financiación, permuta, reserva o visita.
+- Los leads se pueden mover a `Contactado`, `Interesado`, `Negociación` o `Reservado`; si no hay evidencia suficiente permanecen en `Nuevo`.
+
+### Paths modificados
+
+- `app/(dashboard)/crm/actions.ts`
+- `app/(dashboard)/crm/page.tsx`
+- `components/crm/crm-views.tsx`
+- `components/crm/analyze-new-leads-button.tsx`
+- `lib/ai/lead-pipeline-classifier.ts`
+
+### Tablas involucradas
+
+- `public.leads`
+- `public.conversaciones`
+- `public.conversacion_mensajes`
+- `public.vehiculos`
+- `public.empleados`
+
+### Decisiones técnicas
+
+- La ejecución es manual para evitar consumo automático de OpenAI y permitir que el equipo decida cuándo ordenar el pipeline.
+- Se usa una llamada por lote, no una llamada por lead.
+- La actualización modifica solamente `estado` y `updated_by`; no pisa asignaciones, notas, presupuesto ni vehículo de interés.
+- Los resultados inválidos de la IA no se aplican. Si OpenAI no está configurado o falla, la acción devuelve un error visible y no actualiza el lote.
+
+### Validación
+
+- `npm run build` ejecutado correctamente.
+
 ## Polish visual de Recordatorios
 
 Se compactó la pantalla de Recordatorios para alinearla con el lenguaje visual de la plataforma. Los KPIs ahora tienen menor altura y una intensidad más equilibrada, mientras que la alerta de alta prioridad usa un tono ámbar en lugar de ocupar toda la atención con un bloque bordó.

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { canManageSales } from "@/lib/auth/permissions";
+import { classifyLeadPipelineBatch, type LeadPipelineInput } from "@/lib/ai/lead-pipeline-classifier";
 import { isDemoMode } from "@/lib/demo-mode";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -19,7 +20,189 @@ import {
 type ActionState = {
   error?: string;
   success?: boolean;
+  message?: string;
 };
+
+export async function analyzeNewLeadsWithAiAction(): Promise<ActionState> {
+  if (isDemoMode) {
+    return { error: "Modo demo activo: conectá Supabase para analizar leads reales." };
+  }
+
+  const supabase = createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
+
+  const { data: actor } = await supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  if (!actor || actor.activo !== true || !canManageSales(actor.rol)) {
+    return { error: "No tenés permisos para analizar leads." };
+  }
+
+  const { data: rawLeads, error: leadsError } = await supabase
+    .from("leads")
+    .select("id,nombre,origen,vendedor_id,vehiculo_interes_id,created_at")
+    .eq("estado", "nuevo")
+    .order("created_at", { ascending: true })
+    .limit(200);
+
+  if (leadsError) {
+    console.error("CRM AI: no se pudieron leer los leads nuevos", leadsError.message);
+    return { error: "No pudimos leer los leads nuevos. Intentá de nuevo." };
+  }
+
+  const leads = (rawLeads ?? []) as Array<{
+    id: string;
+    nombre: string | null;
+    origen: string | null;
+    vendedor_id: string | null;
+    vehiculo_interes_id: string | null;
+    created_at: string | null;
+  }>;
+
+  if (!leads.length) {
+    return { success: true, message: "No hay leads nuevos para analizar." };
+  }
+
+  const leadIds = leads.map((lead) => lead.id);
+  const [conversationsResult, vehiclesResult, sellersResult] = await Promise.all([
+    supabase
+      .from("conversaciones")
+      .select("id,lead_id,last_message_preview,ultimo_mensaje_at,mensajes_count,unread_count")
+      .in("lead_id", leadIds)
+      .order("ultimo_mensaje_at", { ascending: false }),
+    supabase
+      .from("vehiculos")
+      .select("id,marca,modelo,version,anio,dominio")
+      .in("id", leads.map((lead) => lead.vehiculo_interes_id).filter(Boolean)),
+    supabase
+      .from("empleados")
+      .select("id,nombre")
+      .in("id", leads.map((lead) => lead.vendedor_id).filter(Boolean)),
+  ]);
+
+  if (conversationsResult.error) {
+    console.error("CRM AI: no se pudieron leer las conversaciones", conversationsResult.error.message);
+  }
+
+  const conversations = (conversationsResult.data ?? []) as Array<{
+    id: string;
+    lead_id: string | null;
+    last_message_preview: string | null;
+    ultimo_mensaje_at: string | null;
+    mensajes_count: number | null;
+    unread_count: number | null;
+  }>;
+  const conversationIds = conversations.map((conversation) => conversation.id);
+  const messagesResult = conversationIds.length
+    ? await supabase
+        .from("conversacion_mensajes")
+        .select("conversacion_id,direccion,body,sent_at")
+        .in("conversacion_id", conversationIds)
+        .order("sent_at", { ascending: false })
+        .limit(2500)
+    : { data: [], error: null };
+
+  if (messagesResult.error) {
+    console.error("CRM AI: no se pudieron leer los mensajes", messagesResult.error.message);
+  }
+
+  const messages = (messagesResult.data ?? []) as Array<{
+    conversacion_id: string;
+    direccion: string | null;
+    body: string | null;
+    sent_at: string | null;
+  }>;
+  const messagesByConversation = new Map<string, typeof messages>();
+  for (const message of messages) {
+    const current = messagesByConversation.get(message.conversacion_id) ?? [];
+    if (current.length < 8) current.push(message);
+    messagesByConversation.set(message.conversacion_id, current);
+  }
+
+  const vehicleById = new Map(
+    ((vehiclesResult.data ?? []) as Array<{ id: string; marca: string | null; modelo: string | null; version: string | null; anio: number | null; dominio: string | null }>).map((vehicle) => [
+      vehicle.id,
+      [vehicle.marca, vehicle.modelo, vehicle.version, vehicle.anio, vehicle.dominio].filter(Boolean).join(" "),
+    ])
+  );
+  const sellerById = new Map(
+    ((sellersResult.data ?? []) as Array<{ id: string; nombre: string | null }>).map((seller) => [seller.id, seller.nombre])
+  );
+  const latestConversationByLead = new Map<string, (typeof conversations)[number]>();
+  for (const conversation of conversations) {
+    if (conversation.lead_id && !latestConversationByLead.has(conversation.lead_id)) {
+      latestConversationByLead.set(conversation.lead_id, conversation);
+    }
+  }
+
+  const inputs: LeadPipelineInput[] = leads.map((lead) => {
+    const conversation = latestConversationByLead.get(lead.id);
+    const recentMessages = conversation ? messagesByConversation.get(conversation.id) ?? [] : [];
+    const vendedorRespondio = recentMessages.some((message) =>
+      ["saliente", "outbound", "sent"].includes((message.direccion ?? "").toLowerCase())
+    );
+    return {
+      id: lead.id,
+      nombre: lead.nombre,
+      origen: lead.origen,
+      vendedor: lead.vendedor_id ? sellerById.get(lead.vendedor_id) ?? null : null,
+      vehiculoInteres: lead.vehiculo_interes_id ? vehicleById.get(lead.vehiculo_interes_id) ?? "Vehículo asociado" : null,
+      ultimoMensaje: conversation?.last_message_preview ?? recentMessages[0]?.body ?? null,
+      ultimoMensajeAt: conversation?.ultimo_mensaje_at ?? recentMessages[0]?.sent_at ?? null,
+      mensajesTotal: conversation?.mensajes_count ?? recentMessages.length,
+      mensajesNoLeidos: conversation?.unread_count ?? 0,
+      vendedorRespondio,
+      mensajesRecientes: recentMessages.map((message) => ({ direccion: message.direccion, body: message.body })),
+    };
+  });
+
+  const classifications = [];
+  try {
+    for (let index = 0; index < inputs.length; index += 25) {
+      classifications.push(...await classifyLeadPipelineBatch(inputs.slice(index, index + 25)));
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "No pudimos completar el análisis.";
+    console.error("CRM AI: falló el análisis de leads", message);
+    return { error: message.includes("OPENAI_API_KEY") ? message : "No pudimos analizar los leads. Intentá de nuevo." };
+  }
+
+  const grouped = new Map<string, string[]>();
+  for (const classification of classifications) {
+    if (classification.estado === "nuevo") continue;
+    const ids = grouped.get(classification.estado) ?? [];
+    ids.push(classification.id);
+    grouped.set(classification.estado, ids);
+  }
+
+  let moved = 0;
+  for (const [estado, ids] of grouped) {
+    const { error } = await supabase
+      .from("leads")
+      .update({ estado, updated_by: user.id })
+      .in("id", ids)
+      .eq("estado", "nuevo");
+    if (error) {
+      console.error(`CRM AI: no se pudieron actualizar leads en ${estado}`, error.message);
+      return { error: "Analizamos los leads, pero no pudimos guardar todos los cambios." };
+    }
+    moved += ids.length;
+  }
+
+  revalidatePath("/crm");
+  revalidatePath("/dashboard");
+  return {
+    success: true,
+    message: `Se analizaron ${leads.length} leads y se movieron ${moved} según su actividad.`,
+  };
+}
 
 export async function createLeadAction(
   _prevState: ActionState,

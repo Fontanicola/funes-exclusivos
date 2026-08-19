@@ -13,10 +13,12 @@ export function CrmViews({
   leads,
   pipelineEstados,
   newLeadAction,
+  aiAction,
 }: {
   leads: Lead[];
   pipelineEstados: PipelineEstado[];
   newLeadAction: ReactNode;
+  aiAction?: ReactNode;
 }) {
   const [view, setView] = useState<"pipeline" | "table">("pipeline");
 
@@ -34,7 +36,12 @@ export function CrmViews({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {view === "pipeline" ? newLeadAction : null}
+          {view === "pipeline" ? (
+            <>
+              {aiAction}
+              {newLeadAction}
+            </>
+          ) : null}
           <div className="inline-flex items-center rounded-md border border-[#E5E7EB] bg-white p-1">
             <button
               type="button"
