@@ -1941,6 +1941,23 @@ Además, el mismo desplegable permite filtrar por vehículo de interés. Las opc
 - `npm run build` ejecutado al cierre del rediseño.
 - Build finalizado correctamente sin errores.
 
+## Filtros compactos en toolbar
+
+Se ajustó el patrón compartido de filtros para que el buscador y el acceso a filtros convivan en la misma línea. El botón ahora muestra únicamente el ícono de filtros, con tooltip y etiqueta accesible, y abre un popover pequeño flotante en lugar de expandir los controles hacia abajo dentro del contenido. En WhatsApp se mantuvieron los filtros por vendedor y vehículo de interés dentro de ese popover.
+
+### Paths modificados
+
+- `components/common/advanced-filters.tsx`
+- `components/whatsapp/whatsapp-inbox.tsx`
+
+### Decisión técnica
+
+El cambio se realizó sobre el componente compartido `AdvancedFilters`, por lo que el comportamiento compacto se aplica también a Inventario, Ventas, Compras, Caja, CRM, Gestoría, Comisiones, Empleados, Recordatorios y Rentabilidad sin alterar la lógica de filtrado.
+
+### Validación
+
+- `npm run build` finalizado correctamente.
+
 ## Sistema de colores semánticos para etiquetas
 
 Se unificó el tratamiento visual de las etiquetas de estado para que comuniquen rápidamente la situación operativa: verde suave para estados positivos o activos, ámbar para estados pendientes o intermedios, rojo suave para estados negativos o anulados, azul para estados informativos/en curso y slate para estados neutros. También se incorporaron colores sutiles para roles, orígenes comerciales, interés de compra, conexión de WhatsApp y publicación de catálogo. Las etiquetas puramente descriptivas, como tipos de documento y medios de pago, se mantienen neutras para preservar la jerarquía visual.

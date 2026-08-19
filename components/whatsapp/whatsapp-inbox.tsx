@@ -200,22 +200,21 @@ export function WhatsappInbox({
               </div>
             </div>
 
-            <div className="relative mt-4">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Buscar contacto"
-                className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-3 text-sm text-[#111827] outline-none focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
-              />
-            </div>
-
-            <div className="mt-2">
+            <div className="relative mt-4 flex min-w-0 items-center gap-2">
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Buscar contacto"
+                  className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white pl-9 pr-3 text-sm text-[#111827] outline-none focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
+                />
+              </div>
               <AdvancedFilters label="Filtros">
                 <select
                   value={sellerId}
                   onChange={(event) => setSellerId(event.target.value)}
-                  className="h-9 min-w-[190px] rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+                  className="h-9 w-full min-w-0 rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
                 >
                   <option value="">Todos los vendedores</option>
                   {sellers.map((seller) => (
@@ -227,7 +226,7 @@ export function WhatsappInbox({
                 <select
                   value={interestVehicleId}
                   onChange={(event) => setInterestVehicleId(event.target.value)}
-                  className="h-9 min-w-[190px] rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+                  className="h-9 w-full min-w-0 rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
                 >
                   <option value="">Todos los vehículos</option>
                   {interestVehicles.map((vehicle) => (
