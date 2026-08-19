@@ -3848,3 +3848,15 @@ Tablas y recursos involucrados: `catalogo_config`, `vehiculos`, empleados activo
 Decisiones técnicas: se mantuvieron las reglas existentes de catálogo activo, vehículo en stock y publicación habilitada. Cuando todavía no hay una imagen institucional o de showroom cargada, la interfaz utiliza un espacio editorial intencional para que pueda completarse desde la configuración, en lugar de mostrar un bloque roto. Los CTAs existentes de WhatsApp, filtros, paginación y detalle continúan funcionando.
 
 Pendiente no bloqueante: reemplazar los espacios editoriales por fotografías definitivas de Funes cuando estén disponibles. Validación: `npm run build` finalizado correctamente.
+
+### Mejora de la experiencia de peritajes
+
+Se reorganizó el detalle de peritaje para que funcione como una herramienta de inspección operativa. Se eliminó la duplicación visual de Cliente y Teléfono, se ordenó la identificación de la unidad en una cabecera compacta, se agregó un resumen de estados de paneles y se separaron con mayor claridad checklist, reparaciones, observaciones y valores de referencia.
+
+El mapa 2D de carrocería ahora tiene más espacio, usa colores consistentes para `Pendiente`, `Revisar`, `Reparar` y `Listo`, y convive con un listado desplazable de paneles dentro del mismo bloque. Cada panel continúa abriendo su edición de estado y nota en un modal, con cierre por botón, clic exterior o tecla Escape. No se modificaron acciones, nombres de tablas ni el modelo de datos.
+
+Paths modificados: `components/peritajes/peritaje-workspace.tsx` y `components/peritajes/peritaje-panel-diagram.tsx`.
+
+Tablas Supabase involucradas indirectamente: `peritajes`, `peritaje_items`, `peritaje_paneles`, `peritaje_reparaciones`, `peritaje_plantillas`, `peritaje_plantilla_secciones`, `peritaje_plantilla_items` y `vehiculos`. Validación: `npm run build` finalizado correctamente.
+
+Pendiente operativo: ejecutar `PERITAJES.sql` en Supabase si todavía no fue aplicado y validar el flujo con datos reales de una unidad.
