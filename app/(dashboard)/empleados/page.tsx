@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import { isDemoMode } from "@/lib/demo-mode";
-import { mockEmpleados } from "@/lib/mock-data";
+import { mockEmpleados, mockWhatsappInstancias } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmpleadosTable } from "@/components/empleados/empleados-table";
+import type { WhatsappInstance } from "@/components/whatsapp/whatsapp-instance-card";
 
 export const metadata: Metadata = {
   title: "Empleados | Funes Exclusivos",
 };
 
 export const dynamic = "force-dynamic";
+
+type EmployeeWhatsappInstance = Omit<WhatsappInstance, "empleado"> & {
+  empleado: WhatsappInstance["empleado"] | null;
+};
 
 type Employee = {
   id: string;
@@ -51,6 +56,31 @@ function KpiCard({
 export default async function EmpleadosPage() {
   let empleados: Employee[] = mockEmpleados as Employee[];
   let currentUserId: string | null = null;
+  const whatsappConnections: Record<string, WhatsappInstance> = {};
+
+  const registerConnections = (instances: EmployeeWhatsappInstance[]) => {
+    for (const employee of empleados) {
+      const instance = instances.find(
+        (candidate) =>
+          candidate.empleado_id === employee.id ||
+          candidate.empleado?.nombre === employee.nombre
+      );
+      if (!instance) continue;
+
+      whatsappConnections[employee.id] = {
+        ...instance,
+        qr_base64: instance.qr_base64 ?? null,
+        empleado: {
+          id: employee.id,
+          nombre: employee.nombre,
+          email: employee.email,
+          rol: employee.rol,
+        },
+      };
+    }
+  };
+
+  registerConnections(mockWhatsappInstancias as unknown as EmployeeWhatsappInstance[]);
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
@@ -68,6 +98,20 @@ export default async function EmpleadosPage() {
 
     empleados = (data ?? []) as Employee[];
     currentUserId = user?.id ?? null;
+
+    const { data: instances } = await supabase
+      .from("whatsapp_instancias")
+      .select(
+        "id,empleado_id,provider,instance_name,estado,telefono_conectado,nombre_perfil,qr_code,qr_base64,qr_expires_at,last_connection_at,last_disconnection_at,last_sync_at,last_error,activo,created_at"
+      )
+      .eq("activo", true);
+
+    registerConnections(
+      ((instances ?? []) as unknown as Array<Omit<EmployeeWhatsappInstance, "empleado">>).map((instance) => ({
+        ...instance,
+        empleado: null,
+      }))
+    );
   }
 
   const activeEmployees = empleados.filter((employee) => employee.activo === true);
@@ -100,7 +144,11 @@ export default async function EmpleadosPage() {
         />
       </div>
 
-      <EmpleadosTable empleados={empleados} currentUserId={currentUserId} />
+      <EmpleadosTable
+        empleados={empleados}
+        currentUserId={currentUserId}
+        whatsappConnections={whatsappConnections}
+      />
     </section>
   );
 }

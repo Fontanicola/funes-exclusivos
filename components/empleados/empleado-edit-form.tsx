@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { updateEmpleadoAction } from "@/app/(dashboard)/empleados/actions";
 import { EmpleadoRoleBadge } from "./empleado-role-badge";
+import { EmpleadoWhatsappSection } from "./empleado-whatsapp-section";
+import type { WhatsappInstance } from "@/components/whatsapp/whatsapp-instance-card";
 
 type Employee = {
   id: string;
@@ -53,10 +55,12 @@ export function EmpleadoEditForm({
   employee,
   currentUserId,
   onCancel,
+  whatsappInstance,
 }: {
   employee: Employee;
   currentUserId: string | null;
   onCancel: () => void;
+  whatsappInstance: WhatsappInstance | null;
 }) {
   const [state, formAction] = useFormState(updateEmpleadoAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -70,7 +74,7 @@ export function EmpleadoEditForm({
   }, [onCancel, state.success]);
 
   return (
-    <form ref={formRef} action={formAction} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
+    <form ref={formRef} action={formAction} encType="multipart/form-data" className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
       <input type="hidden" name="id" value={employee.id} />
       {isSelf ? <input type="hidden" name="rol" value={employee.rol ?? "vendedor"} /> : null}
       {isSelf ? <input type="hidden" name="activo" value={String(employee.activo === true)} /> : null}
@@ -186,7 +190,20 @@ export function EmpleadoEditForm({
             className="min-h-[96px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
           />
         </div>
+        <div className="space-y-2 md:col-span-2">
+          <FieldLabel htmlFor="avatar">Foto de perfil</FieldLabel>
+          <input
+            id="avatar"
+            name="avatar"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="block h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-[#8A1538]"
+          />
+          <p className="text-xs text-[#6B7280]">JPG, PNG o WEBP. Máximo 5 MB.</p>
+        </div>
       </div>
+
+      <EmpleadoWhatsappSection employeeId={employee.id} instance={whatsappInstance} />
 
       <div className="mt-4 flex items-center justify-end gap-3">
         <button

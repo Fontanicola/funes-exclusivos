@@ -11,7 +11,7 @@ import {
 } from "@/app/(dashboard)/whatsapp/actions";
 import { WhatsappInstanceStatusBadge } from "./whatsapp-instance-status-badge";
 
-type Instance = {
+export type WhatsappInstance = {
   id: string;
   empleado_id: string | null;
   provider: string | null;
@@ -57,7 +57,7 @@ function formatDateTime(value: string | null) {
   }).format(date);
 }
 
-function getEmployeeName(instance: Instance) {
+function getEmployeeName(instance: WhatsappInstance) {
   return instance.empleado?.nombre ?? "Sin vendedor";
 }
 
@@ -125,7 +125,7 @@ export function WhatsappInstanceCard({
   instance,
   canManageAll = false,
 }: {
-  instance: Instance;
+  instance: WhatsappInstance;
   canManageAll?: boolean;
 }) {
   const [showQr, setShowQr] = useState(instance.estado === "qr_pendiente");

@@ -185,6 +185,7 @@ export async function createWhatsappInstanceAction(
 
   revalidatePath("/whatsapp");
   revalidatePath("/whatsapp/conexiones");
+  revalidatePath("/empleados");
   return { success: true };
 }
 
@@ -280,6 +281,7 @@ export async function refreshWhatsappQrAction(
 
   revalidatePath("/whatsapp");
   revalidatePath("/whatsapp/conexiones");
+  revalidatePath("/empleados");
   return { success: true };
 }
 
@@ -336,6 +338,7 @@ export async function disconnectWhatsappInstanceAction(
 
   revalidatePath("/whatsapp");
   revalidatePath("/whatsapp/conexiones");
+  revalidatePath("/empleados");
   return { success: true };
 }
 
@@ -412,6 +415,7 @@ export async function syncWhatsappConnectionAction(
 
   revalidatePath("/whatsapp");
   revalidatePath("/whatsapp/conexiones");
+  revalidatePath("/empleados");
   return { success: true };
 }
 

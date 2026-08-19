@@ -25,6 +25,10 @@ function toNumberValue(value: FormDataEntryValue | null) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function safeFileName(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "perfil";
+}
+
 async function getAuthUser() {
   const supabase = createSupabaseServerClient();
   const {
@@ -72,6 +76,7 @@ export async function updateEmpleadoAction(
   const fechaIngreso = toStringValue(formData.get("fecha_ingreso")) || null;
   const comisionDefault = toNumberValue(formData.get("comision_default_porcentaje"));
   const notas = toStringValue(formData.get("notas")) || null;
+  const avatarEntry = formData.get("avatar");
 
   if (!id) return { error: "El empleado es obligatorio." };
   if (!["admin", "vendedor", "gestor"].includes(rol)) {
@@ -79,6 +84,45 @@ export async function updateEmpleadoAction(
   }
   if (comisionDefault == null || comisionDefault < 0) {
     return { error: "La comisión default debe ser un número válido mayor o igual a 0." };
+  }
+
+  let avatarUrl: string | undefined;
+  if (avatarEntry && typeof avatarEntry !== "string" && avatarEntry.size > 0) {
+    if (!avatarEntry.type.startsWith("image/")) {
+      return { error: "La foto debe ser JPG, PNG o WEBP." };
+    }
+    if (avatarEntry.size > 5 * 1024 * 1024) {
+      return { error: "La foto no puede superar los 5 MB." };
+    }
+
+    try {
+      const admin = createSupabaseAdminClient();
+      const bucket = "empleados-avatares";
+      await admin.storage.createBucket(bucket, {
+        public: true,
+        fileSizeLimit: "5MB",
+        allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+      });
+
+      const storagePath = `${id}/${crypto.randomUUID()}-${safeFileName(avatarEntry.name)}`;
+      const { error: uploadError } = await admin.storage.from(bucket).upload(storagePath, avatarEntry, {
+        contentType: avatarEntry.type,
+        upsert: false,
+      });
+
+      if (uploadError) {
+        console.error("updateEmpleadoAction avatar upload failed", {
+          code: uploadError.name,
+          message: uploadError.message,
+        });
+        return { error: "No pudimos guardar la foto de perfil." };
+      }
+
+      avatarUrl = admin.storage.from(bucket).getPublicUrl(storagePath).data.publicUrl;
+    } catch (error) {
+      console.error("updateEmpleadoAction avatar storage failed", error);
+      return { error: "No pudimos guardar la foto de perfil." };
+    }
   }
 
   const { data: currentEmployee } = await auth.supabase
@@ -97,18 +141,21 @@ export async function updateEmpleadoAction(
     }
   }
 
+  const employeeUpdate = {
+    nombre,
+    telefono,
+    rol,
+    activo,
+    cargo,
+    fecha_ingreso: fechaIngreso,
+    comision_default_porcentaje: comisionDefault,
+    notas,
+    ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+  };
+
   const { error } = await auth.supabase
     .from("empleados")
-    .update({
-      nombre,
-      telefono,
-      rol,
-      activo,
-      cargo,
-      fecha_ingreso: fechaIngreso,
-      comision_default_porcentaje: comisionDefault,
-      notas,
-    })
+    .update(employeeUpdate)
     .eq("id", id);
 
   if (error) {
@@ -116,6 +163,7 @@ export async function updateEmpleadoAction(
   }
 
   revalidatePath("/empleados");
+  revalidatePath("/whatsapp");
   return { success: true };
 }
 

@@ -11,6 +11,7 @@ import { EmpleadoCreateForm } from "./empleado-create-form";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
+import type { WhatsappInstance } from "@/components/whatsapp/whatsapp-instance-card";
 
 type Employee = {
   id: string;
@@ -83,9 +84,11 @@ function Avatar({ employee }: { employee: Employee }) {
 export function EmpleadosTable({
   empleados,
   currentUserId,
+  whatsappConnections,
 }: {
   empleados: Employee[];
   currentUserId: string | null;
+  whatsappConnections: Record<string, WhatsappInstance>;
 }) {
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<(typeof roleOptions)[number]>("");
@@ -249,6 +252,7 @@ export function EmpleadosTable({
                           <EmpleadoEditForm
                             employee={employee}
                             currentUserId={currentUserId}
+                            whatsappInstance={whatsappConnections[employee.id] ?? null}
                             onCancel={() => setEditingId(null)}
                           />
                         </td>

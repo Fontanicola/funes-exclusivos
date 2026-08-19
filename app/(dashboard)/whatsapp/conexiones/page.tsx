@@ -8,6 +8,7 @@ import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { WhatsappInstanceCreateForm } from "@/components/whatsapp/whatsapp-instance-create-form";
 import { WhatsappInstancesGrid } from "@/components/whatsapp/whatsapp-instances-grid";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
+import type { WhatsappInstance } from "@/components/whatsapp/whatsapp-instance-card";
 
 export const metadata: Metadata = {
   title: "Conexiones WhatsApp | Funes Exclusivos",
@@ -22,30 +23,7 @@ type Employee = {
   rol: string | null;
 };
 
-type Instance = {
-  id: string;
-  empleado_id: string | null;
-  provider: string | null;
-  instance_name: string | null;
-  estado: string | null;
-  telefono_conectado: string | null;
-  nombre_perfil: string | null;
-  qr_code: string | null;
-  qr_base64: string | null;
-  qr_expires_at: string | null;
-  last_connection_at: string | null;
-  last_disconnection_at: string | null;
-  last_sync_at: string | null;
-  last_error: string | null;
-  activo: boolean | null;
-  created_at: string | null;
-  empleado: {
-    id: string;
-    nombre: string | null;
-    email: string | null;
-    rol: string | null;
-  } | null;
-};
+type Instance = WhatsappInstance;
 
 type RawInstance = Omit<Instance, "empleado"> & {
   empleado: Instance["empleado"] | Instance["empleado"][] | null;

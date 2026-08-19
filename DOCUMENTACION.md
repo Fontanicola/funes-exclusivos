@@ -1941,6 +1941,37 @@ Además, el mismo desplegable permite filtrar por vehículo de interés. Las opc
 - `npm run build` ejecutado al cierre del rediseño.
 - Build finalizado correctamente sin errores.
 
+## Perfil y conexión WhatsApp desde Empleados
+
+La edición de cada empleado ahora permite cargar una foto de perfil y administrar su conexión individual de WhatsApp desde la misma pantalla. Si ya existe una instancia, se muestran su estado, teléfono, QR y acciones de sincronización; si no existe, se puede iniciar la conexión para ese empleado sin volver a `Conexiones WhatsApp`.
+
+### Paths modificados
+
+- `app/(dashboard)/empleados/actions.ts`
+- `app/(dashboard)/empleados/page.tsx`
+- `app/(dashboard)/whatsapp/actions.ts`
+- `app/(dashboard)/whatsapp/conexiones/page.tsx`
+- `components/empleados/empleado-edit-form.tsx`
+- `components/empleados/empleados-table.tsx`
+- `components/empleados/empleado-whatsapp-section.tsx`
+- `components/whatsapp/whatsapp-instance-card.tsx`
+
+### Tablas y Storage involucrados
+
+- `public.empleados`
+- `public.whatsapp_instancias`
+- Bucket público `empleados-avatares`
+
+### Decisiones técnicas
+
+- Se reutilizó `empleados.avatar_url`, que ya existía, sin modificar schema.
+- La foto se valida en servidor y se guarda en Storage con un path por empleado; el bucket se crea automáticamente si todavía no existe.
+- La conexión usa las Server Actions existentes de Evolution y conserva los permisos de admin.
+
+### SQL necesario
+
+No hace falta ejecutar SQL. Si el proyecto tiene políticas de Storage que impiden crear o subir desde el entorno actual, habrá que habilitar el bucket `empleados-avatares` desde Supabase; la aplicación ya intenta crearlo automáticamente con el cliente admin server-side.
+
 ## Migración incremental de CSV actualizados
 
 ### Qué se revisó
