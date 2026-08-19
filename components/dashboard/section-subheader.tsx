@@ -68,9 +68,9 @@ export function SectionSubheader({ employee }: { employee: Employee }) {
   return (
     <nav
       aria-label={`Secciones de ${section.label}`}
-      className="border-b border-[#E5E7EB] bg-white px-5"
+      className="border-b border-[#E5E7EB] bg-white px-3 sm:px-5"
     >
-      <div className="flex min-w-0 items-center gap-3 py-1.5">
+      <div className="flex min-w-0 items-center gap-2 py-1.5 sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
           <span className="mr-2 shrink-0 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF]">
             {section.label}

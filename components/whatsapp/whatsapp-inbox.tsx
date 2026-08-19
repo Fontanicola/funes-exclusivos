@@ -183,8 +183,8 @@ export function WhatsappInbox({
 
   return (
     <section className="flex min-h-0 flex-1 overflow-hidden rounded-md border border-[#E5E7EB] bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
-      <div className="grid min-h-0 flex-1 lg:grid-cols-[340px_minmax(0,1fr)]">
-        <aside className="flex min-h-0 flex-col border-b border-[#E5E7EB] bg-[#FCFCFC] lg:border-b-0 lg:border-r">
+      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)]">
+        <aside className="flex min-h-[280px] min-w-0 flex-col border-b border-[#E5E7EB] bg-[#FCFCFC] lg:min-h-0 lg:border-b-0 lg:border-r">
           <div className="shrink-0 border-b border-[#E5E7EB] p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -304,7 +304,7 @@ export function WhatsappInbox({
           </div>
         </aside>
 
-        <main className="flex min-h-0 min-w-0 flex-col bg-[#F8FAFC]">
+        <main className="flex min-h-[420px] min-w-0 flex-col bg-[#F8FAFC] lg:min-h-0">
           {selected ? (
             <>
               <header className="shrink-0 border-b border-[#E5E7EB] bg-white px-4 py-3">

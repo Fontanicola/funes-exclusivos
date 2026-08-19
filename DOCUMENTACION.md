@@ -3861,6 +3861,18 @@ Tablas Supabase involucradas indirectamente: `peritajes`, `peritaje_items`, `per
 
 Pendiente operativo: ejecutar `PERITAJES.sql` en Supabase si todavía no fue aplicado y validar el flujo con datos reales de una unidad.
 
+### Optimización responsive transversal
+
+Se realizó una pasada transversal de adaptación para desktop, tablet y móvil. El shell privado ahora usa padding adaptable, mantiene el viewport controlado y evita overflow horizontal accidental. También se ajustaron el encabezado de plataforma, la navegación secundaria y el sidebar colapsado para aprovechar mejor el ancho disponible sin perder accesibilidad.
+
+Los modales de carga y edición ahora respetan el alto real del viewport (`dvh`), tienen márgenes más seguros en pantallas chicas y permiten desplazarse dentro del contenido sin empujar la página completa. Los menús contextuales limitan su ancho para no salirse de la pantalla. Se reforzó además el comportamiento del pipeline de CRM, el kanban de gestoría y el mapa/modal de peritajes en tablet y móvil.
+
+WhatsApp ahora apila contactos y conversación en pantallas angostas, conservando scroll interno para ambos paneles. Las tablas mantienen su scroll horizontal contenido cuando la densidad de columnas lo exige, mientras que toolbars, filtros y grillas reducen gaps y se adaptan progresivamente. Se agregó una regla global para evitar imágenes que desborden sus contenedores.
+
+Paths modificados: `app/(dashboard)/layout.tsx`, `app/globals.css`, `components/dashboard/sidebar.tsx`, `components/dashboard/breadcrumb-header.tsx`, `components/dashboard/section-subheader.tsx`, `components/common/action-menu.tsx`, `components/common/data-entry-modal.tsx`, `components/crm/crm-pipeline.tsx`, `components/gestoria/gestoria-kanban.tsx`, `components/peritajes/peritaje-panel-diagram.tsx` y `components/whatsapp/whatsapp-inbox.tsx`.
+
+No se modificaron tablas, acciones de negocio, permisos, rutas públicas ni dependencias. Validación técnica: `git diff --check` y `npm run build`. Pendiente recomendado: validar manualmente los breakpoints principales en Chrome responsive y Safari móvil con datos reales, especialmente tablas muy densas y formularios largos.
+
 ### Identidad visual real en catálogo público
 
 Se actualizó la jerarquía de `/catalogo` para que funcione como una vidriera comercial de Funes Exclusivos y no como una pantalla administrativa. La fachada real ahora sostiene el hero por defecto, el showroom acompaña el bloque institucional y el espacio interior refuerza la propuesta de atención personalizada. La portada cargada desde la configuración mantiene prioridad cuando existe.

@@ -57,7 +57,7 @@ export function BreadcrumbHeader({ pathname }: { pathname?: string | null }) {
 
   return (
     <div className="shrink-0 border-b border-[#E5E7EB] bg-white/95 backdrop-blur">
-      <div className="flex min-h-10 items-center justify-between gap-3 px-5">
+      <div className="flex min-h-10 items-center justify-between gap-2 px-3 sm:gap-3 sm:px-5">
         <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-xs">
           {breadcrumbs.map((item, index) => (
             <div key={`${item.href}-${index}`} className="flex min-w-0 items-center gap-1">

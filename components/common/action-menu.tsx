@@ -40,7 +40,7 @@ export function ActionMenu({ children }: { children: ReactNode }) {
         <MoreHorizontal className="h-4 w-4" />
       </button>
       {open ? (
-        <div className="absolute right-0 top-full z-50 mt-2 flex min-w-[180px] flex-col gap-1 rounded-md border border-[#E5E7EB] bg-white p-1.5 shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
+        <div className="absolute right-0 top-full z-50 mt-2 flex max-w-[min(92vw,280px)] min-w-[180px] flex-col gap-1 rounded-md border border-[#E5E7EB] bg-white p-1.5 shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
           {children}
         </div>
       ) : null}

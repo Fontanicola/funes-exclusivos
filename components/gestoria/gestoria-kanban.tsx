@@ -477,7 +477,7 @@ export function GestoriaKanban({
             const visibleStageItems = stageItems.slice(0, visibleCount);
 
             return (
-              <section key={stage.key} className="flex h-[calc(100vh-280px)] min-h-[560px] min-w-0 flex-col rounded-md border border-[#E5E7EB] bg-[#FAFAFA]">
+              <section key={stage.key} className="flex h-[calc(100dvh-280px)] min-h-[480px] min-w-0 flex-col rounded-md border border-[#E5E7EB] bg-[#FAFAFA] sm:min-h-[560px]">
                 <div className="border-b border-[#E5E7EB] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>

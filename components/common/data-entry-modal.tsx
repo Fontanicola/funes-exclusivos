@@ -49,7 +49,7 @@ export function DataEntryModal({
 
       {open ? (
         <div
-          className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-[#111827]/45 px-4 py-6 sm:py-10"
+          className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-[#111827]/45 px-3 py-3 sm:px-4 sm:py-8 lg:py-10"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setOpen(false);
@@ -59,9 +59,9 @@ export function DataEntryModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className={["w-full overflow-hidden rounded-md border border-[#E5E7EB] bg-white shadow-xl", size === "wide" ? "max-w-5xl" : "max-w-2xl"].join(" ")}
+            className={["my-0 max-h-[calc(100dvh-1.5rem)] w-full overflow-hidden rounded-md border border-[#E5E7EB] bg-white shadow-xl sm:max-h-[calc(100dvh-4rem)]", size === "wide" ? "max-w-5xl" : "max-w-2xl"].join(" ")}
           >
-            <header className="flex items-start justify-between gap-4 border-b border-[#E5E7EB] px-5 py-4">
+            <header className="flex items-start justify-between gap-3 border-b border-[#E5E7EB] px-4 py-3 sm:gap-4 sm:px-5 sm:py-4">
               <div className="min-w-0 space-y-1">
                 <h2 id={titleId} className="text-lg font-semibold text-[#111827]">{title}</h2>
                 {description ? <p className="text-sm text-[#6B7280]">{description}</p> : null}
@@ -75,7 +75,7 @@ export function DataEntryModal({
                 <X className="h-4 w-4" />
               </button>
             </header>
-            <div className="max-h-[calc(100vh-170px)] overflow-y-auto p-5">{children}</div>
+            <div className="max-h-[calc(100dvh-7rem)] overflow-y-auto p-4 sm:max-h-[calc(100dvh-9rem)] sm:p-5">{children}</div>
           </section>
         </div>
       ) : null}

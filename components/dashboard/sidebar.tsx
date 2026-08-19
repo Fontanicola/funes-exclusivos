@@ -108,7 +108,7 @@ export function Sidebar({ employee }: { employee: Employee }) {
         }
       }}
       className={[
-        "z-30 flex h-full shrink-0 flex-col border-r border-[#E5E7EB] bg-white px-3 py-3 text-[#111827] transition-[width] duration-200 ease-out",
+        "z-30 flex h-full shrink-0 flex-col border-r border-[#E5E7EB] bg-white px-2 py-3 text-[#111827] transition-[width] duration-200 ease-out sm:px-3",
         collapsed ? "w-[72px]" : "w-[240px]",
       ].join(" ")}
       style={{ width: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH }}
@@ -138,7 +138,7 @@ export function Sidebar({ employee }: { employee: Employee }) {
               width={54}
               height={19}
               priority
-              className="h-auto w-[44px]"
+              className="h-auto w-[42px] sm:w-[44px]"
             />
           </Link>
         )}

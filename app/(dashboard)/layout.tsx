@@ -50,7 +50,7 @@ export default async function DashboardLayout({
             <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             <BreadcrumbHeader pathname={pathname} />
             <SectionSubheader employee={mockEmpleado} />
-            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 py-4">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4 lg:px-5">{children}</div>
           </main>
         </div>
       </div>
@@ -97,7 +97,7 @@ export default async function DashboardLayout({
         <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <BreadcrumbHeader pathname={pathname} />
           <SectionSubheader employee={employee} />
-          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 py-4">{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4 lg:px-5">{children}</div>
         </main>
       </div>
     </div>
