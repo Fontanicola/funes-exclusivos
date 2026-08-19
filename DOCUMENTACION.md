@@ -1958,6 +1958,18 @@ El cambio se realizó sobre el componente compartido `AdvancedFilters`, por lo q
 
 - `npm run build` finalizado correctamente.
 
+## Cierre de modales y filtros
+
+Los popovers de filtros ahora se cierran al hacer click fuera de su contenido o al presionar `Escape`, igual que las ventanas de carga. Los clicks dentro de los controles siguen funcionando sin cerrar el panel accidentalmente.
+
+### Paths modificados
+
+- `components/common/advanced-filters.tsx`
+
+### Validación
+
+- `npm run build` finalizado correctamente.
+
 ## Vistas de Pipeline CRM
 
 Se reorganizó el CRM para que el usuario pueda elegir entre vista de columnas y vista de tabla, sin mostrar ambas al mismo tiempo. Las columnas del pipeline ya no están contenidas dentro de una card grande: se presentan como etapas independientes, con scroll horizontal para recorrerlas y scroll vertical interno para revisar los leads de cada etapa sin alargar toda la página.

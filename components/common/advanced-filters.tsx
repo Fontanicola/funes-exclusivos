@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 
 export function AdvancedFilters({
@@ -12,9 +12,33 @@ export function AdvancedFilters({
   label?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const closeWhenOutside = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && !containerRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("pointerdown", closeWhenOutside);
+    window.addEventListener("keydown", closeWithEscape);
+
+    return () => {
+      document.removeEventListener("pointerdown", closeWhenOutside);
+      window.removeEventListener("keydown", closeWithEscape);
+    };
+  }, [open]);
 
   return (
-    <div className="relative inline-flex shrink-0">
+    <div ref={containerRef} className="relative inline-flex shrink-0">
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
