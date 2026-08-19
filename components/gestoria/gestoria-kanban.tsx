@@ -3,9 +3,8 @@
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { CalendarDays, CheckCircle2, Circle, FileText, Search, Send, UserRound } from "lucide-react";
+import { CheckCircle2, Circle, FileText, Search, UserRound } from "lucide-react";
 import { updateGestoriaOperacionFormAction } from "@/app/(dashboard)/gestoria/actions";
-import { GestoriaStatusBadge } from "./gestoria-status-badge";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Employee = {
@@ -259,9 +258,8 @@ function MilestoneRow({
   );
 }
 
-function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestores: Employee[] }) {
+function OperationCard({ tramite }: { tramite: GestoriaTramite }) {
   const overdue = isOverdue(tramite);
-  const gestionTipo = tramite.gestion_tipo ?? "interna";
 
   return (
     <article className={["rounded-md border bg-white p-4", overdue ? "border-rose-200" : "border-[#E5E7EB]"].join(" ")}>
@@ -274,7 +272,6 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
             {getVehicleMeta(tramite) || tramite.titulo || "Operación de gestoría"}
           </p>
         </div>
-        <GestoriaStatusBadge status={tramite.estado} />
       </div>
 
       <div className="mt-3 grid gap-2 text-xs text-[#6B7280]">
@@ -282,19 +279,9 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
           <UserRound className="h-3.5 w-3.5" />
           <span className="truncate">{getClientName(tramite)}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-3.5 w-3.5" />
-          <span>
-            Envío {formatDate(tramite.fecha_envio)} · Firma {formatDate(tramite.fecha_firma)}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Send className="h-3.5 w-3.5" />
-          <span className="capitalize">Gestión {gestionTipo}</span>
-        </div>
       </div>
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      <div className="mt-4 grid gap-2">
         <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-3 py-2">
           <p className="text-[11px] font-medium text-[#6B7280]">Presupuesto</p>
           <p className="mt-1 text-sm font-semibold text-[#111827]">
@@ -318,65 +305,13 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
       <form action={updateGestoriaOperacionFormAction} className="mt-4 space-y-3 border-t border-[#E5E7EB] pt-3">
         <input type="hidden" name="id" value={tramite.id} />
 
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div>
-            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Etapa</p>
-            <SelectField name="etapa" defaultValue={tramite.etapa ?? "presupuesto"}>
-              {stages.map((stage) => (
-                <option key={stage.key} value={stage.key}>
-                  {stage.label}
-                </option>
-              ))}
-            </SelectField>
-          </div>
-          <div>
-            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Estado</p>
-            <SelectField name="estado" defaultValue={tramite.estado ?? "pendiente"}>
-              <option value="pendiente">Pendiente</option>
-              <option value="en_proceso">En proceso</option>
-              <option value="observado">Observado</option>
-              <option value="completado">Completado</option>
-              <option value="cancelado">Cancelado</option>
-            </SelectField>
-          </div>
-        </div>
-
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div>
-            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Gestor</p>
-            <SelectField name="responsable_id" defaultValue={tramite.responsable?.id ?? ""}>
-              <option value="">Sin gestor</option>
-              {gestores.map((gestor) => (
-                <option key={gestor.id} value={gestor.id}>
-                  {gestor.nombre ?? gestor.email ?? "Gestor"}
-                </option>
-              ))}
-            </SelectField>
-          </div>
-          <div>
-            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Gestión</p>
-            <SelectField name="gestion_tipo" defaultValue={gestionTipo}>
-              <option value="interna">Interna</option>
-              <option value="cliente">Cliente</option>
-              <option value="mixta">Mixta</option>
-            </SelectField>
-          </div>
-        </div>
-
-        <div className="grid gap-2 sm:grid-cols-3">
-          <div>
-            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Fecha de envío</p>
-            <InputField name="fecha_envio" type="date" defaultValue={tramite.fecha_envio} />
-          </div>
-          <div>
-            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Firma</p>
-            <InputField name="fecha_firma" type="date" defaultValue={tramite.fecha_firma} />
-          </div>
-          <div>
-            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Vencimiento</p>
-            <InputField name="fecha_vencimiento" type="date" defaultValue={tramite.fecha_vencimiento} />
-          </div>
-        </div>
+        <input type="hidden" name="etapa" value={tramite.etapa ?? "presupuesto"} />
+        <input type="hidden" name="estado" value={tramite.estado ?? "pendiente"} />
+        <input type="hidden" name="responsable_id" value={tramite.responsable?.id ?? ""} />
+        <input type="hidden" name="gestion_tipo" value={tramite.gestion_tipo ?? "interna"} />
+        <input type="hidden" name="fecha_envio" value={tramite.fecha_envio ?? ""} />
+        <input type="hidden" name="fecha_firma" value={tramite.fecha_firma ?? ""} />
+        <input type="hidden" name="fecha_vencimiento" value={tramite.fecha_vencimiento ?? ""} />
 
         <div className="grid gap-2 sm:grid-cols-[1fr_90px]">
           <div>
@@ -557,7 +492,7 @@ export function GestoriaKanban({
                 <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
                   {stageItems.length ? (
                     visibleStageItems.map((tramite) => (
-                      <OperationCard key={tramite.id} tramite={tramite} gestores={gestores} />
+                      <OperationCard key={tramite.id} tramite={tramite} />
                     ))
                   ) : (
                     <div className="rounded-md border border-dashed border-[#E5E7EB] bg-white px-4 py-8 text-center text-sm text-[#6B7280]">

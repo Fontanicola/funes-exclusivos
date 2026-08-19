@@ -1463,6 +1463,23 @@
 ### Validación
 - `npm run build` ejecutado correctamente.
 
+## Compactación de cards de Gestoría
+
+### Qué se mejoró
+- Presupuesto y costo final ahora se muestran uno debajo del otro para aprovechar mejor el ancho de cada card.
+- Se retiraron de la edición inline los controles redundantes de etapa, estado, gestor, tipo de gestión y fechas operativas.
+- Se mantuvieron los hitos documentales y el costo final como acciones principales de la card.
+
+### Paths modificados
+- `components/gestoria/gestoria-kanban.tsx`
+- `DOCUMENTACION.md`
+
+### Decisiones técnicas
+- Los valores retirados de la interfaz se envían como campos ocultos con su valor actual para conservar el comportamiento del Server Action y evitar sobrescrituras accidentales.
+
+### Validación
+- `npm run build` ejecutado correctamente.
+
 ## Paginación progresiva de columnas de Gestoría
 
 ### Qué se mejoró
