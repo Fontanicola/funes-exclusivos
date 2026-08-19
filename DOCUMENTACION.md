@@ -1435,6 +1435,26 @@ El alta de recordatorios pasó a integrarse en la misma toolbar que la búsqueda
 
 - `npm run build` ejecutado correctamente.
 
+## Comparativa comercial de Comisiones
+
+Se mejoró la comparativa comercial para que la lectura por vendedor sea más clara y útil para dirección. Cada vendedor ahora muestra en paralelo el volumen vendido y la comisión generada, con barras independientes, importes por moneda y una tasa efectiva cuando los valores están expresados en la misma moneda.
+
+También se redujo el texto repetido, se eliminaron etiquetas en mayúsculas innecesarias y se reorganizó cada vendedor en una tarjeta más aireada, con jerarquía clara entre nombre, unidades, ventas y comisión. No se modificaron las consultas ni las reglas de cálculo existentes.
+
+### Paths modificados
+
+- `components/comisiones/comisiones-comparativa.tsx`
+
+### Tablas involucradas
+
+- `public.comisiones`
+- `public.ventas`
+- `public.empleados`
+
+### Validación
+
+- `npm run build` ejecutado correctamente.
+
 ## Tarjeta de vehículo de interés en CRM
 
 ### Qué se mejoró

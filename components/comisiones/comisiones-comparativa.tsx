@@ -53,7 +53,7 @@ function formatCurrencyBreakdown(groups: Map<string, number>) {
   if (!entries.length) return "—";
 
   return entries
-    .map(([currency, total]) => `${currency} ${formatMoney(total, currency)}`)
+    .map(([currency, total]) => formatMoney(total, currency))
     .join(" · ");
 }
 
@@ -71,6 +71,14 @@ function summarizeCurrencyMap(groups: Map<string, number>) {
 
 function getSellerName(comision: Comision) {
   return comision.vendedor?.nombre ?? "Sin vendedor";
+}
+
+function getEffectiveRate(summary: VendorSummary) {
+  const soldEntries = Array.from(summary.soldByCurrency.entries());
+  const commissionEntries = Array.from(summary.commissionByCurrency.entries());
+  if (soldEntries.length !== 1 || commissionEntries.length !== 1) return null;
+  if (soldEntries[0][0] !== commissionEntries[0][0] || soldEntries[0][1] <= 0) return null;
+  return (commissionEntries[0][1] / soldEntries[0][1]) * 100;
 }
 
 export function ComisionesComparativa({ comisiones }: { comisiones: Comision[] }) {
@@ -121,7 +129,8 @@ export function ComisionesComparativa({ comisiones }: { comisiones: Comision[] }
     );
   }, [comisiones]);
 
-  const maxCommission = summaries[0]?.totalCommissionNominal ?? 0;
+  const maxSold = Math.max(...summaries.map((summary) => summary.totalSoldNominal), 0);
+  const maxCommission = Math.max(...summaries.map((summary) => summary.totalCommissionNominal), 0);
 
   if (!summaries.length) {
     return (
@@ -138,69 +147,79 @@ export function ComisionesComparativa({ comisiones }: { comisiones: Comision[] }
       <div className="space-y-1 border-b border-[#E5E7EB] pb-4">
         <h2 className="text-base font-semibold text-[#111827]">Comparativa comercial</h2>
         <p className="text-sm text-[#6B7280]">
-          Ranking por vendedor según comisiones generadas y volumen vendido.
+          Volumen vendido y comisión generada por vendedor.
         </p>
       </div>
 
-      <div className="mt-4 space-y-4">
+      <div className="mt-4 grid gap-3 xl:grid-cols-2">
         {summaries.map((summary) => {
-          const barWidth = maxCommission > 0 ? Math.max((summary.totalCommissionNominal / maxCommission) * 100, 6) : 0;
+          const soldBarWidth = maxSold > 0 ? Math.max((summary.totalSoldNominal / maxSold) * 100, 5) : 0;
+          const commissionBarWidth = maxCommission > 0 ? Math.max((summary.totalCommissionNominal / maxCommission) * 100, 5) : 0;
+          const effectiveRate = getEffectiveRate(summary);
 
           return (
-            <article key={summary.id} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-sm font-semibold text-[#111827]">{summary.name}</p>
-                    <p className="text-xs text-[#6B7280]">{summary.units} unidades vendidas</p>
-                  </div>
-
-                  <div className="grid gap-2 text-sm text-[#111827] sm:grid-cols-2">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">
-                        Monto total vendido
-                      </p>
-                      <p className="mt-1 font-medium">
-                        {summarizeCurrencyMap(summary.soldByCurrency)}
-                      </p>
-                      <p className="mt-1 text-xs text-[#6B7280]">
-                        {formatCurrencyBreakdown(summary.soldByCurrency)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.12em] text-[#6B7280]">
-                        Comisión generada
-                      </p>
-                      <p className="mt-1 font-medium">
-                        {summarizeCurrencyMap(summary.commissionByCurrency)}
-                      </p>
-                      <p className="mt-1 text-xs text-[#6B7280]">
-                        {formatCurrencyBreakdown(summary.commissionByCurrency)}
-                      </p>
-                    </div>
-                  </div>
+            <article key={summary.id} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4 transition hover:border-[#D8A1B2]">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-[#111827]">{summary.name}</p>
+                  <p className="mt-1 text-xs text-[#6B7280]">
+                    {summary.units} {summary.units === 1 ? "unidad vendida" : "unidades vendidas"}
+                  </p>
                 </div>
+                {effectiveRate != null ? (
+                  <span className="shrink-0 rounded-full border border-[#D8A1B2] bg-[#FDF2F5] px-2.5 py-1 text-xs font-medium text-[#8A1538]">
+                    {effectiveRate.toLocaleString("es-AR", { maximumFractionDigits: 2 })}% sobre ventas
+                  </span>
+                ) : null}
+              </div>
 
-                <div className="min-w-[220px] flex-1 lg:max-w-[360px]">
-                  <div className="flex items-center justify-between text-xs uppercase tracking-[0.12em] text-[#6B7280]">
-                    <span>Comisión</span>
-                    <span>{formatAmount(summary.totalCommissionNominal)}</span>
-                  </div>
-                  <div className="mt-2 h-3 overflow-hidden rounded-full bg-[#E5E7EB]">
-                    <div
-                      className="h-full rounded-full bg-[#8A1538] transition-all"
-                      style={{ width: `${barWidth}%` }}
-                    />
-                  </div>
-                  <div className="mt-2 text-xs text-[#6B7280]">
-                    {formatCurrencyBreakdown(summary.commissionByCurrency)}
-                  </div>
-                </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <MetricBlock
+                  label="Vendido"
+                  value={summarizeCurrencyMap(summary.soldByCurrency)}
+                  detail={formatCurrencyBreakdown(summary.soldByCurrency)}
+                  barWidth={soldBarWidth}
+                  barClassName="bg-slate-500"
+                />
+                <MetricBlock
+                  label="Comisión"
+                  value={summarizeCurrencyMap(summary.commissionByCurrency)}
+                  detail={formatCurrencyBreakdown(summary.commissionByCurrency)}
+                  barWidth={commissionBarWidth}
+                  barClassName="bg-[#8A1538]"
+                />
               </div>
             </article>
           );
         })}
       </div>
     </section>
+  );
+}
+
+function MetricBlock({
+  label,
+  value,
+  detail,
+  barWidth,
+  barClassName,
+}: {
+  label: string;
+  value: string;
+  detail: string;
+  barWidth: number;
+  barClassName: string;
+}) {
+  return (
+    <div className="min-w-0 rounded-md border border-[#E5E7EB] bg-white p-3">
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-xs font-medium text-[#6B7280]">{label}</p>
+        <p className="truncate text-sm font-semibold text-[#111827]">{value}</p>
+      </div>
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#E5E7EB]">
+        <div className={`h-full rounded-full transition-all ${barClassName}`} style={{ width: `${barWidth}%` }} />
+      </div>
+      <p className="mt-2 truncate text-xs text-[#6B7280]">{detail}</p>
+    </div>
   );
 }
