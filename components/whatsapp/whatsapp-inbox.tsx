@@ -68,6 +68,8 @@ type Message = {
   created_at: string | null;
 };
 
+const CONTACTS_PAGE_SIZE = 20;
+
 function formatTime(value: string | null) {
   if (!value) return "";
   const date = new Date(value);
@@ -111,6 +113,7 @@ export function WhatsappInbox({
   const [query, setQuery] = useState("");
   const [sellerId, setSellerId] = useState("");
   const [selectedId, setSelectedId] = useState(conversaciones[0]?.id ?? null);
+  const [visibleContacts, setVisibleContacts] = useState(CONTACTS_PAGE_SIZE);
 
   const sellers = useMemo(
     () =>
@@ -144,11 +147,20 @@ export function WhatsappInbox({
     });
   }, [conversaciones, query, sellerId]);
 
+  const visibleConversations = useMemo(
+    () => filtered.slice(0, visibleContacts),
+    [filtered, visibleContacts]
+  );
+
   useEffect(() => {
-    if (!filtered.some((conversation) => conversation.id === selectedId)) {
-      setSelectedId(filtered[0]?.id ?? null);
+    setVisibleContacts(CONTACTS_PAGE_SIZE);
+  }, [query, sellerId]);
+
+  useEffect(() => {
+    if (!visibleConversations.some((conversation) => conversation.id === selectedId)) {
+      setSelectedId(visibleConversations[0]?.id ?? null);
     }
-  }, [filtered, selectedId]);
+  }, [selectedId, visibleConversations]);
 
   const selected = conversaciones.find((conversation) => conversation.id === selectedId) ?? null;
   const selectedMessages = selected ? mensajes[selected.id] ?? [] : [];
@@ -200,7 +212,7 @@ export function WhatsappInbox({
 
           <div className="min-h-0 flex-1 overflow-y-auto">
             {filtered.length ? (
-              filtered.map((conversation) => {
+              visibleConversations.map((conversation) => {
                 const isSelected = conversation.id === selectedId;
                 const unanswered = hasUnansweredMessage(conversation, mensajes);
                 const interestVehicle = vehicleName(conversation);
@@ -251,6 +263,15 @@ export function WhatsappInbox({
                 <p className="mt-1 text-xs leading-5 text-[#6B7280]">Probá cambiar la búsqueda o conectar WhatsApp.</p>
               </div>
             )}
+            {visibleConversations.length < filtered.length ? (
+              <button
+                type="button"
+                onClick={() => setVisibleContacts((current) => current + CONTACTS_PAGE_SIZE)}
+                className="w-full border-t border-[#E5E7EB] bg-white px-4 py-3 text-center text-xs font-semibold text-[#8A1538] transition hover:bg-[#FDF2F5]"
+              >
+                Ver más
+              </button>
+            ) : null}
           </div>
         </aside>
 

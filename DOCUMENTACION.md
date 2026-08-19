@@ -1436,6 +1436,18 @@ Se eliminó el contenedor interno adicional del hilo de mensajes dentro del inbo
 
 El componente de mensajes mantiene su borde cuando se usa en una vista independiente, pero se vuelve transparente y sin caja adicional cuando se renderiza dentro del inbox mediante `fillHeight`.
 
+## Paginación de contactos de WhatsApp
+
+La lista de conversaciones del inbox ahora muestra hasta 20 contactos por tanda. Cuando hay más resultados disponibles aparece `Ver más` al pie del panel izquierdo para cargar los siguientes 20 sin cambiar de pantalla ni afectar el hilo seleccionado. La paginación se reinicia al buscar o filtrar por vendedor.
+
+### Paths modificados
+
+- `components/whatsapp/whatsapp-inbox.tsx`
+
+### Decisión técnica
+
+Se implementó paginación progresiva en el cliente para conservar el filtrado y la selección instantánea sobre los datos ya cargados por la pantalla, manteniendo el scroll independiente de contactos y mensajes.
+
 ## Ajuste de Empleados y headers internos
 
 Se compactó la pantalla de Empleados eliminando el encabezado interno repetido y el bloque descriptivo que duplicaban la identificación de la sección ya presente en el header de plataforma. El botón `Nuevo usuario` ahora vive junto al buscador y al control de filtros de la tabla, reduciendo el espacio vertical y manteniendo la carga de usuarios en un modal. Los filtros de rol y estado continúan agrupados detrás de `Más filtros`.
