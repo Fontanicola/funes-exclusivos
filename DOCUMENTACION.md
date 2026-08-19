@@ -1448,6 +1448,7 @@
 - Las burbujas ya no muestran el tipo técnico `Texto`; muestran el nombre del contacto en mensajes entrantes y el vendedor en mensajes salientes.
 - El vehículo de interés ahora se muestra como `Interés: ...` en verde suave.
 - Se agregó el vendedor asignado debajo de cada conversación.
+- La etiqueta de interés del contacto se alineó junto al nombre para ahorrar espacio vertical.
 
 ### Paths modificados
 

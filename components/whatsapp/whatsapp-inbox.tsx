@@ -264,11 +264,11 @@ export function WhatsappInbox({
                       <UserRound className="h-4 w-4" />
                     </span>
                     <div className="min-w-0">
-                      <h3 className="truncate text-base font-semibold text-[#111827]">{contactName(selected)}</h3>
-                      <p className="mt-0.5 text-xs text-[#6B7280]">{selected.contacto_telefono || "Sin teléfono"}</p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <h3 className="truncate text-base font-semibold text-[#111827]">{contactName(selected)}</h3>
                         <ConversacionInterestBadge interest={selected.ia_interes_compra ?? selected.interes_compra} />
                       </div>
+                      <p className="mt-0.5 text-xs text-[#6B7280]">{selected.contacto_telefono || "Sin teléfono"}</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
