@@ -121,7 +121,7 @@ export function CrmPipeline({
                   });
                 }}
                 className={[
-                  "flex h-[min(62vh,680px)] min-h-[420px] w-[300px] shrink-0 flex-col overflow-visible rounded-md border bg-[#FAFAFA] p-3 transition",
+                  "flex h-[calc(100vh-300px)] min-h-[560px] w-[300px] shrink-0 flex-col overflow-visible rounded-md border bg-[#FAFAFA] p-3 transition",
                   draggedLeadId ? "border-[#D8A1B2]" : "border-[#E5E7EB]",
                 ].join(" ")}
               >

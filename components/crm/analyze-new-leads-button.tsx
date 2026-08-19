@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Sparkles } from "lucide-react";
 import { analyzeNewLeadsWithAiAction } from "@/app/(dashboard)/crm/actions";
 
@@ -9,6 +9,31 @@ export function AnalyzeNewLeadsButton({ availableCount = 0 }: { availableCount?:
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [limit, setLimit] = useState(String(Math.min(Math.max(availableCount, 1), 20)));
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const updatePosition = () => {
+      const trigger = triggerRef.current;
+      if (!trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const width = 224;
+      setPopoverPosition({
+        top: rect.bottom + 8,
+        left: Math.min(Math.max(rect.left, 12), Math.max(12, window.innerWidth - width - 12)),
+      });
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [isOpen]);
 
   function handleAnalyze() {
     setFeedback(null);
@@ -24,6 +49,7 @@ export function AnalyzeNewLeadsButton({ availableCount = 0 }: { availableCount?:
     <div className="relative flex flex-col items-end gap-1">
       <button
         type="button"
+        ref={triggerRef}
         onClick={() => setIsOpen((current) => !current)}
         disabled={isPending || availableCount === 0}
         aria-expanded={isOpen}
@@ -34,7 +60,12 @@ export function AnalyzeNewLeadsButton({ availableCount = 0 }: { availableCount?:
         {isPending ? "Analizando..." : "Analizar"}
       </button>
       {isOpen ? (
-        <div className="absolute left-0 top-10 z-30 w-56 max-w-[calc(100vw-2rem)] rounded-md border border-[#E5E7EB] bg-white p-3 shadow-lg">
+        <div
+          className="fixed z-[60] w-56 max-w-[calc(100vw-2rem)] rounded-md border border-[#E5E7EB] bg-white p-3 shadow-lg"
+          style={{ top: popoverPosition.top, left: popoverPosition.left }}
+          role="dialog"
+          aria-label="Analizar leads nuevos"
+        >
           <p className="text-xs font-medium text-[#111827]">¿Cuántos leads analizamos?</p>
           <select
             value={limit}

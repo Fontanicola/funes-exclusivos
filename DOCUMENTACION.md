@@ -3690,6 +3690,12 @@ Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`.
 
 No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
 
+### Ajuste final de altura y popover del pipeline
+
+Las columnas del pipeline ahora ocupan el área visible disponible hasta el final de la sección, manteniendo el scroll vertical de cada columna. El selector de análisis de leads se posiciona respecto del viewport y ya no queda oculto por los contenedores con scroll horizontal.
+
+Paths modificados: `components/crm/crm-pipeline.tsx`, `components/crm/analyze-new-leads-button.tsx`.
+
 ### Corrección del modal de análisis del pipeline
 
 Se corrigió el popover de `Analizar` para que no quede recortado por el contenedor de la columna `Nuevo`. Ahora se ancla desde el lado izquierdo de la columna, respeta el ancho disponible del viewport y queda por encima del contenido sin afectar el scroll interno.
