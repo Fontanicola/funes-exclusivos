@@ -12,6 +12,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PresupuestosTable } from "@/components/gestoria/presupuestos-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 
 export const metadata: Metadata = {
   title: "Presupuestos de gestoría | Funes Exclusivos",
@@ -158,6 +159,12 @@ export default async function GestoriaPresupuestosPage({ searchParams }: { searc
 
   return (
     <section className="space-y-6">
+      <SectionSubheaderActions>
+        <Link href="/gestoria/presupuestos/nuevo" className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-[#8A1538] px-3 text-xs font-medium text-white transition hover:bg-[#6F102D]">
+          <Plus className="h-3.5 w-3.5" />
+          Nuevo presupuesto
+        </Link>
+      </SectionSubheaderActions>
       <header className="space-y-2">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">
@@ -175,15 +182,6 @@ export default async function GestoriaPresupuestosPage({ searchParams }: { searc
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/gestoria/presupuestos/nuevo"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
-            >
-              <Plus className="h-4 w-4" />
-              Nuevo presupuesto
-            </Link>
-          </div>
         </div>
         {isDemoMode ? (
           <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">

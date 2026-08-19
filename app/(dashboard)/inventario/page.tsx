@@ -9,6 +9,7 @@ import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { InventarioTable } from "@/components/inventario/inventario-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 
 export const metadata: Metadata = {
   title: "Inventario | Funes Exclusivos",
@@ -144,6 +145,8 @@ export default async function InventarioPage({ searchParams }: { searchParams?: 
         </div>
       ) : null}
 
+      <SectionSubheaderActions>{toolbarAction}</SectionSubheaderActions>
+
       <CollapsibleSummary sectionKey="inventario">
         <div className="grid gap-4 md:grid-cols-3">
         <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
@@ -174,7 +177,6 @@ export default async function InventarioPage({ searchParams }: { searchParams?: 
         proveedores={proveedores}
         canEdit={canEditInventory}
         role={currentRole}
-        toolbarAction={toolbarAction}
       />
     </section>
   );

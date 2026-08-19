@@ -6,6 +6,9 @@ import { EmpleadosTable } from "@/components/empleados/empleados-table";
 import type { WhatsappInstance } from "@/components/whatsapp/whatsapp-instance-card";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { EmpleadoCreateForm } from "@/components/empleados/empleado-create-form";
 
 export const metadata: Metadata = {
   title: "Empleados | Funes Exclusivos",
@@ -125,6 +128,16 @@ export default async function EmpleadosPage({ searchParams }: { searchParams?: {
 
   return (
     <section className="space-y-6">
+      <SectionSubheaderActions>
+        <DataEntryModal
+          triggerLabel="Nuevo usuario"
+          title="Nuevo usuario"
+          description="Creá el acceso y asigná el rol operativo dentro de Funes Exclusivos."
+          triggerClassName="inline-flex h-8 items-center justify-center rounded-md bg-[#8A1538] px-3 text-xs font-medium text-white transition hover:bg-[#6F102D]"
+        >
+          <EmpleadoCreateForm />
+        </DataEntryModal>
+      </SectionSubheaderActions>
       <CollapsibleSummary sectionKey="empleados">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiCard

@@ -68,31 +68,34 @@ export function SectionSubheader({ employee }: { employee: Employee }) {
       aria-label={`Secciones de ${section.label}`}
       className="border-b border-[#E5E7EB] bg-white px-5"
     >
-      <div className="flex min-w-max items-center gap-1 overflow-x-auto py-1.5">
-        <span className="mr-2 shrink-0 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF]">
-          {section.label}
-        </span>
-        {items.map((item) => {
-          const active = matches(pathname, item.href);
-          const Icon = item.icon;
+      <div className="flex min-w-0 items-center gap-3 py-1.5">
+        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+          <span className="mr-2 shrink-0 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF]">
+            {section.label}
+          </span>
+          {items.map((item) => {
+            const active = matches(pathname, item.href);
+            const Icon = item.icon;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={[
-                "inline-flex h-8 shrink-0 items-center gap-2 rounded-md border px-3 text-xs font-medium transition",
-                active
-                  ? "border-[#D8A1B2] bg-[#FDF2F5] text-[#8A1538]"
-                  : "border-transparent text-[#64748B] hover:border-[#E5E7EB] hover:bg-[#FAFAFA] hover:text-[#111827]",
-              ].join(" ")}
-            >
-              <Icon className={active ? "h-3.5 w-3.5 text-[#8A1538]" : "h-3.5 w-3.5 text-[#94A3B8]"} />
-              {item.label}
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={[
+                  "inline-flex h-8 shrink-0 items-center gap-2 rounded-md border px-3 text-xs font-medium transition",
+                  active
+                    ? "border-[#D8A1B2] bg-[#FDF2F5] text-[#8A1538]"
+                    : "border-transparent text-[#64748B] hover:border-[#E5E7EB] hover:bg-[#FAFAFA] hover:text-[#111827]",
+                ].join(" ")}
+              >
+                <Icon className={active ? "h-3.5 w-3.5 text-[#8A1538]" : "h-3.5 w-3.5 text-[#94A3B8]"} />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+        <div id="section-subheader-actions" className="flex shrink-0 items-center gap-2" />
       </div>
     </nav>
   );

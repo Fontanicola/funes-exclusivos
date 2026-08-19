@@ -8,6 +8,7 @@ import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CompraKpis } from "@/components/compras/compra-kpis";
 import { ComprasTable } from "@/components/compras/compras-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 
 export const metadata: Metadata = {
   title: "Compras | Funes Exclusivos",
@@ -89,19 +90,14 @@ export default async function ComprasPage({ searchParams }: { searchParams?: { f
 
   return (
     <section className="space-y-6">
+      <SectionSubheaderActions>
+        <Link href="/compras/nueva" className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-[#8A1538] px-3 text-xs font-medium text-white transition hover:bg-[#6F102D]">
+          <Plus className="h-3.5 w-3.5" />
+          Nueva compra
+        </Link>
+      </SectionSubheaderActions>
       <CompraKpis compras={compras} />
-      <ComprasTable
-        compras={compras}
-        toolbarAction={
-          <Link
-            href="/compras/nueva"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
-          >
-            <Plus className="h-4 w-4" />
-            Nueva compra
-          </Link>
-        }
-      />
+      <ComprasTable compras={compras} />
     </section>
   );
 }

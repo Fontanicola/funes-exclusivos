@@ -8,6 +8,7 @@ import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { GestoriaKanban } from "@/components/gestoria/gestoria-kanban";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 
 export const metadata: Metadata = {
   title: "Gestoría | Funes Exclusivos",
@@ -221,6 +222,16 @@ export default async function GestoriaPage({ searchParams }: { searchParams?: { 
         </div>
       ) : null}
 
+      <SectionSubheaderActions>
+        <Link href="/gestoria/presupuestos" className="inline-flex h-8 items-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] hover:bg-[#F9FAFB]">
+          Presupuestos
+        </Link>
+        <Link href="/gestoria/nuevo" className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-[#8A1538] px-3 text-xs font-medium text-white hover:bg-[#6F102D]">
+          <Plus className="h-3.5 w-3.5" />
+          Nuevo trámite
+        </Link>
+      </SectionSubheaderActions>
+
       <CollapsibleSummary sectionKey="gestoria">
         <div className="grid gap-4 md:grid-cols-4">
         <KpiCard label="Presupuesto" value={kpis.presupuesto} />
@@ -233,23 +244,6 @@ export default async function GestoriaPage({ searchParams }: { searchParams?: { 
       <GestoriaKanban
         tramites={tramites}
         gestores={gestores}
-        toolbarAction={
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/gestoria/presupuestos"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-            >
-              Presupuestos
-            </Link>
-            <Link
-              href="/gestoria/nuevo"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
-            >
-              <Plus className="h-4 w-4" />
-              Nuevo trámite
-            </Link>
-          </div>
-        }
       />
     </section>
   );

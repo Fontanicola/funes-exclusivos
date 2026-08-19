@@ -9,6 +9,7 @@ import { CrmViews } from "@/components/crm/crm-views";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { AnalyzeNewLeadsButton } from "@/components/crm/analyze-new-leads-button";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 
 export const metadata: Metadata = {
   title: "CRM | Funes Exclusivos",
@@ -167,6 +168,15 @@ export default async function CrmPage({ searchParams }: { searchParams?: { from?
   const negotiationLeads = getNegotiationLeads(leads);
   const upcomingLeads = getUpcomingLeads(leads);
   const presupuestoTotal = aggregateByCurrency(activeLeads, "presupuesto_min");
+  const newLeadAction = (
+    <Link
+      href="/crm/nuevo"
+      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-[#8A1538] px-3 text-xs font-medium text-white transition hover:bg-[#6F102D]"
+    >
+      <Plus className="h-3.5 w-3.5" />
+      Nuevo lead
+    </Link>
+  );
 
   return (
     <section className="space-y-6">
@@ -175,6 +185,8 @@ export default async function CrmPage({ searchParams }: { searchParams?: { from?
           Modo demo: los leads usan datos simulados y no se guardarán cambios reales.
         </div>
       ) : null}
+
+      <SectionSubheaderActions>{newLeadAction}</SectionSubheaderActions>
 
       <CollapsibleSummary sectionKey="crm">
         <div className="grid gap-4 md:grid-cols-3">
@@ -204,15 +216,7 @@ export default async function CrmPage({ searchParams }: { searchParams?: { from?
         leads={leads}
         pipelineEstados={pipelineEstados}
         aiAction={<AnalyzeNewLeadsButton availableCount={leads.filter((lead) => lead.estado === "nuevo").length} />}
-        newLeadAction={
-          <Link
-            href="/crm/nuevo"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
-          >
-            <Plus className="h-4 w-4" />
-            Nuevo lead
-          </Link>
-        }
+        newLeadAction={null}
       />
     </section>
   );

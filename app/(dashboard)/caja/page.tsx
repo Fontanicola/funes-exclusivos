@@ -15,6 +15,7 @@ import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { CajaSummary } from "@/components/caja/caja-summary";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 
 export const metadata: Metadata = {
   title: "Caja | Funes Exclusivos",
@@ -355,6 +356,18 @@ export default async function CajaPage({ searchParams }: { searchParams?: { from
         </div>
       ) : null}
 
+      <SectionSubheaderActions>
+        {canManageCaja(currentRole) ? (
+          <DataEntryModal
+            triggerLabel="Cargar movimiento"
+            title="Nuevo movimiento de caja"
+            description="Registrá un ingreso o egreso manual."
+          >
+            <CajaMovimientoForm proveedores={proveedores} activos={activos} role={currentRole} />
+          </DataEntryModal>
+        ) : null}
+      </SectionSubheaderActions>
+
       <CollapsibleSummary sectionKey="caja">
         <CajaSummary
           ingresos={ingresos}
@@ -368,21 +381,13 @@ export default async function CajaPage({ searchParams }: { searchParams?: { from
 
       <div className="space-y-6">
         <div>
-          {canManageCaja(currentRole) ? (
-            <DataEntryModal
-              triggerLabel="Cargar movimiento"
-              title="Nuevo movimiento de caja"
-              description="Registrá un ingreso o egreso manual."
-            >
-              <CajaMovimientoForm proveedores={proveedores} activos={activos} role={currentRole} />
-            </DataEntryModal>
-          ) : (
+          {!canManageCaja(currentRole) ? (
             <section className="rounded-md border border-[#E5E7EB] bg-white p-4">
               <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-5 text-sm text-[#6B7280]">
                 No tenés permisos para cargar movimientos manuales.
               </div>
             </section>
-          )}
+          ) : null}
         </div>
 
         <div className="space-y-6">

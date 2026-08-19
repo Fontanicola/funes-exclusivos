@@ -3741,3 +3741,13 @@ Se eliminó el overflow vertical accidental del carril general del pipeline. El 
 Paths modificados: `components/crm/crm-pipeline.tsx`, `app/(dashboard)/layout.tsx`.
 
 No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
+
+### Acciones y métricas en el subheader contextual
+
+Se consolidó el patrón de navegación contextual para que las acciones principales de cada sección no ocupen una fila adicional dentro del contenido. Compras, Ventas, Inventario, Caja, CRM, Gestoría, Presupuestos, Catálogo, Comisiones, Empleados y Recordatorios ahora montan sus acciones en el subheader del área correspondiente. El control de resumen también vive allí y se presenta como `Métricas`, con las cards colapsadas por defecto y persistencia de la preferencia por sección en el navegador.
+
+Path creado: `components/dashboard/section-subheader-actions.tsx`.
+
+Paths modificados: `components/dashboard/section-subheader.tsx`, `components/common/collapsible-summary.tsx`, `app/(dashboard)/compras/page.tsx`, `app/(dashboard)/ventas/page.tsx`, `app/(dashboard)/inventario/page.tsx`, `app/(dashboard)/caja/page.tsx`, `app/(dashboard)/crm/page.tsx`, `app/(dashboard)/gestoria/page.tsx`, `app/(dashboard)/gestoria/presupuestos/page.tsx`, `app/(dashboard)/dashboard/catalogo/page.tsx`, `app/(dashboard)/comisiones/page.tsx`, `app/(dashboard)/empleados/page.tsx`, `app/(dashboard)/recordatorios/page.tsx`, `components/empleados/empleados-table.tsx`.
+
+Decisión técnica: se usa un portal React hacia un contenedor único del subheader para mantener acciones y métricas alineadas sin duplicar toolbars ni alterar las tablas. No se modificaron tablas Supabase ni reglas de negocio. Validación: `npm run build` finalizado correctamente.

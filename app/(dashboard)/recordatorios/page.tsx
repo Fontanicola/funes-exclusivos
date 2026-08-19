@@ -9,6 +9,7 @@ import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -278,6 +279,19 @@ export default async function RecordatoriosPage({ searchParams }: { searchParams
         </div>
       ) : null}
 
+      <SectionSubheaderActions>
+        <DataEntryModal
+          triggerLabel="Crear recordatorio"
+          title="Nuevo recordatorio"
+          description="Cargá un seguimiento, vencimiento o alerta operativa."
+        >
+          <RecordatorioForm
+            employees={assignableEmployees.length ? assignableEmployees : employees}
+            defaultAsignadoId={currentEmployeeId}
+          />
+        </DataEntryModal>
+      </SectionSubheaderActions>
+
       <CollapsibleSummary sectionKey="recordatorios">
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
         <KpiCard compact title="Pendientes" value={String(kpis.pendientes)} description="Seguimientos activos" variant="default" />
@@ -291,18 +305,6 @@ export default async function RecordatoriosPage({ searchParams }: { searchParams
       <RecordatoriosTable
         recordatorios={filteredRecordatorios}
         employees={assignableEmployees.length ? assignableEmployees : employees}
-        toolbarAction={
-          <DataEntryModal
-            triggerLabel="Crear recordatorio"
-            title="Nuevo recordatorio"
-            description="Cargá un seguimiento, vencimiento o alerta operativa."
-          >
-            <RecordatorioForm
-              employees={assignableEmployees.length ? assignableEmployees : employees}
-              defaultAsignadoId={currentEmployeeId}
-            />
-          </DataEntryModal>
-        }
       />
     </section>
   );

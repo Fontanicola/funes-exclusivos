@@ -11,6 +11,7 @@ import { ComisionesVendedoresChart, type VendorSeries } from "@/components/comis
 import { ComisionesTable } from "@/components/comisiones/comisiones-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 
 export const metadata: Metadata = {
   title: "Comisiones | Funes Exclusivos",
@@ -310,6 +311,14 @@ export default async function ComisionesPage({ searchParams }: { searchParams?: 
         </div>
       ) : null}
 
+      <SectionSubheaderActions>
+        {canManageCommissions(currentRole) ? (
+          <Link href="/comisiones/liquidaciones" className="inline-flex h-8 items-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] hover:bg-[#F9FAFB]">
+            Liquidaciones
+          </Link>
+        ) : null}
+      </SectionSubheaderActions>
+
       <CollapsibleSummary sectionKey="comisiones">
         <div className="grid gap-4 md:grid-cols-3">
         <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
@@ -343,16 +352,6 @@ export default async function ComisionesPage({ searchParams }: { searchParams?: 
       <ComisionesComparativa comisiones={comisiones} potenciales={potenciales} />
       <ComisionesTable
         comisiones={comisiones}
-        toolbarAction={
-          canManageCommissions(currentRole) ? (
-            <Link
-              href="/comisiones/liquidaciones"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-            >
-              Liquidaciones
-            </Link>
-          ) : null
-        }
       />
     </section>
   );

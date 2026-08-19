@@ -10,6 +10,7 @@ import { CatalogoVisualEditor } from "@/components/catalogo/catalogo-visual-edit
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 
 export const metadata: Metadata = {
   title: "Catálogo | Funes Exclusivos",
@@ -149,29 +150,28 @@ export default async function CatalogoPage({ searchParams }: { searchParams?: { 
         </div>
       </CollapsibleSummary>
 
+      <SectionSubheaderActions>
+        <DataEntryModal
+          triggerLabel="Editar vidriera"
+          title="Editor visual del catálogo"
+          description="Configurá la portada, los destacados y la información pública de la vidriera."
+          size="wide"
+        >
+          <CatalogoVisualEditor config={config} destacados={destacados} heroImageUrl={heroImageUrl} />
+        </DataEntryModal>
+        <Link
+          href="/catalogo"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex h-8 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+        >
+          Abrir catálogo
+        </Link>
+      </SectionSubheaderActions>
+
       <div className="space-y-6">
         <CatalogoVehiculosTable
           vehiculos={vehiculos}
-          toolbarAction={
-            <div className="flex flex-wrap gap-2">
-              <DataEntryModal
-                triggerLabel="Editar vidriera"
-                title="Editor visual del catálogo"
-                description="Configurá la portada, los destacados y la información pública de la vidriera."
-                size="wide"
-              >
-                <CatalogoVisualEditor config={config} destacados={destacados} heroImageUrl={heroImageUrl} />
-              </DataEntryModal>
-              <Link
-                href="/catalogo"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-              >
-                Abrir catálogo público
-              </Link>
-            </div>
-          }
         />
       </div>
     </section>

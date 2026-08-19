@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BarChart3, Plus } from "lucide-react";
-import { canManageSales, canViewMargins } from "@/lib/auth/permissions";
+import { canViewMargins } from "@/lib/auth/permissions";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleado, mockVentas } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -9,6 +9,7 @@ import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { VentasTable } from "@/components/ventas/ventas-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 
 export const metadata: Metadata = {
   title: "Ventas | Funes Exclusivos",
@@ -179,7 +180,6 @@ function resolveAmount(value: Record<string, any>) {
 export default async function VentasPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
   const dateRange = parseDateRange(searchParams);
   let ventas: Venta[] = mockVentas as Venta[];
-  let canCreateSale = canManageSales(mockEmpleado.rol);
   let currentRole: string | null = mockEmpleado.rol;
 
   if (!isDemoMode) {
@@ -246,7 +246,6 @@ export default async function VentasPage({ searchParams }: { searchParams?: { fr
         .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
 
       currentRole = employee?.rol ?? null;
-      canCreateSale = canManageSales(currentRole) && employee?.activo === true;
     }
 
     ventas = baseVentas.map((venta) => ({
@@ -269,6 +268,22 @@ export default async function VentasPage({ searchParams }: { searchParams?: { fr
           Modo demo: los datos son simulados y no se guardarán cambios reales.
         </div>
       ) : null}
+
+      <SectionSubheaderActions>
+        <Link href="/ventas/pendientes-entrega" className="inline-flex h-8 items-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] hover:bg-[#F9FAFB]">
+          Pendientes de entrega
+        </Link>
+        {canViewMargins(currentRole) ? (
+          <Link href="/ventas/renta" className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] hover:bg-[#F9FAFB]">
+            <BarChart3 className="h-3.5 w-3.5" />
+            Rentabilidad
+          </Link>
+        ) : null}
+        <Link href="/ventas/nueva" className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-[#8A1538] px-3 text-xs font-medium text-white hover:bg-[#6F102D]">
+          <Plus className="h-3.5 w-3.5" />
+          Nueva venta
+        </Link>
+      </SectionSubheaderActions>
 
       <CollapsibleSummary sectionKey="ventas">
         <div className="grid gap-4 md:grid-cols-3">
@@ -302,38 +317,6 @@ export default async function VentasPage({ searchParams }: { searchParams?: { fr
       <VentasTable
         ventas={ventas}
         role={currentRole}
-        toolbarAction={
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/ventas/pendientes-entrega"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-            >
-              Pendientes de entrega
-            </Link>
-            {canViewMargins(currentRole) ? (
-              <Link
-                href="/ventas/renta"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-              >
-                <BarChart3 className="h-4 w-4" />
-                Rentabilidad
-              </Link>
-            ) : null}
-            {canCreateSale ? (
-              <Link
-                href="/ventas/nueva"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"
-              >
-                <Plus className="h-4 w-4" />
-                Nueva venta
-              </Link>
-            ) : (
-              <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-2 text-sm text-[#6B7280]">
-                Solo lectura para tu rol.
-              </div>
-            )}
-          </div>
-        }
       />
     </section>
   );
