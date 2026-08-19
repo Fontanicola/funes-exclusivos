@@ -7,6 +7,7 @@ import { canManageInventory } from "@/lib/auth/permissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { InventarioTable } from "@/components/inventario/inventario-table";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Inventario | Funes Exclusivos",
@@ -68,7 +69,8 @@ function formatPublishedTotal(vehiculos: Vehiculo[]) {
   }).format(total);
 }
 
-export default async function InventarioPage() {
+export default async function InventarioPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let vehiculos: Vehiculo[] = mockVehiculos as unknown as Vehiculo[];
   let proveedores: Proveedor[] = mockProveedores as Proveedor[];
   let canEditInventory = canManageInventory(mockEmpleado.rol);
@@ -115,6 +117,7 @@ export default async function InventarioPage() {
       canEditInventory = canManageInventory(currentRole) && employee?.activo === true;
     }
   }
+  vehiculos = filterByDateRange(vehiculos, dateRange, (vehiculo) => vehiculo.fecha_ingreso ?? vehiculo.created_at);
   const totalVehiculos = vehiculos.length;
   const enStock = vehiculos.filter((vehiculo) => vehiculo.estado === "en_stock").length;
   const valorPublicadoTotal = formatPublishedTotal(vehiculos);

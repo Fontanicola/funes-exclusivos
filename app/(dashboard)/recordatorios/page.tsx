@@ -7,6 +7,7 @@ import { RecordatorioForm } from "@/components/recordatorios/recordatorio-form";
 import { RecordatoriosTable } from "@/components/recordatorios/recordatorios-table";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { KpiCard } from "@/components/dashboard/kpi-card";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const dynamic = "force-dynamic";
 
@@ -258,9 +259,11 @@ async function loadData() {
   };
 }
 
-export default async function RecordatoriosPage() {
+export default async function RecordatoriosPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
   const { recordatorios, employees, currentEmployeeId, currentEmployeeRole } = await loadData();
-  const kpis = getKpis(recordatorios);
+  const dateRange = parseDateRange(searchParams);
+  const filteredRecordatorios = filterByDateRange(recordatorios, dateRange, (recordatorio) => recordatorio.fecha_vencimiento ?? recordatorio.created_at);
+  const kpis = getKpis(filteredRecordatorios);
   const assignableEmployees =
     currentEmployeeRole === "admin"
       ? employees
@@ -294,7 +297,7 @@ export default async function RecordatoriosPage() {
           />
         </DataEntryModal>
         <RecordatoriosTable
-          recordatorios={recordatorios}
+          recordatorios={filteredRecordatorios}
           employees={assignableEmployees.length ? assignableEmployees : employees}
         />
       </div>

@@ -7,6 +7,7 @@ import { mockEmpleado, mockVentas } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { VentasTable } from "@/components/ventas/ventas-table";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Ventas | Funes Exclusivos",
@@ -174,7 +175,8 @@ function resolveAmount(value: Record<string, any>) {
   return typeof raw === "number" ? raw : Number(raw) || 0;
 }
 
-export default async function VentasPage() {
+export default async function VentasPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let ventas: Venta[] = mockVentas as Venta[];
   let canCreateSale = canManageSales(mockEmpleado.rol);
   let currentRole: string | null = mockEmpleado.rol;
@@ -252,6 +254,7 @@ export default async function VentasPage() {
       entrega: entregaPorVenta.get(venta.id) ?? null,
     }));
   }
+  ventas = filterByDateRange(ventas, dateRange, (venta) => venta.fecha_venta ?? venta.created_at);
   const ventasRegistradas = ventas.filter((venta) => venta.estado === "registrada");
   const currencyGroups = groupByCurrency(ventas);
   const totalRegistradas = ventasRegistradas.length;

@@ -10,6 +10,7 @@ import {
 } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PresupuestosTable } from "@/components/gestoria/presupuestos-table";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Presupuestos de gestoría | Funes Exclusivos",
@@ -120,7 +121,8 @@ function getMonthKey(value: string | null) {
   return value.slice(0, 7);
 }
 
-export default async function GestoriaPresupuestosPage() {
+export default async function GestoriaPresupuestosPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let presupuestos: Presupuesto[] = mockGestoriaPresupuestos as Presupuesto[];
 
   if (!isDemoMode) {
@@ -141,6 +143,7 @@ export default async function GestoriaPresupuestosPage() {
     }));
   }
 
+  presupuestos = filterByDateRange(presupuestos, dateRange, (presupuesto) => presupuesto.fecha ?? presupuesto.created_at);
   const nowMonth = new Date().toISOString().slice(0, 7);
   const presupuestosMes = presupuestos.filter((presupuesto) => getMonthKey(presupuesto.fecha) === nowMonth);
   const totalPresupuestado = groupByCurrency(

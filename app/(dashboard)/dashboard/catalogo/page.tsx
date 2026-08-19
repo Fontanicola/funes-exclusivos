@@ -8,6 +8,7 @@ import { getCatalogoHeroUrl } from "@/lib/catalogo/hero";
 import { CatalogoVehiculosTable } from "@/components/catalogo/catalogo-vehiculos-table";
 import { CatalogoVisualEditor } from "@/components/catalogo/catalogo-visual-editor";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Catálogo | Funes Exclusivos",
@@ -79,7 +80,8 @@ function KpiCard({
   );
 }
 
-export default async function CatalogoPage() {
+export default async function CatalogoPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let config: CatalogoConfig = mockCatalogoConfig as CatalogoConfig;
   let vehiculos: Vehiculo[] = mockVehiculos as Vehiculo[];
   let heroImageUrl: string | null = null;
@@ -113,6 +115,7 @@ export default async function CatalogoPage() {
     heroImageUrl = heroResult;
   }
 
+  vehiculos = filterByDateRange(vehiculos, dateRange, (vehicle) => vehicle.created_at);
   const publishedCount = vehiculos.filter((vehicle) => vehicle.catalogo_publicado).length;
   const featuredCount = vehiculos.filter((vehicle) => vehicle.catalogo_destacado).length;
   const stockWithoutPublication = vehiculos.filter(

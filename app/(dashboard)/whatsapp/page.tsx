@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { WhatsappConnectionAlert } from "@/components/whatsapp/whatsapp-connection-alert";
 import { WhatsappInbox } from "@/components/whatsapp/whatsapp-inbox";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "WhatsApp | Funes Exclusivos",
@@ -127,7 +128,8 @@ function normalizeSingleRelation<T>(value: T | T[] | null | undefined) {
   return value ?? null;
 }
 
-export default async function WhatsappPage() {
+export default async function WhatsappPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let instancias: Instance[] = mockWhatsappInstancias as Instance[];
   let conversaciones: Conversation[] = mockConversaciones as Conversation[];
   let mensajesPorConversacion: Record<string, Message[]> = {};
@@ -222,6 +224,7 @@ export default async function WhatsappPage() {
     }
   }
 
+  conversaciones = filterByDateRange(conversaciones, dateRange, (conversation) => conversation.ultimo_mensaje_at ?? conversation.created_at);
   const problematicInstances = instancias.filter((instance) =>
     ["desconectado", "error", "qr_pendiente"].includes((instance.estado ?? "").toLowerCase())
   );

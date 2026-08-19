@@ -6,6 +6,7 @@ import { mockComisionLiquidaciones } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { LiquidacionesTable } from "@/components/comisiones/liquidaciones-table";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Liquidaciones de comisión | Funes Exclusivos",
@@ -80,7 +81,8 @@ function LiquidacionStatusBadge({ status }: { status: string | null }) {
   );
 }
 
-export default async function LiquidacionesPage() {
+export default async function LiquidacionesPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let liquidaciones: Liquidacion[] = mockComisionLiquidaciones as Liquidacion[];
 
   if (!isDemoMode) {
@@ -100,6 +102,13 @@ export default async function LiquidacionesPage() {
       vendedor: normalizeSingleRelation(item.vendedor),
     }));
   }
+
+  liquidaciones = filterByDateRange(liquidaciones, dateRange, (liquidacion) => {
+    const periodDate = liquidacion.periodo && /^\d{4}-\d{2}$/.test(liquidacion.periodo)
+      ? `${liquidacion.periodo}-01`
+      : null;
+    return periodDate ?? liquidacion.created_at;
+  });
 
   return (
     <section className="space-y-6">

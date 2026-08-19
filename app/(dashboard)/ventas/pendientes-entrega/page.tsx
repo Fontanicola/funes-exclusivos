@@ -9,6 +9,7 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { PendientesEntregaTable } from "@/components/ventas/pendientes-entrega-table";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Pendientes de entrega | Funes Exclusivos",
@@ -78,7 +79,8 @@ function normalizeSingleRelation<T>(value: T | T[] | null | undefined) {
   return value ?? null;
 }
 
-export default async function PendientesEntregaPage() {
+export default async function PendientesEntregaPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let entregas: Entrega[] = [];
 
   if (isDemoMode) {
@@ -136,6 +138,8 @@ export default async function PendientesEntregaPage() {
   const observed = entregas.filter((entrega) => (entrega.estado ?? "").toLowerCase() === "observada").length;
   const ready = entregas.filter((entrega) => (entrega.estado ?? "").toLowerCase() === "lista_para_entregar").length;
   const delivered = entregas.filter((entrega) => (entrega.estado ?? "").toLowerCase() === "entregada").length;
+
+  entregas = filterByDateRange(entregas, dateRange, (entrega) => entrega.venta?.fecha_venta ?? entrega.created_at);
 
   return (
     <section className="space-y-6">

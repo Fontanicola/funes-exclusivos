@@ -13,6 +13,7 @@ import { CajaMovimientoForm } from "@/components/caja/caja-movimiento-form";
 import { CajaMovimientosTable } from "@/components/caja/caja-movimientos-table";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { CajaSummary } from "@/components/caja/caja-summary";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Caja | Funes Exclusivos",
@@ -274,7 +275,8 @@ function aggregateBalances(movimientos: Movimiento[]): BalanceSummary[] {
   return Array.from(groups.values()).sort((left, right) => order.indexOf(left.key) - order.indexOf(right.key));
 }
 
-export default async function CajaPage() {
+export default async function CajaPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let movimientos: Movimiento[] = mockCajaMovimientos as Movimiento[];
   let proveedores: Proveedor[] = mockProveedores as Proveedor[];
   let activos: Activo[] = mockActivos as Activo[];
@@ -337,6 +339,7 @@ export default async function CajaPage() {
     }
   }
 
+  movimientos = filterByDateRange(movimientos, dateRange, (movimiento) => movimiento.fecha ?? movimiento.created_at);
   const ingresos = aggregateIncomeByCurrency(movimientos);
   const egresos = aggregateExpensesByCurrency(movimientos);
   const saldo = aggregateByCurrency(movimientos);

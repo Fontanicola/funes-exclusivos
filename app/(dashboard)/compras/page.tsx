@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CompraKpis } from "@/components/compras/compra-kpis";
 import { ComprasTable } from "@/components/compras/compras-table";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Compras | Funes Exclusivos",
@@ -60,7 +61,8 @@ function normalizeSingleRelation<T>(value: T | T[] | null | undefined) {
   return value ?? null;
 }
 
-export default async function ComprasPage() {
+export default async function ComprasPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let compras: Compra[] = mockComprasVehiculos as unknown as Compra[];
 
   if (!isDemoMode) {
@@ -82,6 +84,8 @@ export default async function ComprasPage() {
       proveedor: normalizeSingleRelation(compra.proveedor),
     }));
   }
+
+  compras = filterByDateRange(compras, dateRange, (compra) => compra.fecha);
 
   return (
     <section className="space-y-6">

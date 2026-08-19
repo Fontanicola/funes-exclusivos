@@ -6,6 +6,7 @@ import { mockEmpleados, mockGestoriaPresupuestos, mockGestoriaTramites } from "@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { GestoriaKanban } from "@/components/gestoria/gestoria-kanban";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Gestoría | Funes Exclusivos",
@@ -149,7 +150,8 @@ function KpiCard({
   );
 }
 
-export default async function GestoriaPage() {
+export default async function GestoriaPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let tramites: GestoriaTramite[] = mockGestoriaTramites as GestoriaTramite[];
   let gestores: Employee[] = (mockEmpleados as Employee[]).filter((empleado) =>
     ["admin", "gestor"].includes((empleado.rol ?? "").toLowerCase())
@@ -207,6 +209,7 @@ export default async function GestoriaPage() {
     }));
   }
 
+  tramites = filterByDateRange(tramites, dateRange, (tramite) => tramite.fecha_inicio ?? tramite.fecha_vencimiento ?? tramite.created_at);
   const kpis = getKpiTramites(tramites);
 
   return (

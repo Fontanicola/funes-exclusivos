@@ -22,6 +22,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { RentaKpis } from "@/components/ventas/renta-kpis";
 import { RentaTable } from "@/components/ventas/renta-table";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Rentabilidad | Funes Exclusivos",
@@ -43,7 +44,8 @@ function normalizeSingleRelation<T>(value: T | T[] | null | undefined) {
   return value ?? null;
 }
 
-export default async function VentaRentaPage() {
+export default async function VentaRentaPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let ventas = mockVentas as RentaVenta[];
   let gastos = mockVehiculoGastos as RentaExpense[];
   let pagos = mockVentasPagos as RentaPayment[];
@@ -149,6 +151,10 @@ export default async function VentaRentaPage() {
     }
   }
 
+  ventas = filterByDateRange(ventas, dateRange, (venta) => venta.fecha_venta ?? venta.created_at);
+  gastos = filterByDateRange(gastos, dateRange, (gasto) => gasto.fecha);
+  pagos = filterByDateRange(pagos, dateRange, (pago) => pago.fecha);
+  entregas = filterByDateRange(entregas, dateRange, (entrega) => entrega.fecha_entrega);
   const rows = calculateRentaRows(ventas, gastos, pagos, entregas);
   const metrics = calculateRentaKpis(rows);
   const canSeeFinancials = canViewMargins(currentRole);

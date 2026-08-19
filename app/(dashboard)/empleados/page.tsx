@@ -4,6 +4,7 @@ import { mockEmpleados, mockWhatsappInstancias } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmpleadosTable } from "@/components/empleados/empleados-table";
 import type { WhatsappInstance } from "@/components/whatsapp/whatsapp-instance-card";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Empleados | Funes Exclusivos",
@@ -53,7 +54,8 @@ function KpiCard({
   );
 }
 
-export default async function EmpleadosPage() {
+export default async function EmpleadosPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let empleados: Employee[] = mockEmpleados as Employee[];
   let currentUserId: string | null = null;
   const whatsappConnections: Record<string, WhatsappInstance> = {};
@@ -114,6 +116,7 @@ export default async function EmpleadosPage() {
     );
   }
 
+  empleados = filterByDateRange(empleados, dateRange, (employee) => employee.fecha_ingreso ?? employee.created_at);
   const activeEmployees = empleados.filter((employee) => employee.activo === true);
   const admins = activeEmployees.filter((employee) => employee.rol === "admin");
   const sellers = activeEmployees.filter((employee) => employee.rol === "vendedor");

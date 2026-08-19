@@ -6,6 +6,7 @@ import { mockLeads, mockPipelineEstados } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CrmViews } from "@/components/crm/crm-views";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "CRM | Funes Exclusivos",
@@ -122,7 +123,8 @@ function getUpcomingLeads(leads: Lead[]) {
   return leads.filter((lead) => Boolean(lead.proximo_contacto));
 }
 
-export default async function CrmPage() {
+export default async function CrmPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let leads: Lead[] = mockLeads as Lead[];
   let pipelineEstados: PipelineEstado[] = mockPipelineEstados as PipelineEstado[];
 
@@ -153,6 +155,7 @@ export default async function CrmPage() {
     }));
   }
 
+  leads = filterByDateRange(leads, dateRange, (lead) => lead.created_at ?? lead.proximo_contacto);
   const activeLeads = getActiveLeads(leads);
   const negotiationLeads = getNegotiationLeads(leads);
   const upcomingLeads = getUpcomingLeads(leads);

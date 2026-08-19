@@ -9,6 +9,7 @@ import { WhatsappInstanceCreateForm } from "@/components/whatsapp/whatsapp-insta
 import { WhatsappInstancesGrid } from "@/components/whatsapp/whatsapp-instances-grid";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 import type { WhatsappInstance } from "@/components/whatsapp/whatsapp-instance-card";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Conexiones WhatsApp | Funes Exclusivos",
@@ -46,7 +47,8 @@ function getEmployeesFromInstances(instances: Instance[]) {
   return Array.from(employees.values());
 }
 
-export default async function WhatsappConnectionsPage() {
+export default async function WhatsappConnectionsPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let instancias: Instance[] = mockWhatsappInstancias as Instance[];
   let employees: Employee[] = getEmployeesFromInstances(instancias);
   let canManageAll = true;
@@ -119,6 +121,8 @@ export default async function WhatsappConnectionsPage() {
       employees = (employeesResult.data ?? []) as Employee[];
     }
   }
+
+  instancias = filterByDateRange(instancias, dateRange, (instance) => instance.created_at);
 
   return (
     <section className="space-y-6">

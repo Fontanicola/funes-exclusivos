@@ -30,6 +30,7 @@ import { CommercialSummary } from "@/components/dashboard/commercial-summary";
 import { OperationsSummary } from "@/components/dashboard/operations-summary";
 import { DashboardAlerts } from "@/components/dashboard/dashboard-alerts";
 import { VendorActivitySummary } from "@/components/dashboard/vendor-activity-summary";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,15 @@ type RawRelation<T> = T | T[] | null;
 function normalizeSingleRelation<T>(value: RawRelation<T>) {
   if (Array.isArray(value)) return value[0] ?? null;
   return value ?? null;
+}
+
+function dateFrom(item: unknown, ...keys: string[]) {
+  const record = item as Record<string, unknown>;
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value) return value;
+  }
+  return null;
 }
 
 async function safeSelect<T>(
@@ -263,8 +273,30 @@ async function loadDashboardData() {
   };
 }
 
-export default async function DashboardPage() {
-  const data = await loadDashboardData();
+export default async function DashboardPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
+  const sourceData = await loadDashboardData();
+  const data = {
+    ...sourceData,
+    vehiculos: filterByDateRange(sourceData.vehiculos as any[], dateRange, (item) => dateFrom(item, "fecha_ingreso", "created_at")),
+    ventas: filterByDateRange(sourceData.ventas as any[], dateRange, (item) => dateFrom(item, "fecha_venta", "created_at")),
+    ventasEntregas: filterByDateRange(sourceData.ventasEntregas as any[], dateRange, (item) => dateFrom(item, "fecha_entrega", "created_at")),
+    vehiculoGastos: filterByDateRange(sourceData.vehiculoGastos as any[], dateRange, (item) => dateFrom(item, "fecha", "created_at")),
+    vehiculoDocumentos: filterByDateRange(sourceData.vehiculoDocumentos as any[], dateRange, (item) => dateFrom(item, "fecha_emision", "fecha_vencimiento", "created_at")),
+    comprasVehiculos: filterByDateRange(sourceData.comprasVehiculos as any[], dateRange, (item) => dateFrom(item, "fecha", "created_at")),
+    cajaMovimientos: filterByDateRange(sourceData.cajaMovimientos as any[], dateRange, (item) => dateFrom(item, "fecha", "created_at")),
+    comisiones: filterByDateRange(sourceData.comisiones as any[], dateRange, (item) => dateFrom(item, "fecha_generada", "created_at")),
+    comisionLiquidaciones: filterByDateRange(sourceData.comisionLiquidaciones as any[], dateRange, (item) => {
+      const period = (item as Record<string, unknown>).periodo;
+      const periodDate = typeof period === "string" && /^\d{4}-\d{2}$/.test(period) ? `${period}-01` : null;
+      return periodDate ?? dateFrom(item, "created_at");
+    }),
+    leads: filterByDateRange(sourceData.leads as any[], dateRange, (item) => dateFrom(item, "created_at", "proximo_contacto")),
+    gestoriaTramites: filterByDateRange(sourceData.gestoriaTramites as any[], dateRange, (item) => dateFrom(item, "fecha_vencimiento", "created_at")),
+    gestoriaPresupuestos: filterByDateRange(sourceData.gestoriaPresupuestos as any[], dateRange, (item) => dateFrom(item, "fecha", "created_at")),
+    conversaciones: filterByDateRange(sourceData.conversaciones as any[], dateRange, (item) => dateFrom(item, "ultimo_mensaje_at", "created_at")),
+    recordatorios: filterByDateRange(sourceData.recordatorios as any[], dateRange, (item) => dateFrom(item, "fecha_vencimiento", "created_at")),
+  };
   const metrics = buildDashboardMetrics(data);
   let currentRole: string | null = isDemoMode ? mockEmpleado.rol : null;
 

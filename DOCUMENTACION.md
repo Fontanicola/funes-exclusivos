@@ -1418,6 +1418,49 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Filtro global por período
+
+### Qué se construyó
+
+- Se agregó un selector de período reutilizable en el header de la plataforma privada.
+- Permite ver todo el período, el mes actual, el mes anterior o definir un rango personalizado desde/hasta.
+- El período seleccionado se guarda en la URL mediante `from` y `to`, por lo que se puede recargar o compartir la vista filtrada.
+- El filtro se aplica a los datos operativos de Dashboard, Inventario, Compras, Ventas, Rentabilidad, Caja, CRM, Gestoría, Presupuestos, Recordatorios, Comisiones, Liquidaciones, WhatsApp, Catálogo interno, Entregas y Empleados.
+
+### Paths creados/modificados
+
+- `lib/date-range.ts`
+- `components/dashboard/period-filter.tsx`
+- `components/dashboard/breadcrumb-header.tsx`
+- `app/(dashboard)/dashboard/page.tsx`
+- `app/(dashboard)/inventario/page.tsx`
+- `app/(dashboard)/compras/page.tsx`
+- `app/(dashboard)/ventas/page.tsx`
+- `app/(dashboard)/ventas/renta/page.tsx`
+- `app/(dashboard)/ventas/pendientes-entrega/page.tsx`
+- `app/(dashboard)/caja/page.tsx`
+- `app/(dashboard)/crm/page.tsx`
+- `app/(dashboard)/gestoria/page.tsx`
+- `app/(dashboard)/gestoria/presupuestos/page.tsx`
+- `app/(dashboard)/recordatorios/page.tsx`
+- `app/(dashboard)/comisiones/page.tsx`
+- `app/(dashboard)/comisiones/liquidaciones/page.tsx`
+- `app/(dashboard)/whatsapp/page.tsx`
+- `app/(dashboard)/whatsapp/conexiones/page.tsx`
+- `app/(dashboard)/dashboard/catalogo/page.tsx`
+- `app/(dashboard)/empleados/page.tsx`
+
+### Decisiones técnicas
+
+- Se usó un único control visual en el header para evitar repetir filtros de fecha en cada módulo.
+- Cada sección usa su fecha operativa principal: venta, compra, movimiento, vencimiento, último mensaje, fecha de ingreso o período de liquidación.
+- No se modificó el schema ni se agregaron consultas o dependencias nuevas; el rango se aplica sobre los datos ya cargados por cada página y funciona igual en modo demo.
+- Las páginas sin información temporal operativa, como configuración, mantienen el selector global sin alterar su contenido.
+
+### Validación
+
+- `npm run build` ejecutado y finalizado correctamente sin errores.
+
 ## Ajuste visual del hilo de WhatsApp
 
 Se eliminó el contenedor interno adicional del hilo de mensajes dentro del inbox. Los mensajes ahora ocupan directamente el panel principal, conservando las burbujas de entrada y salida y el scroll interno del chat, sin modificar la persistencia ni la lógica de conversaciones.

@@ -8,6 +8,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { ComisionesComparativa } from "@/components/comisiones/comisiones-comparativa";
 import { ComisionesTable } from "@/components/comisiones/comisiones-table";
+import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const metadata: Metadata = {
   title: "Comisiones | Funes Exclusivos",
@@ -131,7 +132,8 @@ function getUniqueSoldUnits(comisiones: Comision[]) {
   return saleIds.size;
 }
 
-export default async function ComisionesPage() {
+export default async function ComisionesPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+  const dateRange = parseDateRange(searchParams);
   let comisiones: Comision[] = mockComisiones as Comision[];
   let currentRole: string | null = mockEmpleado.rol;
 
@@ -173,6 +175,7 @@ export default async function ComisionesPage() {
     }
   }
 
+  comisiones = filterByDateRange(comisiones, dateRange, (comision) => comision.fecha_generada ?? comision.created_at);
   const comisionesValidas = comisiones.filter(
     (comision) => comision.estado !== "anulada" && comision.venta?.estado !== "anulada"
   );
