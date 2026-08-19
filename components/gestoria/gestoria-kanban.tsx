@@ -6,7 +6,6 @@ import { useFormStatus } from "react-dom";
 import { CalendarDays, CheckCircle2, Circle, FileText, Search, Send, UserRound } from "lucide-react";
 import { updateGestoriaOperacionFormAction } from "@/app/(dashboard)/gestoria/actions";
 import { GestoriaStatusBadge } from "./gestoria-status-badge";
-import { PaginationControls } from "@/components/common/pagination-controls";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Employee = {
@@ -446,7 +445,7 @@ export function GestoriaKanban({
   const [gestorFilter, setGestorFilter] = useState("");
   const [gestionFilter, setGestionFilter] = useState("");
   const [onlyPendingBudget, setOnlyPendingBudget] = useState(false);
-  const [stagePages, setStagePages] = useState<Record<string, number>>({});
+  const [stageVisibleCounts, setStageVisibleCounts] = useState<Record<string, number>>({});
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -539,9 +538,8 @@ export function GestoriaKanban({
         <div className="grid gap-4 py-4 xl:grid-cols-4">
           {stages.map((stage) => {
             const stageItems = filtered.filter((tramite) => (tramite.etapa ?? "presupuesto") === stage.key);
-            const totalPages = Math.max(1, Math.ceil(stageItems.length / PAGE_SIZE));
-            const currentPage = Math.min(stagePages[stage.key] ?? 1, totalPages);
-            const visibleStageItems = stageItems.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+            const visibleCount = stageVisibleCounts[stage.key] ?? PAGE_SIZE;
+            const visibleStageItems = stageItems.slice(0, visibleCount);
 
             return (
               <section key={stage.key} className="flex h-[calc(100vh-280px)] min-h-[560px] min-w-0 flex-col rounded-md border border-[#E5E7EB] bg-[#FAFAFA]">
@@ -567,14 +565,25 @@ export function GestoriaKanban({
                     </div>
                   )}
                 </div>
-                <PaginationControls
-                  page={currentPage}
-                  totalItems={stageItems.length}
-                  pageSize={PAGE_SIZE}
-                  onPageChange={(nextPage) =>
-                    setStagePages((current) => ({ ...current, [stage.key]: nextPage }))
-                  }
-                />
+                {stageItems.length > visibleCount ? (
+                  <div className="border-t border-[#E5E7EB] px-4 py-3 text-center">
+                    <p className="mb-2 text-xs text-[#6B7280]">
+                      Mostrando {visibleStageItems.length} de {stageItems.length}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setStageVisibleCounts((current) => ({
+                          ...current,
+                          [stage.key]: visibleCount + PAGE_SIZE,
+                        }))
+                      }
+                      className="text-sm font-medium text-[#8A1538] transition hover:text-[#6F102D]"
+                    >
+                      Ver más
+                    </button>
+                  </div>
+                ) : null}
               </section>
             );
           })}

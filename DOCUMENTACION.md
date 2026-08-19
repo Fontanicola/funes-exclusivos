@@ -1463,6 +1463,24 @@
 ### Validación
 - `npm run build` ejecutado correctamente.
 
+## Paginación progresiva de columnas de Gestoría
+
+### Qué se mejoró
+- Las columnas del tablero de Gestoría muestran 20 operaciones inicialmente.
+- Se reemplazó la navegación numerada por un botón `Ver más` al pie de cada columna.
+- Cada click agrega 20 operaciones sin mover al usuario ni aumentar el alto de la sección con controles de paginación.
+
+### Paths modificados
+- `components/gestoria/gestoria-kanban.tsx`
+- `DOCUMENTACION.md`
+
+### Decisiones técnicas
+- La paginación se mantiene local por columna y respeta los filtros activos.
+- El scroll continúa limitado al contenido interno de cada columna.
+
+### Validación
+- `npm run build` ejecutado correctamente.
+
 ## Clasificación masiva de leads con IA
 
 ### Qué se construyó
