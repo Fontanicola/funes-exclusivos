@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useEffect, useState, useTransition } from "react";
 import { updateLeadStatusAction } from "@/app/(dashboard)/crm/actions";
 
@@ -55,9 +56,11 @@ function getVehicleSummary(lead: Lead) {
 export function CrmPipeline({
   leads,
   pipelineEstados,
+  newColumnAction,
 }: {
   leads: Lead[];
   pipelineEstados: PipelineEstado[];
+  newColumnAction?: ReactNode;
 }) {
   const [localLeads, setLocalLeads] = useState(leads);
   const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
@@ -122,8 +125,11 @@ export function CrmPipeline({
                 ].join(" ")}
               >
                 <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#E5E7EB] pb-3">
-                  <div>
-                    <p className="text-sm font-semibold text-[#111827]">{state.nombre}</p>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-[#111827]">{state.nombre}</p>
+                      {state.slug === "nuevo" ? newColumnAction : null}
+                    </div>
                     <p className="text-xs text-[#6B7280]">{stateLeads.length} leads</p>
                   </div>
                   <span className="rounded-full border border-[#E5E7EB] bg-white px-2 py-1 text-xs font-medium text-[#111827]">

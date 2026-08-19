@@ -200,7 +200,7 @@ export default async function CrmPage({ searchParams }: { searchParams?: { from?
       <CrmViews
         leads={leads}
         pipelineEstados={pipelineEstados}
-        aiAction={<AnalyzeNewLeadsButton />}
+        aiAction={<AnalyzeNewLeadsButton availableCount={leads.filter((lead) => lead.estado === "nuevo").length} />}
         newLeadAction={
           <Link
             href="/crm/nuevo"

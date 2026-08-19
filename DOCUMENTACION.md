@@ -3661,3 +3661,13 @@ Paths modificados: `components/catalogo/catalogo-hero-upload-form.tsx`, `app/(da
 Se eliminó el header interno redundante de la pantalla administrativa de Catálogo. Las acciones `Editar vidriera` y `Abrir catálogo público` ahora comparten la misma toolbar que la búsqueda y los filtros, reduciendo espacio sin perder accesibilidad. Se revisaron las páginas del dashboard y no se modificaron headers de detalle o formularios, donde el título contextual sigue siendo necesario para orientar la tarea.
 
 Paths modificados: `app/(dashboard)/dashboard/catalogo/page.tsx`, `components/catalogo/catalogo-vehiculos-table.tsx`.
+
+### Análisis por lote de leads nuevos
+
+La acción de análisis con IA se movió al encabezado de la columna `Nuevo` del pipeline para mantener el foco operativo y reducir ruido en la toolbar general. El botón ahora se muestra como `Analizar` y abre un selector compacto para elegir cuántos leads procesar. El límite seleccionado se aplica en la consulta de leads nuevos, con un máximo seguro de 200 registros y sin cambiar los permisos ni la lógica de clasificación existente.
+
+Paths modificados: `app/(dashboard)/crm/actions.ts`, `app/(dashboard)/crm/page.tsx`, `components/crm/analyze-new-leads-button.tsx`, `components/crm/crm-pipeline.tsx`, `components/crm/crm-views.tsx`.
+
+Tablas y servicios involucrados: `leads`, `conversaciones`, `conversacion_mensajes`, `vehiculos`, `empleados` y OpenAI para la clasificación manual solicitada.
+
+Validación: `npm run build` finalizado correctamente.

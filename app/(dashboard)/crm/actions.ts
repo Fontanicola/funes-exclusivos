@@ -23,7 +23,7 @@ type ActionState = {
   message?: string;
 };
 
-export async function analyzeNewLeadsWithAiAction(): Promise<ActionState> {
+export async function analyzeNewLeadsWithAiAction(requestedLimit = 20): Promise<ActionState> {
   if (isDemoMode) {
     return { error: "Modo demo activo: conectá Supabase para analizar leads reales." };
   }
@@ -45,12 +45,16 @@ export async function analyzeNewLeadsWithAiAction(): Promise<ActionState> {
     return { error: "No tenés permisos para analizar leads." };
   }
 
+  const limit = Number.isInteger(requestedLimit)
+    ? Math.min(Math.max(requestedLimit, 1), 200)
+    : 20;
+
   const { data: rawLeads, error: leadsError } = await supabase
     .from("leads")
     .select("id,nombre,origen,vendedor_id,vehiculo_interes_id,created_at")
     .eq("estado", "nuevo")
     .order("created_at", { ascending: true })
-    .limit(200);
+    .limit(limit);
 
   if (leadsError) {
     console.error("CRM AI: no se pudieron leer los leads nuevos", leadsError.message);

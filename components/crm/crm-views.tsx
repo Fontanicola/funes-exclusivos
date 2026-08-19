@@ -38,7 +38,6 @@ export function CrmViews({
         <div className="flex items-center gap-2">
           {view === "pipeline" ? (
             <>
-              {aiAction}
               {newLeadAction}
             </>
           ) : null}
@@ -76,7 +75,11 @@ export function CrmViews({
       </div>
 
       {view === "pipeline" ? (
-        <CrmPipeline leads={leads} pipelineEstados={pipelineEstados} />
+        <CrmPipeline
+          leads={leads}
+          pipelineEstados={pipelineEstados}
+          newColumnAction={aiAction}
+        />
       ) : (
         <LeadsTable leads={leads} toolbarAction={newLeadAction} />
       )}
