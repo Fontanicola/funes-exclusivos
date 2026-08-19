@@ -34,7 +34,7 @@ export function AnalyzeNewLeadsButton({ availableCount = 0 }: { availableCount?:
         {isPending ? "Analizando..." : "Analizar"}
       </button>
       {isOpen ? (
-        <div className="absolute right-0 top-10 z-20 w-56 rounded-md border border-[#E5E7EB] bg-white p-3 shadow-lg">
+        <div className="absolute left-0 top-10 z-30 w-56 max-w-[calc(100vw-2rem)] rounded-md border border-[#E5E7EB] bg-white p-3 shadow-lg">
           <p className="text-xs font-medium text-[#111827]">¿Cuántos leads analizamos?</p>
           <select
             value={limit}

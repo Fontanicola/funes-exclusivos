@@ -3690,6 +3690,12 @@ Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`.
 
 No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
 
+### Corrección del modal de análisis del pipeline
+
+Se corrigió el popover de `Analizar` para que no quede recortado por el contenedor de la columna `Nuevo`. Ahora se ancla desde el lado izquierdo de la columna, respeta el ancho disponible del viewport y queda por encima del contenido sin afectar el scroll interno.
+
+Paths modificados: `components/crm/analyze-new-leads-button.tsx`, `components/crm/crm-pipeline.tsx`.
+
 ### Corrección de escala del gráfico de comisiones
 
 Se fijó la altura renderizada del SVG para evitar que el gráfico creciera con el ancho de la pantalla. También se redujeron las etiquetas de ejes y meses para mantener una escala más liviana y legible.
