@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { PaginationControls } from "@/components/common/pagination-controls";
+import { useEffect, useState, useTransition } from "react";
+import { updateLeadStatusAction } from "@/app/(dashboard)/crm/actions";
 
 type Lead = {
   id: string;
@@ -59,7 +59,13 @@ export function CrmPipeline({
   leads: Lead[];
   pipelineEstados: PipelineEstado[];
 }) {
-  const [pages, setPages] = useState<Record<string, number>>({});
+  const [localLeads, setLocalLeads] = useState(leads);
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
+  const [draggedLeadId, setDraggedLeadId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [dragError, setDragError] = useState<string | null>(null);
+
+  useEffect(() => setLocalLeads(leads), [leads]);
   const states = pipelineEstados.length
     ? pipelineEstados
     : [
@@ -79,13 +85,42 @@ export function CrmPipeline({
           .slice()
           .sort((left, right) => left.orden - right.orden)
           .map((state) => {
-            const stateLeads = leads.filter((lead) => lead.estado === state.slug);
-            const totalPages = Math.max(1, Math.ceil(stateLeads.length / PAGE_SIZE));
-            const currentPage = Math.min(pages[state.id] ?? 1, totalPages);
-            const visibleLeads = stateLeads.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+            const stateLeads = localLeads.filter((lead) => lead.estado === state.slug);
+            const visibleCount = visibleCounts[state.id] ?? PAGE_SIZE;
+            const visibleLeads = stateLeads.slice(0, visibleCount);
 
             return (
-              <div key={state.id} className="flex h-[min(62vh,680px)] min-h-[420px] min-w-0 flex-col rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+              <div
+                key={state.id}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  const leadId = event.dataTransfer.getData("text/lead-id") || draggedLeadId;
+                  if (!leadId) return;
+                  const previousLeads = localLeads;
+                  const movedLead = previousLeads.find((lead) => lead.id === leadId);
+                  if (!movedLead || movedLead.estado === state.slug) return;
+
+                  setDragError(null);
+                  setLocalLeads((current) => current.map((lead) => lead.id === leadId ? { ...lead, estado: state.slug } : lead));
+                  setDraggedLeadId(null);
+
+                  const formData = new FormData();
+                  formData.set("lead_id", leadId);
+                  formData.set("estado", state.slug);
+                  startTransition(async () => {
+                    const result = await updateLeadStatusAction(formData);
+                    if (result.error) {
+                      setLocalLeads(previousLeads);
+                      setDragError(result.error);
+                    }
+                  });
+                }}
+                className={[
+                  "flex h-[min(62vh,680px)] min-h-[420px] min-w-0 flex-col rounded-md border bg-[#FAFAFA] p-3 transition",
+                  draggedLeadId ? "border-[#D8A1B2]" : "border-[#E5E7EB]",
+                ].join(" ")}
+              >
                 <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#E5E7EB] pb-3">
                   <div>
                     <p className="text-sm font-semibold text-[#111827]">{state.nombre}</p>
@@ -102,7 +137,20 @@ export function CrmPipeline({
                       <Link
                         key={lead.id}
                         href={`/crm/${lead.id}`}
-                        className="block rounded-md border border-[#E5E7EB] bg-white p-3 transition hover:bg-[#F9FAFB]"
+                        draggable
+                        onDragStart={(event) => {
+                          event.dataTransfer.effectAllowed = "move";
+                          event.dataTransfer.setData("text/lead-id", lead.id);
+                          setDraggedLeadId(lead.id);
+                        }}
+                        onDragEnd={() => setDraggedLeadId(null)}
+                        onClick={(event) => {
+                          if (draggedLeadId) event.preventDefault();
+                        }}
+                        className={[
+                          "block cursor-grab rounded-md border border-[#E5E7EB] bg-white p-3 transition hover:bg-[#F9FAFB] active:cursor-grabbing",
+                          draggedLeadId === lead.id ? "opacity-50" : "",
+                        ].join(" ")}
                       >
                         <div className="space-y-2">
                           <div>
@@ -118,24 +166,27 @@ export function CrmPipeline({
                         </div>
                       </Link>
                     ))
-                  ) : (
+                ) : (
                     <div className="rounded-md border border-dashed border-[#E5E7EB] bg-white px-3 py-6 text-center text-xs text-[#6B7280]">
                       Sin leads en esta etapa.
                     </div>
                   )}
                 </div>
-                <PaginationControls
-                  page={currentPage}
-                  totalItems={stateLeads.length}
-                  pageSize={PAGE_SIZE}
-                  onPageChange={(nextPage) =>
-                    setPages((current) => ({ ...current, [state.id]: nextPage }))
-                  }
-                />
+                {visibleLeads.length < stateLeads.length ? (
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCounts((current) => ({ ...current, [state.id]: (current[state.id] ?? PAGE_SIZE) + PAGE_SIZE }))}
+                    className="mt-3 shrink-0 border-t border-[#E5E7EB] pt-3 text-center text-xs font-semibold text-[#8A1538] hover:underline"
+                  >
+                    Ver más
+                  </button>
+                ) : null}
               </div>
             );
           })}
       </div>
+      {isPending ? <p className="mt-2 text-xs text-[#6B7280]">Guardando cambio de etapa...</p> : null}
+      {dragError ? <p className="mt-2 text-xs text-rose-700">{dragError}</p> : null}
     </div>
   );
 }

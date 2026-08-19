@@ -155,6 +155,48 @@ export async function createLeadInteractionAction(
   return { success: true };
 }
 
+export async function updateLeadStatusAction(formData: FormData): Promise<ActionState> {
+  if (isDemoMode) {
+    return { error: "Modo demo activo: el cambio se muestra solo en esta sesión." };
+  }
+
+  const supabase = createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
+
+  const { data: actor } = await supabase
+    .from("empleados")
+    .select("id,rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+
+  if (!actor || actor.activo !== true || !canManageSales(actor.rol)) {
+    return { error: "No tenés permisos para mover este lead." };
+  }
+
+  const leadId = toOptionalString(formData.get("lead_id"));
+  const estado = toLowerTrimmed(formData.get("estado"));
+  const validStates = ["nuevo", "contactado", "interesado", "negociacion", "reservado", "ganado", "perdido"];
+
+  if (!leadId || !validStates.includes(estado)) {
+    return { error: "El estado seleccionado no es válido." };
+  }
+
+  const { error } = await supabase
+    .from("leads")
+    .update({ estado, updated_by: user.id })
+    .eq("id", leadId);
+
+  if (error) return { error: "No pudimos actualizar el estado del lead." };
+
+  revalidatePath("/crm");
+  revalidatePath(`/crm/${leadId}`);
+  return { success: true };
+}
+
 export async function convertLeadToVentaAction(
   _prevState: ActionState,
   formData: FormData

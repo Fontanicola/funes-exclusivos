@@ -1958,6 +1958,30 @@ El cambio se realizó sobre el componente compartido `AdvancedFilters`, por lo q
 
 - `npm run build` finalizado correctamente.
 
+## Pipeline CRM con carga incremental y drag and drop
+
+El pipeline ahora carga 10 leads por etapa y muestra `Ver más` al final de cada columna para incorporar los siguientes sin paginación tradicional. También se habilitó mover leads entre etapas mediante drag and drop nativo; el cambio se refleja de inmediato y se persiste mediante una Server Action validada por sesión, empleado activo y permisos comerciales.
+
+### Paths modificados
+
+- `app/(dashboard)/crm/actions.ts`
+- `components/crm/crm-pipeline.tsx`
+
+### Decisiones técnicas
+
+- No se agregaron dependencias externas: se usa Drag and Drop nativo del navegador.
+- El scroll vertical continúa dentro de cada columna y la carga incremental mantiene el límite inicial de 10.
+- Si la persistencia falla, la tarjeta vuelve a la etapa anterior y se muestra un mensaje operativo.
+- En modo demo el movimiento es local a la sesión y no modifica datos reales.
+
+### Tablas involucradas
+
+- `public.leads`
+
+### Validación
+
+- `npm run build` finalizado correctamente.
+
 ## Inventario con preset y filtros avanzados
 
 El listado de Inventario ahora inicia mostrando únicamente vehículos `en_stock`, reduciendo ruido al entrar al módulo. Se retiró la columna de publicación de la tabla y se ampliaron los filtros dentro del popover compartido: estado, estado de preparación, año desde/hasta y precio comercial desde/hasta. La búsqueda por vehículo y la paginación se mantienen.
