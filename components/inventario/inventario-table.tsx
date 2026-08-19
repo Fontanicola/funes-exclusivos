@@ -3,11 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Eye, PencilLine, Search, SlidersHorizontal, X } from "lucide-react";
+import { Eye, PencilLine, Search, X } from "lucide-react";
 import { canManageInventory, canViewCosts } from "@/lib/auth/permissions";
 import { VehiculoStatusBadge } from "./vehiculo-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { ActionMenu } from "@/components/common/action-menu";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Vehiculo = {
   id: string;
@@ -108,8 +109,8 @@ function getProviderLabel(vehiculo: Vehiculo, proveedores: Proveedor[]) {
   return provider.categoria ? `${provider.nombre ?? "Proveedor"} · ${provider.categoria}` : provider.nombre ?? "Proveedor";
 }
 
-function getExternalBadge(value: boolean | null) {
-  return value ? "border-[#D1FAE5] bg-[#ECFDF5] text-[#065F46]" : "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]";
+function getCommercialPrice(vehiculo: Vehiculo) {
+  return vehiculo.precio_contado ?? vehiculo.precio_venta;
 }
 
 export function InventarioTable({
@@ -126,19 +127,38 @@ export function InventarioTable({
   toolbarAction?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
-  const [onlyStock, setOnlyStock] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("en_stock");
+  const [preparationFilter, setPreparationFilter] = useState("");
+  const [yearFrom, setYearFrom] = useState("");
+  const [yearTo, setYearTo] = useState("");
+  const [priceFrom, setPriceFrom] = useState("");
+  const [priceTo, setPriceTo] = useState("");
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
   const showCosts = canViewCosts(role);
   const showPreparation = canManageInventory(role);
 
+  const preparationOptions = useMemo(
+    () => Array.from(new Set(vehiculos.map((vehiculo) => vehiculo.estado_preparacion).filter(Boolean))).sort(),
+    [vehiculos]
+  );
+
   const filteredVehiculos = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
+    const minimumPrice = priceFrom ? Number(priceFrom) : null;
+    const maximumPrice = priceTo ? Number(priceTo) : null;
+    const minimumYear = yearFrom ? Number(yearFrom) : null;
+    const maximumYear = yearTo ? Number(yearTo) : null;
 
     return vehiculos.filter((vehiculo) => {
-      if (onlyStock && vehiculo.estado !== "en_stock") {
-        return false;
-      }
+      if (statusFilter && vehiculo.estado !== statusFilter) return false;
+      if (preparationFilter && vehiculo.estado_preparacion !== preparationFilter) return false;
+      if (minimumYear != null && (vehiculo.anio == null || vehiculo.anio < minimumYear)) return false;
+      if (maximumYear != null && (vehiculo.anio == null || vehiculo.anio > maximumYear)) return false;
+
+      const price = getCommercialPrice(vehiculo);
+      if (minimumPrice != null && (price == null || price < minimumPrice)) return false;
+      if (maximumPrice != null && (price == null || price > maximumPrice)) return false;
 
       if (!normalizedQuery) return true;
 
@@ -155,7 +175,7 @@ export function InventarioTable({
 
       return searchable.includes(normalizedQuery);
     });
-  }, [onlyStock, query, vehiculos]);
+  }, [preparationFilter, priceFrom, priceTo, query, statusFilter, vehiculos, yearFrom, yearTo]);
 
   const totalPages = Math.max(1, Math.ceil(filteredVehiculos.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -187,19 +207,79 @@ export function InventarioTable({
             ) : null}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setOnlyStock((current) => !current)}
-            className={[
-              "inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium transition",
-              onlyStock
-                ? "border-[#E5E7EB] bg-[#8A1538] text-white hover:bg-[#6F102D]"
-                : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]",
-            ].join(" ")}
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            Solo stock
-          </button>
+          <AdvancedFilters label="Filtros de inventario">
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="h-9 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+            >
+              <option value="">Todos los estados</option>
+              <option value="en_stock">En stock</option>
+              <option value="vendido">Vendido</option>
+              <option value="en_consignacion">En consignación</option>
+              <option value="reservado">Reservado</option>
+            </select>
+            <select
+              value={preparationFilter}
+              onChange={(event) => setPreparationFilter(event.target.value)}
+              className="h-9 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+            >
+              <option value="">Toda la preparación</option>
+              {preparationOptions.map((option) => (
+                <option key={option} value={option ?? ""}>{option}</option>
+              ))}
+            </select>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                min="0"
+                value={yearFrom}
+                onChange={(event) => setYearFrom(event.target.value)}
+                placeholder="Año desde"
+                className="h-9 min-w-0 rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+              />
+              <input
+                type="number"
+                min="0"
+                value={yearTo}
+                onChange={(event) => setYearTo(event.target.value)}
+                placeholder="Año hasta"
+                className="h-9 min-w-0 rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                min="0"
+                value={priceFrom}
+                onChange={(event) => setPriceFrom(event.target.value)}
+                placeholder="Precio desde"
+                className="h-9 min-w-0 rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+              />
+              <input
+                type="number"
+                min="0"
+                value={priceTo}
+                onChange={(event) => setPriceTo(event.target.value)}
+                placeholder="Precio hasta"
+                className="h-9 min-w-0 rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFilter("en_stock");
+                setPreparationFilter("");
+                setYearFrom("");
+                setYearTo("");
+                setPriceFrom("");
+                setPriceTo("");
+              }}
+              className="h-9 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-xs font-medium text-[#6B7280] transition hover:bg-white"
+            >
+              Restablecer filtros
+            </button>
+          </AdvancedFilters>
         </div>
 
         <p className="text-xs text-[#6B7280]">
@@ -217,7 +297,6 @@ export function InventarioTable({
               {showCosts ? <th className="px-4 py-3">Compra</th> : null}
               <th className="px-4 py-3">Pricing</th>
               {showPreparation ? <th className="px-4 py-3">Preparación</th> : null}
-              <th className="px-4 py-3">Publicación</th>
               <th className="px-4 py-3">Estado</th>
               <th className="px-4 py-3">Ingreso</th>
               <th className="px-4 py-3">Acción</th>
@@ -228,9 +307,6 @@ export function InventarioTable({
               visibleVehiculos.map((vehiculo) => {
                 const photoUrl = getPhotoUrl(vehiculo.fotos);
                 const initials = getInitials(vehiculo.marca, vehiculo.modelo);
-                const publishedMl = Boolean(vehiculo.publicado_mercadolibre);
-                const publishedRg = Boolean(vehiculo.publicado_rodados_google);
-
                 return (
                   <tr
                     key={vehiculo.id}
@@ -340,16 +416,6 @@ export function InventarioTable({
                       </td>
                     ) : null}
                     <td className="px-4 py-3 align-middle">
-                      <div className="flex flex-wrap gap-2">
-                        <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getExternalBadge(vehiculo.publicado_mercadolibre)}`}>
-                          ML {publishedMl ? "Sí" : "No"}
-                        </span>
-                        <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getExternalBadge(vehiculo.publicado_rodados_google)}`}>
-                          RG {publishedRg ? "Sí" : "No"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 align-middle">
                       <VehiculoStatusBadge status={vehiculo.estado} />
                     </td>
                     <td className="px-4 py-3 align-middle text-sm text-[#111827]">
@@ -382,7 +448,7 @@ export function InventarioTable({
               <tr>
                 <td
                   colSpan={
-                    8 + (showCosts ? 1 : 0) + (showPreparation ? 1 : 0)
+                    7 + (showCosts ? 1 : 0) + (showPreparation ? 1 : 0)
                   }
                   className="px-4 py-14 text-center"
                 >

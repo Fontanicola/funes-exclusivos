@@ -1958,6 +1958,24 @@ El cambio se realizó sobre el componente compartido `AdvancedFilters`, por lo q
 
 - `npm run build` finalizado correctamente.
 
+## Inventario con preset y filtros avanzados
+
+El listado de Inventario ahora inicia mostrando únicamente vehículos `en_stock`, reduciendo ruido al entrar al módulo. Se retiró la columna de publicación de la tabla y se ampliaron los filtros dentro del popover compartido: estado, estado de preparación, año desde/hasta y precio comercial desde/hasta. La búsqueda por vehículo y la paginación se mantienen.
+
+### Paths modificados
+
+- `components/inventario/inventario-table.tsx`
+
+### Decisiones técnicas
+
+- El preset inicial es visual y client-side; no cambia consultas ni datos persistidos.
+- El filtro de precio usa primero `precio_contado` y luego `precio_venta`.
+- `Restablecer filtros` vuelve al preset operativo de vehículos en stock.
+
+### Validación
+
+- `npm run build` finalizado correctamente.
+
 ## Menús contextuales de acciones
 
 Se creó un patrón compartido de acciones con botón de tres puntos para reducir ruido visual en tablas. Las acciones de cada fila se mantienen disponibles dentro del menú contextual, que se cierra al hacer click afuera o presionar `Escape`; las acciones destructivas conservan su tratamiento visual diferenciado.
