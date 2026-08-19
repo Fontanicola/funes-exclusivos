@@ -226,6 +226,8 @@ export default async function WhatsappConversationPage({
           messages={messages}
           lastMessagePreview={conversation.last_message_preview}
           hasRecentActivity={Boolean(conversation.last_message_preview)}
+          incomingLabel={conversation.contacto_nombre ?? "Cliente"}
+          outgoingLabel={conversation.vendedor?.nombre ?? "Vendedor"}
         />
         <ConversacionDetail conversation={conversation} />
       </div>

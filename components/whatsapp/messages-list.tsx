@@ -40,17 +40,6 @@ function getDirection(message: Message) {
   return "entrante";
 }
 
-function getTypeLabel(type: string | null) {
-  const normalized = (type ?? "").toLowerCase();
-  if (!normalized || ["text", "texto"].includes(normalized)) return "Texto";
-  if (["image", "imagen"].includes(normalized)) return "Imagen";
-  if (normalized === "audio") return "Audio";
-  if (["document", "documento"].includes(normalized)) return "Documento";
-  if (normalized === "sticker") return "Sticker";
-  if (normalized === "video") return "Video";
-  return "Mensaje";
-}
-
 function getFallbackBody(type: string | null) {
   const normalized = (type ?? "").toLowerCase();
   if (["image", "imagen"].includes(normalized)) return "Imagen";
@@ -67,6 +56,8 @@ export function MessagesList({
   paginate = true,
   showHeader = true,
   fillHeight = false,
+  incomingLabel = "Cliente",
+  outgoingLabel = "Vendedor",
 }: {
   messages: Message[];
   lastMessagePreview?: string | null;
@@ -74,6 +65,8 @@ export function MessagesList({
   paginate?: boolean;
   showHeader?: boolean;
   fillHeight?: boolean;
+  incomingLabel?: string;
+  outgoingLabel?: string;
 }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(messages.length / PAGE_SIZE));
@@ -99,7 +92,7 @@ export function MessagesList({
         {messages.length ? (
           visibleMessages.map((message) => {
             const isOutgoing = getDirection(message) === "saliente";
-            const typeLabel = getTypeLabel(message.message_type ?? message.tipo ?? null);
+            const senderLabel = isOutgoing ? outgoingLabel : incomingLabel;
             const body = message.body?.trim() || getFallbackBody(message.message_type ?? message.tipo ?? null);
 
             return (
@@ -116,8 +109,11 @@ export function MessagesList({
                   ].join(" ")}
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
-                      {typeLabel}
+                    <span className={[
+                      "text-[10px] font-semibold uppercase tracking-[0.14em]",
+                      isOutgoing ? "text-[#8A1538]" : "text-[#6B7280]",
+                    ].join(" ")}>
+                      {senderLabel}
                     </span>
                     <span className="text-xs text-[#6B7280]">
                       {formatDateTime(message.sent_at ?? message.created_at)}

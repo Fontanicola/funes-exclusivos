@@ -60,7 +60,10 @@ type Message = {
   id: string;
   body: string | null;
   message_type?: string | null;
+  tipo?: string | null;
   direccion?: string | null;
+  direction?: string | null;
+  from_me?: boolean | null;
   sent_at: string | null;
   created_at: string | null;
 };
@@ -83,6 +86,19 @@ function contactName(conversation: Conversation) {
 function vehicleName(conversation: Conversation) {
   if (!conversation.vehiculo) return null;
   return [conversation.vehiculo.marca, conversation.vehiculo.modelo].filter(Boolean).join(" ") || null;
+}
+
+function isIncoming(message: Message) {
+  const direction = (message.direccion ?? message.direction ?? "").toLowerCase();
+  if (!direction && typeof message.from_me === "boolean") return !message.from_me;
+  if (!direction) return false;
+  return !["saliente", "outbound", "sent"].includes(direction);
+}
+
+function hasUnansweredMessage(conversation: Conversation, messages: Record<string, Message[]>) {
+  const conversationMessages = messages[conversation.id] ?? [];
+  const lastMessage = conversationMessages[conversationMessages.length - 1];
+  return Boolean(lastMessage && isIncoming(lastMessage));
 }
 
 export function WhatsappInbox({
@@ -186,7 +202,8 @@ export function WhatsappInbox({
             {filtered.length ? (
               filtered.map((conversation) => {
                 const isSelected = conversation.id === selectedId;
-                const unread = conversation.unread_count ?? 0;
+                const unanswered = hasUnansweredMessage(conversation, mensajes);
+                const interestVehicle = vehicleName(conversation);
 
                 return (
                   <button
@@ -204,20 +221,23 @@ export function WhatsappInbox({
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center justify-between gap-2">
                           <span className="truncate text-sm font-semibold text-[#111827]">{contactName(conversation)}</span>
-                          <span className="shrink-0 text-[10px] text-[#9CA3AF]">{formatTime(conversation.ultimo_mensaje_at)}</span>
+                          <span className="flex shrink-0 items-center gap-2">
+                            <span className="text-[10px] text-[#9CA3AF]">{formatTime(conversation.ultimo_mensaje_at)}</span>
+                            {unanswered ? (
+                              <span
+                                className="h-2 w-2 rounded-full bg-[#8A1538]"
+                                aria-label="El vendedor tiene un mensaje pendiente de responder"
+                                title="Mensaje pendiente de respuesta"
+                              />
+                            ) : null}
+                          </span>
                         </span>
                         <span className="mt-1 block truncate text-xs text-[#6B7280]">
                           {conversation.last_message_preview || "Sin mensajes guardados"}
                         </span>
-                        <span className="mt-2 flex flex-wrap items-center gap-1.5">
-                          {unread > 0 ? (
-                            <span
-                              className="h-2 w-2 rounded-full bg-[#8A1538]"
-                              aria-label="Hay mensajes sin responder"
-                              title="Hay mensajes sin responder"
-                            />
-                          ) : null}
-                          {vehicleName(conversation) ? <span className="truncate text-[10px] text-[#6B7280]">{vehicleName(conversation)}</span> : null}
+                        <span className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
+                          {interestVehicle ? <span className="truncate font-medium text-[#166534]">Interés: {interestVehicle}</span> : null}
+                          {conversation.vendedor?.nombre ? <span className="truncate text-[#6B7280]">Vendedor: {conversation.vendedor.nombre}</span> : null}
                         </span>
                       </span>
                     </div>
@@ -267,7 +287,16 @@ export function WhatsappInbox({
               </header>
 
               <div className="min-h-0 flex-1 overflow-hidden p-3 sm:p-4">
-                <MessagesList messages={selectedMessages} lastMessagePreview={selected.last_message_preview} hasRecentActivity={Boolean(selected.last_message_preview)} paginate={false} showHeader={false} fillHeight />
+                <MessagesList
+                  messages={selectedMessages}
+                  lastMessagePreview={selected.last_message_preview}
+                  hasRecentActivity={Boolean(selected.last_message_preview)}
+                  paginate={false}
+                  showHeader={false}
+                  fillHeight
+                  incomingLabel={contactName(selected)}
+                  outgoingLabel={selected.vendedor?.nombre ?? "Vendedor"}
+                />
               </div>
             </>
           ) : (

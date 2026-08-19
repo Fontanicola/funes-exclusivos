@@ -1438,6 +1438,28 @@
 - `npx tsc --noEmit` ejecutado correctamente.
 - `npm run build` ejecutado correctamente.
 
+## Mejoras de lectura en WhatsApp
+
+### Qué se ajustó
+
+- El indicador de mensajes pendientes ahora se calcula con el último mensaje real de la conversación: solo aparece cuando el último mensaje es entrante.
+- Se eliminó la dependencia visual del contador `unread_count`, que podía quedar desactualizado.
+- El punto de conversación pendiente se movió junto al horario, en el extremo derecho de cada contacto.
+- Las burbujas ya no muestran el tipo técnico `Texto`; muestran el nombre del contacto en mensajes entrantes y el vendedor en mensajes salientes.
+- El vehículo de interés ahora se muestra como `Interés: ...` en verde suave.
+- Se agregó el vendedor asignado debajo de cada conversación.
+
+### Paths modificados
+
+- `components/whatsapp/whatsapp-inbox.tsx`
+- `components/whatsapp/messages-list.tsx`
+- `app/(dashboard)/whatsapp/[id]/page.tsx`
+
+### Validación
+
+- `npx tsc --noEmit` ejecutado correctamente.
+- `npm run build` ejecutado correctamente.
+
 ## Ajuste de bandeja WhatsApp
 
 ### Qué se mejoró
