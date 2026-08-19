@@ -17,6 +17,7 @@ type KpiCardProps = {
     label?: string;
   };
   note?: string;
+  compact?: boolean;
   className?: string;
 };
 
@@ -122,6 +123,7 @@ export function KpiCard({
   badge,
   progress,
   note,
+  compact = false,
   className = "",
 }: KpiCardProps) {
   const resolvedTone = tone ?? variantToneMap[variant ?? "default"];
@@ -132,7 +134,7 @@ export function KpiCard({
       className={[
         "group relative h-full overflow-hidden rounded-md border transition",
         classes.shell,
-        featured ? "p-6" : "p-5",
+        compact ? "p-4" : featured ? "p-6" : "p-5",
         resolvedTone === "highlight" ? "" : "hover:border-[#D8A1B2]",
         className,
       ].join(" ")}
@@ -143,9 +145,9 @@ export function KpiCard({
           classes.accent,
         ].join(" ")}
       />
-      <div className="relative z-10 flex h-full flex-col justify-between gap-6">
+      <div className={`relative z-10 flex h-full flex-col justify-between ${compact ? "gap-3" : "gap-6"}`}>
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-3">
+          <div className={compact ? "space-y-2" : "space-y-3"}>
             <div className="flex items-center gap-2">
               <p className={`text-sm font-medium ${resolvedTone === "highlight" ? "text-white/75" : "text-[#6B7280]"}`}>
                 {title}
@@ -156,11 +158,11 @@ export function KpiCard({
                 </span>
               ) : null}
             </div>
-            <p className={`${featured ? "text-4xl" : "text-3xl"} font-semibold tracking-tight ${classes.title}`}>
+            <p className={`${compact ? "text-2xl" : featured ? "text-4xl" : "text-3xl"} font-semibold tracking-tight ${classes.title}`}>
               {value}
             </p>
             {description ? (
-              <p className={`max-w-sm text-sm leading-6 ${resolvedTone === "highlight" ? "text-white/70" : "text-[#6B7280]"}`}>
+              <p className={`max-w-sm ${compact ? "text-xs leading-5" : "text-sm leading-6"} ${resolvedTone === "highlight" ? "text-white/70" : "text-[#6B7280]"}`}>
                 {description}
               </p>
             ) : null}

@@ -1418,6 +1418,23 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Polish visual de Recordatorios
+
+Se compactó la pantalla de Recordatorios para alinearla con el lenguaje visual de la plataforma. Los KPIs ahora tienen menor altura y una intensidad más equilibrada, mientras que la alerta de alta prioridad usa un tono ámbar en lugar de ocupar toda la atención con un bloque bordó.
+
+El alta de recordatorios pasó a integrarse en la misma toolbar que la búsqueda y los filtros. El formulario se simplificó dentro del modal, eliminando el borde y el título duplicados que generaban una tarjeta dentro de otra. Se mantuvieron la paginación, los filtros y las acciones operativas existentes.
+
+### Paths modificados
+
+- `app/(dashboard)/recordatorios/page.tsx`
+- `components/recordatorios/recordatorios-table.tsx`
+- `components/recordatorios/recordatorio-form.tsx`
+- `components/dashboard/kpi-card.tsx`
+
+### Validación
+
+- `npm run build` ejecutado correctamente.
+
 ## Tarjeta de vehículo de interés en CRM
 
 ### Qué se mejoró

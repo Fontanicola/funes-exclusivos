@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Search, X, Check, CalendarClock, Ban } from "lucide-react";
 import {
   cancelRecordatorioAction,
@@ -241,9 +241,11 @@ async function postponeAction(formData: FormData) {
 export function RecordatoriosTable({
   recordatorios,
   employees,
+  toolbarAction,
 }: {
   recordatorios: Recordatorio[];
   employees: Employee[];
+  toolbarAction?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof statusOptions)[number]>("");
@@ -280,9 +282,9 @@ export function RecordatoriosTable({
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
       <div className="border-b border-[#E5E7EB] p-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap gap-2">
-          <div className="relative min-w-[260px] flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          {toolbarAction ? <div className="shrink-0">{toolbarAction}</div> : null}
+          <div className="relative min-w-[220px] flex-1 md:max-w-[360px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input
               value={query}
@@ -378,11 +380,10 @@ export function RecordatoriosTable({
               </select>
             </div>
           </AdvancedFilters>
-          <p className="text-xs text-[#6B7280]">
+          <p className="ml-auto text-xs text-[#6B7280]">
             Mostrando {visibleRecordatorios.length} de {filtered.length}
           </p>
         </div>
-      </div>
       </div>
 
       <div className="overflow-x-auto">

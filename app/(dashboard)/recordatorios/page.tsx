@@ -277,30 +277,30 @@ export default async function RecordatoriosPage({ searchParams }: { searchParams
         </div>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <KpiCard title="Pendientes" value={String(kpis.pendientes)} description="Seguimientos activos" variant="default" />
-        <KpiCard title="Vencidos" value={String(kpis.vencidos)} description="Requieren atención" variant="danger" />
-        <KpiCard title="Hoy" value={String(kpis.hoy)} description="Para revisar hoy" variant="warning" />
-        <KpiCard title="Alta prioridad" value={String(kpis.altaPrioridad)} description="Críticos o urgentes" variant="highlight" />
-        <KpiCard title="Completados del mes" value={String(kpis.completadosMes)} description="Cerrados este mes" variant="positive" />
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+        <KpiCard compact title="Pendientes" value={String(kpis.pendientes)} description="Seguimientos activos" variant="default" />
+        <KpiCard compact title="Vencidos" value={String(kpis.vencidos)} description="Requieren atención" variant="danger" />
+        <KpiCard compact title="Hoy" value={String(kpis.hoy)} description="Para revisar hoy" variant="warning" />
+        <KpiCard compact title="Alta prioridad" value={String(kpis.altaPrioridad)} description="Críticos o urgentes" variant="warning" />
+        <KpiCard compact title="Completados del mes" value={String(kpis.completadosMes)} description="Cerrados este mes" variant="positive" />
       </div>
 
-      <div className="space-y-6">
-        <DataEntryModal
-          triggerLabel="Crear recordatorio"
-          title="Nuevo recordatorio"
-          description="Cargá un seguimiento, vencimiento o alerta operativa."
-        >
-          <RecordatorioForm
-            employees={assignableEmployees.length ? assignableEmployees : employees}
-            defaultAsignadoId={currentEmployeeId}
-          />
-        </DataEntryModal>
-        <RecordatoriosTable
-          recordatorios={filteredRecordatorios}
-          employees={assignableEmployees.length ? assignableEmployees : employees}
-        />
-      </div>
+      <RecordatoriosTable
+        recordatorios={filteredRecordatorios}
+        employees={assignableEmployees.length ? assignableEmployees : employees}
+        toolbarAction={
+          <DataEntryModal
+            triggerLabel="Crear recordatorio"
+            title="Nuevo recordatorio"
+            description="Cargá un seguimiento, vencimiento o alerta operativa."
+          >
+            <RecordatorioForm
+              employees={assignableEmployees.length ? assignableEmployees : employees}
+              defaultAsignadoId={currentEmployeeId}
+            />
+          </DataEntryModal>
+        }
+      />
     </section>
   );
 }

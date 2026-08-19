@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
-import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 import { createRecordatorioAction } from "@/app/(dashboard)/recordatorios/actions";
@@ -65,16 +64,9 @@ export function RecordatorioForm({
     <form
       ref={formRef}
       action={formAction}
-      className="rounded-md border border-[#E5E7EB] bg-white"
+      className="bg-white"
     >
-      <div className="border-b border-[#E5E7EB] p-5">
-        <h2 className="text-base font-semibold text-[#111827]">Nuevo recordatorio</h2>
-        <p className="mt-1 text-sm text-[#6B7280]">
-          Seguimientos, vencimientos y alertas operativas en una sola carga.
-        </p>
-      </div>
-
-      <div className="space-y-4 p-5">
+      <div className="space-y-4">
         {state.error ? (
           <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
             {state.error}
@@ -168,14 +160,7 @@ export function RecordatorioForm({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-          <Link
-            href="/dashboard"
-            className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-          >
-            Volver
-          </Link>
-
+        <div className="flex justify-end pt-2">
           <SubmitButton />
         </div>
       </div>
