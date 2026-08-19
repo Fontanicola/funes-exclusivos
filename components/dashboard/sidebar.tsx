@@ -8,6 +8,7 @@ import {
   BadgeDollarSign,
   Banknote,
   Bell,
+  ClipboardCheck,
   FileText,
   Grid2X2,
   LayoutDashboard,
@@ -48,6 +49,7 @@ const navigation: NavigationGroup[] = [
     icon: LayoutDashboard,
     items: [
       { label: "Inventario", href: "/inventario", icon: Package },
+      { label: "Peritajes", href: "/peritajes", icon: ClipboardCheck },
       { label: "Compras", href: "/compras", icon: BadgeDollarSign },
       { label: "Ventas", href: "/ventas", icon: ShoppingCart },
       { label: "Caja", href: "/caja", icon: Banknote },

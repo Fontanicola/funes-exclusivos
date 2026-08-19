@@ -94,6 +94,14 @@ export function canAccessRoute(role: UserRole, pathname: string) {
 
   const allowed = [
     {
+      prefix: "/peritajes/plantillas",
+      roles: ["admin"],
+    },
+    {
+      prefix: "/peritajes",
+      roles: ["admin", "gestor"],
+    },
+    {
       prefix: "/dashboard/catalogo",
       roles: ["admin"],
     },

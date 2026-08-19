@@ -3801,3 +3801,19 @@ Se creó el componente reutilizable `components/common/summary-chart.tsx`, que u
 Paths modificados: `app/(dashboard)/inventario/page.tsx`, `app/(dashboard)/compras/page.tsx`, `app/(dashboard)/ventas/page.tsx`, `app/(dashboard)/ventas/renta/page.tsx`, `app/(dashboard)/crm/page.tsx`, `app/(dashboard)/gestoria/page.tsx`, `app/(dashboard)/gestoria/presupuestos/page.tsx`, `app/(dashboard)/comisiones/page.tsx`, `app/(dashboard)/empleados/page.tsx`, `app/(dashboard)/dashboard/catalogo/page.tsx`, `app/(dashboard)/recordatorios/page.tsx` y `components/common/summary-chart.tsx`.
 
 Tablas involucradas indirectamente: `vehiculos`, `compras_vehiculos`, `ventas`, `leads`, `gestoria_tramites`, `gestoria_presupuestos`, `comisiones`, `empleados`, `catalogo_config`, `recordatorios` y `caja_movimientos`. Validación: `npm run build`.
+
+### Estructura e interfaz inicial de peritajes
+
+Se preparó una estructura completa para peritajes de vehículos, con plantillas administrables, secciones e ítems configurables, estados por componente, paneles visuales del vehículo, observaciones, reparaciones con costos y valores de referencia. La interfaz incluye un mapa 2D interactivo del vehículo con estados `Pendiente`, `Revisar`, `Reparar`, `Listo` y `No aplica`, además del acceso desde Inventario, listado general de peritajes y administración de plantillas.
+
+Path SQL creado: `PERITAJES.sql`. Debe ejecutarse manualmente en el proyecto Supabase de producción; no fue ejecutado desde el repositorio. La migración es idempotente, no crea enums nuevos, agrega índices y políticas RLS para empleados activos, y carga una plantilla base inspirada en el formulario de peritaje recibido.
+
+Paths creados: `app/(dashboard)/peritajes/page.tsx`, `app/(dashboard)/peritajes/actions.ts`, `app/(dashboard)/peritajes/plantillas/page.tsx`, `app/(dashboard)/inventario/[id]/peritaje/page.tsx`, `components/peritajes/peritaje-create-form.tsx`, `components/peritajes/peritaje-panel-diagram.tsx`, `components/peritajes/peritaje-status-badge.tsx`, `components/peritajes/peritaje-template-manager.tsx`, `components/peritajes/peritaje-workspace.tsx`, `lib/peritajes/types.ts` y `lib/peritajes/demo.ts`.
+
+Paths modificados: `components/dashboard/sidebar.tsx`, `components/dashboard/section-subheader.tsx`, `components/inventario/vehiculo-detail.tsx` y `lib/auth/permissions.ts` para navegación, acceso y permisos. Admin y gestor pueden cargar/editar peritajes; solo admin administra plantillas. La interfaz mantiene modo demo sin persistencia real y no agrega dependencias.
+
+Tablas Supabase involucradas: `peritaje_plantillas`, `peritaje_plantilla_secciones`, `peritaje_plantilla_items`, `peritajes`, `peritaje_items`, `peritaje_paneles`, `peritaje_reparaciones` y `vehiculos`.
+
+Decisión técnica: se implementó primero una representación 2D interactiva, sin librerías externas ni SQL ejecutado automáticamente. La estructura deja separado el catálogo de paneles y el checklist para poder sumar una vista 3D en una etapa posterior sin migrar nuevamente los datos. La plantilla solicita códigos únicos por ítem para evitar conflictos al agregar varios ítems dentro de una misma sección.
+
+Pendiente operativo: ejecutar `PERITAJES.sql` manualmente en Supabase, verificar las políticas RLS y probar una creación/edición real con un usuario admin y uno gestor. Validación local: `npm run build` finalizado correctamente.

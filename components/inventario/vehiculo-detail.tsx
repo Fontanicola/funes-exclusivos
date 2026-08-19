@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { CalendarDays, Camera, Gauge, MapPin, ShieldCheck, Tag, Wrench } from "lucide-react";
+import { CalendarDays, Camera, ClipboardCheck, Gauge, MapPin, ShieldCheck, Tag, Wrench } from "lucide-react";
 import { canViewCosts } from "@/lib/auth/permissions";
 import { VehiculoStatusBadge } from "./vehiculo-status-badge";
 
@@ -247,6 +247,13 @@ export function VehiculoDetail({
           </div>
 
           <div className="flex flex-wrap gap-3">
+            <Link
+              href={`/inventario/${vehiculo.id}/peritaje`}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+            >
+              <ClipboardCheck className="h-4 w-4 text-[#8A1538]" />
+              Peritaje
+            </Link>
             {canEdit ? (
               <Link
                 href={`/inventario/${vehiculo.id}/editar`}
