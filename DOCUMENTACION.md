@@ -1963,6 +1963,25 @@ Además, el mismo desplegable permite filtrar por vehículo de interés. Las opc
 
 - `npm run build` ejecutado correctamente sin errores TypeScript ni de generación de rutas.
 
+## WhatsApp: posición inicial del hilo
+
+### Qué se corrigió
+
+- Al seleccionar una conversación en el inbox de WhatsApp, el hilo ahora se posiciona automáticamente en el último mensaje disponible.
+- El scroll interno continúa habilitado para revisar mensajes anteriores, sin modificar la paginación del detalle independiente.
+
+### Paths modificados
+
+- `components/whatsapp/messages-list.tsx`
+
+### Decisión técnica
+
+- Se utilizó un `ref` sobre el contenedor del hilo y `requestAnimationFrame` después de cambiar la conversación, evitando cálculos de layout durante el render.
+
+### Validación
+
+- `npm run build` ejecutado luego del ajuste.
+
 ## Badges sin saltos de línea
 
 ### Qué se corrigió

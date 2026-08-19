@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PaginationControls } from "@/components/common/pagination-controls";
 
 type Message = {
@@ -69,11 +69,25 @@ export function MessagesList({
   outgoingLabel?: string;
 }) {
   const [page, setPage] = useState(1);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const totalPages = Math.max(1, Math.ceil(messages.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const visibleMessages = paginate
     ? messages.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
     : messages;
+
+  useEffect(() => {
+    if (paginate) return;
+
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [messages, paginate]);
 
   return (
     <section
@@ -94,6 +108,7 @@ export function MessagesList({
       ) : null}
 
       <div
+        ref={messagesContainerRef}
         className={[
           "space-y-3 overflow-y-auto p-4",
           fillHeight ? "min-h-0 flex-1 bg-transparent" : "max-h-[74vh] bg-[#FAFAFA]",
