@@ -1733,6 +1733,8 @@ También se normalizó el estado de preparación al valor válido del esquema (`
 
 El filtro de vendedores del inbox se movió junto al buscador como un botón `Filtros` con ícono. El selector queda oculto hasta desplegarlo, optimizando el espacio disponible sin cambiar el comportamiento de búsqueda ni asignación.
 
+Además, el mismo desplegable permite filtrar por vehículo de interés. Las opciones se construyen únicamente a partir de los vehículos asociados a las conversaciones, por lo que seleccionar un modelo como `Toyota Yaris` muestra todos los chats interesados en esa unidad; el filtro puede combinarse con vendedor.
+
 ### Paths modificados
 
 - `components/whatsapp/whatsapp-inbox.tsx`

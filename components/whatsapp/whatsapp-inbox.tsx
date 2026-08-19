@@ -113,6 +113,7 @@ export function WhatsappInbox({
 }) {
   const [query, setQuery] = useState("");
   const [sellerId, setSellerId] = useState("");
+  const [interestVehicleId, setInterestVehicleId] = useState("");
   const [selectedId, setSelectedId] = useState(conversaciones[0]?.id ?? null);
   const [visibleContacts, setVisibleContacts] = useState(CONTACTS_PAGE_SIZE);
 
@@ -126,11 +127,25 @@ export function WhatsappInbox({
     [conversaciones]
   );
 
+  const interestVehicles = useMemo(
+    () =>
+      conversaciones
+        .map((conversation) => ({
+          id: conversation.vehiculo_interes_id,
+          name: vehicleName(conversation),
+        }))
+        .filter((vehicle): vehicle is { id: string; name: string } => Boolean(vehicle.id && vehicle.name))
+        .filter((vehicle, index, all) => all.findIndex((item) => item.id === vehicle.id) === index)
+        .sort((a, b) => a.name.localeCompare(b.name, "es")),
+    [conversaciones]
+  );
+
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return conversaciones.filter((conversation) => {
       if (sellerId && conversation.vendedor_id !== sellerId) return false;
+      if (interestVehicleId && conversation.vehiculo_interes_id !== interestVehicleId) return false;
       if (!normalizedQuery) return true;
 
       return [
@@ -146,7 +161,7 @@ export function WhatsappInbox({
         .toLowerCase()
         .includes(normalizedQuery);
     });
-  }, [conversaciones, query, sellerId]);
+  }, [conversaciones, query, sellerId, interestVehicleId]);
 
   const visibleConversations = useMemo(
     () => filtered.slice(0, visibleContacts),
@@ -155,7 +170,7 @@ export function WhatsappInbox({
 
   useEffect(() => {
     setVisibleContacts(CONTACTS_PAGE_SIZE);
-  }, [query, sellerId]);
+  }, [query, sellerId, interestVehicleId]);
 
   useEffect(() => {
     if (!visibleConversations.some((conversation) => conversation.id === selectedId)) {
@@ -206,6 +221,18 @@ export function WhatsappInbox({
                   {sellers.map((seller) => (
                     <option key={seller.id} value={seller.id}>
                       {seller.nombre ?? "Sin vendedor"}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={interestVehicleId}
+                  onChange={(event) => setInterestVehicleId(event.target.value)}
+                  className="h-9 min-w-[190px] rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+                >
+                  <option value="">Todos los vehículos</option>
+                  {interestVehicles.map((vehicle) => (
+                    <option key={vehicle.id} value={vehicle.id}>
+                      {vehicle.name}
                     </option>
                   ))}
                 </select>
