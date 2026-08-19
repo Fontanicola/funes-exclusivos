@@ -3690,6 +3690,12 @@ Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`.
 
 No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
 
+### Corrección de escala del gráfico de comisiones
+
+Se fijó la altura renderizada del SVG para evitar que el gráfico creciera con el ancho de la pantalla. También se redujeron las etiquetas de ejes y meses para mantener una escala más liviana y legible.
+
+Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`.
+
 ### Pipeline CRM con columnas amplias
 
 Se ajustó la vista de columnas del pipeline para usar un ancho mínimo cómodo por etapa y scroll horizontal en el carril completo. Cada columna conserva su scroll vertical interno y la paginación `Ver más`, evitando comprimir las tarjetas cuando se muestran todas las etapas.

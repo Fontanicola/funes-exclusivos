@@ -20,7 +20,7 @@ export type VendorSeries = {
 type Metric = "sold" | "units" | "commission";
 
 const CHART_WIDTH = 820;
-const CHART_HEIGHT = 220;
+const CHART_HEIGHT = 200;
 const PLOT_LEFT = 34;
 const PLOT_RIGHT = 14;
 const PLOT_TOP = 14;
@@ -119,13 +119,13 @@ export function ComisionesVendedoresChart({
 
       <div className="relative mt-3 overflow-x-auto">
         <div className="relative min-w-[620px]">
-          <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className="h-auto w-full" role="img" aria-label="Comparativa mensual por vendedor">
+          <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className="h-[200px] w-full" role="img" aria-label="Comparativa mensual por vendedor">
             {yTicks.map((tick, index) => {
               const y = yFor(tick);
               return (
                 <g key={index}>
                   <line x1={PLOT_LEFT} x2={CHART_WIDTH - PLOT_RIGHT} y1={y} y2={y} stroke="#E5E7EB" strokeWidth="0.75" strokeDasharray="2 3" />
-                  <text x={PLOT_LEFT - 7} y={y + 3} textAnchor="end" fontSize="9" fill="#94A3B8">
+                  <text x={PLOT_LEFT - 7} y={y + 3} textAnchor="end" fontSize="8" fill="#94A3B8">
                     {metric === "units" ? Math.round(tick) : new Intl.NumberFormat("es-AR", { notation: "compact", maximumFractionDigits: 1 }).format(tick)}
                   </text>
                 </g>
@@ -145,7 +145,7 @@ export function ComisionesVendedoresChart({
             {months.map((month, index) => (
               <g key={month.key} onMouseEnter={() => setHoveredIndex(index)} onMouseLeave={() => setHoveredIndex(null)}>
                 <rect x={xFor(index) - 22} y={PLOT_TOP} width="44" height={plotHeight} fill="transparent" className="cursor-crosshair" />
-                <text x={xFor(index)} y={CHART_HEIGHT - 7} textAnchor="middle" fontSize="9" fill="#64748B">{month.label}</text>
+                <text x={xFor(index)} y={CHART_HEIGHT - 6} textAnchor="middle" fontSize="8" fill="#64748B">{month.label}</text>
               </g>
             ))}
             {hoveredIndex != null ? <line x1={xFor(hoveredIndex)} x2={xFor(hoveredIndex)} y1={PLOT_TOP} y2={PLOT_TOP + plotHeight} stroke="#CBD5E1" strokeWidth="0.75" strokeDasharray="2 3" /> : null}
