@@ -6,6 +6,7 @@ import { canAccessRoute } from "@/lib/auth/permissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { BreadcrumbHeader } from "@/components/dashboard/breadcrumb-header";
+import { SectionSubheader } from "@/components/dashboard/section-subheader";
 import { mockEmpleado } from "@/lib/mock-data";
 
 type Employee = {
@@ -48,6 +49,7 @@ export default async function DashboardLayout({
           <Sidebar employee={mockEmpleado} />
           <main className="min-w-0 flex-1">
             <BreadcrumbHeader pathname={pathname} />
+            <SectionSubheader employee={mockEmpleado} />
             <div className="px-5 py-4">{children}</div>
           </main>
         </div>
@@ -94,6 +96,7 @@ export default async function DashboardLayout({
         <Sidebar employee={employee} />
         <main className="min-w-0 flex-1">
           <BreadcrumbHeader pathname={pathname} />
+          <SectionSubheader employee={employee} />
           <div className="px-5 py-4">{children}</div>
         </main>
       </div>

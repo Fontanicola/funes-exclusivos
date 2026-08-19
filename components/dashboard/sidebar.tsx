@@ -8,7 +8,6 @@ import {
   BadgeDollarSign,
   Banknote,
   Bell,
-  ChevronDown,
   FileText,
   Grid2X2,
   LayoutDashboard,
@@ -82,11 +81,6 @@ const COLLAPSED_WIDTH = "72px";
 export function Sidebar({ employee }: { employee: Employee }) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    Operación: true,
-    Comercial: true,
-    Administración: true,
-  });
   const collapsed = !expanded;
 
   const visibleNavigation = useMemo(
@@ -100,16 +94,6 @@ export function Sidebar({ employee }: { employee: Employee }) {
     [employee.rol]
   );
   const showPrimaryNavigation = canAccessRoute(employee.rol, primaryNavigation.href);
-
-  const activeGroupLabels = useMemo(() => {
-    return new Set(
-      visibleNavigation
-        .filter((group) =>
-          group.items.some((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
-        )
-        .map((group) => group.label)
-    );
-  }, [pathname, visibleNavigation]);
 
   return (
     <aside
@@ -199,84 +183,27 @@ export function Sidebar({ employee }: { employee: Employee }) {
 
         {visibleNavigation.map((group) => {
           const GroupIcon = group.icon;
-          const groupOpen = openGroups[group.label] ?? true;
-          const groupActive = activeGroupLabels.has(group.label);
-          const showItems = collapsed || groupOpen || groupActive;
+          const groupHref = group.items[0]?.href ?? "/dashboard";
+          const groupActive = group.items.some((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
 
           return (
-          <section key={group.label} className={collapsed ? "space-y-1" : "space-y-1.5"}>
-            {!collapsed ? (
-              <button
-                type="button"
-                onClick={() =>
-                  setOpenGroups((current) => ({
-                    ...current,
-                    [group.label]: !(current[group.label] ?? true),
-                  }))
-                }
-                className={[
-                  "flex h-8 w-full items-center justify-between rounded-md border border-transparent px-2 text-left text-[10px] font-semibold uppercase tracking-[0.16em] transition",
-                  groupActive
-                    ? "bg-[#FDF2F5] text-[#7A1230]"
-                    : "text-[#9CA3AF] hover:bg-[#FAFAFA] hover:text-[#64748B]",
-                ].join(" ")}
-                aria-expanded={showItems}
-              >
-                <span className="flex min-w-0 items-center gap-2">
-                  <GroupIcon
-                    className={[
-                      "h-3.5 w-3.5 shrink-0",
-                      groupActive ? "text-[#8A1538]" : "text-[#94A3B8]",
-                    ].join(" ")}
-                  />
-                  <span className="truncate">{group.label}</span>
-                </span>
-                <ChevronDown
-                  className={[
-                    "h-3.5 w-3.5 shrink-0 transition-transform",
-                    showItems ? "rotate-180" : "",
-                  ].join(" ")}
-                />
-              </button>
-            ) : null}
-
-            {showItems ? <div className={["space-y-1", collapsed ? "" : "pl-1"].join(" ")}>
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    title={collapsed ? item.label : undefined}
-                    className={[
-                      "group relative flex items-center rounded-md border py-2 text-sm font-medium transition",
-                      collapsed ? "justify-center px-2" : "gap-3 px-3",
-                      active
-                        ? "border-[#D8A1B2] bg-[#FDF2F5] text-[#7A1230]"
-                        : "border-transparent text-[#64748B] hover:border-[#E5E7EB] hover:bg-[#FAFAFA] hover:text-[#111827]",
-                    ].join(" ")}
-                  >
-                    <span
-                      className={[
-                        "absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-[#8A1538] transition-opacity",
-                        active ? "opacity-100" : "opacity-0 group-hover:opacity-30",
-                      ].join(" ")}
-                    />
-                    <Icon
-                      className={[
-                        "h-4 w-4 shrink-0 transition",
-                        active ? "text-[#8A1538]" : "text-[#94A3B8] group-hover:text-[#64748B]",
-                      ].join(" ")}
-                    />
-                    {!collapsed ? <span className="truncate">{item.label}</span> : null}
-                  </Link>
-                );
-              })}
-            </div> : null}
-          </section>
+          <Link
+            key={group.label}
+            href={groupHref}
+            aria-current={groupActive ? "page" : undefined}
+            title={collapsed ? group.label : undefined}
+            className={[
+              "group relative flex items-center rounded-md border py-2 text-sm font-medium transition",
+              collapsed ? "justify-center px-2" : "gap-3 px-3",
+              groupActive
+                ? "border-[#D8A1B2] bg-[#FDF2F5] text-[#7A1230]"
+                : "border-transparent text-[#64748B] hover:border-[#E5E7EB] hover:bg-[#FAFAFA] hover:text-[#111827]",
+            ].join(" ")}
+          >
+            <span className={["absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-[#8A1538] transition-opacity", groupActive ? "opacity-100" : "opacity-0 group-hover:opacity-30"].join(" ")} />
+            <GroupIcon className={["h-4 w-4 shrink-0 transition", groupActive ? "text-[#8A1538]" : "text-[#94A3B8] group-hover:text-[#64748B]"].join(" ")} />
+            {!collapsed ? <span className="truncate">{group.label}</span> : null}
+          </Link>
         );
         })}
       </nav>

@@ -3723,3 +3723,13 @@ Se mejoró la lectura de los hitos operativos dentro de las tarjetas de gestorí
 Path modificado: `components/gestoria/gestoria-kanban.tsx`.
 
 No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
+
+### Navegación contextual por áreas
+
+Se reorganizó la navegación interna para que el sidebar concentre únicamente Dashboard y las áreas principales: Operación, Comercial y Administración. Las subsecciones de cada área ahora aparecen en una subbarra contextual debajo del header de plataforma, con íconos, estado activo, permisos por rol y scroll horizontal responsive. Se conservaron las rutas existentes y el control de acceso actual.
+
+Path creado: `components/dashboard/section-subheader.tsx`.
+
+Paths modificados: `components/dashboard/sidebar.tsx`, `app/(dashboard)/layout.tsx`.
+
+No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
