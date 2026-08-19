@@ -3644,3 +3644,8 @@ No hace falta ejecutar SQL. Si el proyecto tiene políticas de Storage que impid
 
 ### Decisiones técnicas
 - Se conservaron los datos de empleado necesarios para permisos y logout, pero no se presentan como información secundaria en la interfaz.
+### Corrección de vehículo de interés en CRM
+
+Se corrigió la celda de vehículo de interés en la vista de tabla del CRM. El disparador del detalle ya no queda vacío: ahora muestra una tarjeta compacta con miniatura, nombre y datos resumidos; cuando la unidad no tiene foto, se muestra un ícono de cámara como indicador visual. El modal con la ficha comercial del vehículo se mantiene disponible al hacer clic.
+
+Paths modificados: `components/common/data-entry-modal.tsx`, `components/crm/leads-table.tsx`.

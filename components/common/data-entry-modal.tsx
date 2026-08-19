@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 
 export function DataEntryModal({
   triggerLabel,
+  triggerContent,
   title,
   description,
   children,
@@ -12,6 +13,7 @@ export function DataEntryModal({
   size = "wide",
 }: {
   triggerLabel: string;
+  triggerContent?: ReactNode;
   title: string;
   description?: string;
   children: ReactNode;
@@ -42,7 +44,7 @@ export function DataEntryModal({
         onClick={() => setOpen(true)}
         className={triggerClassName ?? "inline-flex h-10 items-center justify-center rounded-md bg-[#8A1538] px-4 text-sm font-medium text-white transition hover:bg-[#6F102D]"}
       >
-        {triggerLabel}
+        {triggerContent ?? triggerLabel}
       </button>
 
       {open ? (

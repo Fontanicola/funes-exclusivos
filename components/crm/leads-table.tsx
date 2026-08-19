@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import { Camera, Search, X } from "lucide-react";
 import { LeadOriginBadge } from "./lead-origin-badge";
 import { LeadStatusBadge } from "./lead-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
@@ -114,7 +114,22 @@ function VehicleInterestCard({ lead }: { lead: Lead }) {
 
   return (
     <DataEntryModal
-      triggerLabel=""
+      triggerLabel={title}
+      triggerContent={
+        <>
+          <span className="flex h-11 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-[#E5E7EB] bg-[#F9FAFB]">
+            {photo ? (
+              <img src={photo} alt={`Foto de ${title}`} loading="lazy" className="h-full w-full object-cover" />
+            ) : (
+              <Camera className="h-4 w-4 text-[#9CA3AF]" aria-label="Sin foto" />
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-medium text-[#111827]">{title}</span>
+            <span className="mt-0.5 block truncate text-xs text-[#6B7280]">{subtitle || "Ficha incompleta"}</span>
+          </span>
+        </>
+      }
       title="Vehículo de interés"
       description="Información comercial de la unidad asociada al lead."
       size="default"
