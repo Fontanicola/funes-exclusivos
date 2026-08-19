@@ -7,11 +7,12 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 import Link from "next/link";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 import { updateVehiculoCatalogoAction } from "@/app/(dashboard)/catalogo/actions";
 import { CatalogoStatusBadge } from "./catalogo-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Vehiculo = {
   id: string;
@@ -31,6 +32,7 @@ type Vehiculo = {
   catalogo_titulo: string | null;
   catalogo_descripcion: string | null;
   catalogo_orden: number | null;
+  estado_preparacion?: string | null;
   created_at: string | null;
 };
 
@@ -45,6 +47,12 @@ const publicationFilters = [
   { value: "", label: "Todos" },
   { value: "publicado", label: "Publicados" },
   { value: "no_publicado", label: "No publicados" },
+] as const;
+const preparationFilters = [
+  { value: "", label: "Toda preparación" },
+  { value: "sin_preparar", label: "Sin preparar" },
+  { value: "en_preparacion", label: "En preparación" },
+  { value: "listo", label: "Listo" },
 ] as const;
 const PAGE_SIZE = 10;
 
@@ -250,7 +258,10 @@ function CatalogoRow({
         </div>
       </td>
       <td className="px-4 py-4 align-top">
-        <p className="text-sm font-medium text-[#111827]">{vehicle.estado ?? "—"}</p>
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-[#111827]">{vehicle.estado ?? "—"}</p>
+          <p className="text-xs text-[#6B7280]">{vehicle.estado_preparacion ?? "Sin preparar"}</p>
+        </div>
       </td>
       <td className="px-4 py-4 align-top">
         <div className="space-y-3">
@@ -346,7 +357,13 @@ function CatalogoRow({
 export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] }) {
   const [query, setQuery] = useState("");
   const [publicationFilter, setPublicationFilter] = useState<(typeof publicationFilters)[number]["value"]>("");
-  const [onlyStock, setOnlyStock] = useState(false);
+  const [preparationFilter, setPreparationFilter] = useState<(typeof preparationFilters)[number]["value"]>("");
+  const [minYear, setMinYear] = useState("");
+  const [maxYear, setMaxYear] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [onlyFeatured, setOnlyFeatured] = useState(false);
+  const [onlyStock, setOnlyStock] = useState(true);
   const [page, setPage] = useState(1);
 
   const filteredVehiculos = useMemo(() => {
@@ -356,12 +373,29 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
       if (onlyStock && vehicle.estado !== "en_stock") return false;
       if (publicationFilter === "publicado" && !vehicle.catalogo_publicado) return false;
       if (publicationFilter === "no_publicado" && vehicle.catalogo_publicado) return false;
+      if (preparationFilter && vehicle.estado_preparacion !== preparationFilter) return false;
+      if (onlyFeatured && !vehicle.catalogo_destacado) return false;
+
+      const year = vehicle.anio ?? 0;
+      const minYearValue = minYear ? Number(minYear) : null;
+      const maxYearValue = maxYear ? Number(maxYear) : null;
+      const price = vehicle.precio_venta ?? 0;
+      const minPriceValue = minPrice ? Number(minPrice) : null;
+      const maxPriceValue = maxPrice ? Number(maxPrice) : null;
+      if (minYearValue != null && Number.isFinite(minYearValue) && year < minYearValue) return false;
+      if (maxYearValue != null && Number.isFinite(maxYearValue) && year > maxYearValue) return false;
+      if (minPriceValue != null && Number.isFinite(minPriceValue) && price < minPriceValue) return false;
+      if (maxPriceValue != null && Number.isFinite(maxPriceValue) && price > maxPriceValue) return false;
 
       if (!normalizedQuery) return true;
 
       return getSearchableText(vehicle).includes(normalizedQuery);
     });
-  }, [onlyStock, publicationFilter, query, vehiculos]);
+  }, [maxPrice, maxYear, minPrice, minYear, onlyFeatured, onlyStock, preparationFilter, publicationFilter, query, vehiculos]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [maxPrice, maxYear, minPrice, minYear, onlyFeatured, onlyStock, preparationFilter, publicationFilter, query]);
 
   const totalPages = Math.max(1, Math.ceil(filteredVehiculos.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -392,33 +426,48 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
             ) : null}
           </div>
 
-          <select
-            value={publicationFilter}
-            onChange={(event) =>
-              setPublicationFilter(event.target.value as (typeof publicationFilters)[number]["value"])
-            }
-            className="h-10 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
-          >
-            {publicationFilters.map((option) => (
-              <option key={option.value || "all"} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-
-          <button
-            type="button"
-            onClick={() => setOnlyStock((current) => !current)}
-            className={[
-              "inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium transition",
-              onlyStock
-                ? "border-[#E5E7EB] bg-[#8A1538] text-white hover:bg-[#6F102D]"
-                : "border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB]",
-            ].join(" ")}
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            Solo stock
-          </button>
+          <AdvancedFilters label="Filtros del catálogo">
+            <label className="flex items-center gap-2 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-3 py-2 text-xs text-[#111827]">
+              <input
+                type="checkbox"
+                checked={onlyStock}
+                onChange={(event) => setOnlyStock(event.target.checked)}
+                className="h-4 w-4 rounded border-[#D1D5DB] text-[#8A1538] focus:ring-[#E9B8C6]"
+              />
+              Solo unidades en stock
+            </label>
+            <select
+              value={publicationFilter}
+              onChange={(event) => setPublicationFilter(event.target.value as (typeof publicationFilters)[number]["value"])}
+              className="h-9 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+            >
+              {publicationFilters.map((option) => <option key={option.value || "all"} value={option.value}>{option.label}</option>)}
+            </select>
+            <select
+              value={preparationFilter}
+              onChange={(event) => setPreparationFilter(event.target.value as (typeof preparationFilters)[number]["value"])}
+              className="h-9 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+            >
+              {preparationFilters.map((option) => <option key={option.value || "all-preparation"} value={option.value}>{option.label}</option>)}
+            </select>
+            <div className="grid grid-cols-2 gap-2">
+              <Input value={minYear} onChange={(event) => setMinYear(event.target.value)} type="number" placeholder="Año desde" aria-label="Año desde" />
+              <Input value={maxYear} onChange={(event) => setMaxYear(event.target.value)} type="number" placeholder="Año hasta" aria-label="Año hasta" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Input value={minPrice} onChange={(event) => setMinPrice(event.target.value)} type="number" placeholder="Precio desde" aria-label="Precio desde" />
+              <Input value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} type="number" placeholder="Precio hasta" aria-label="Precio hasta" />
+            </div>
+            <label className="flex items-center gap-2 px-1 py-1 text-xs text-[#111827]">
+              <input
+                type="checkbox"
+                checked={onlyFeatured}
+                onChange={(event) => setOnlyFeatured(event.target.checked)}
+                className="h-4 w-4 rounded border-[#D1D5DB] text-[#8A1538] focus:ring-[#E9B8C6]"
+              />
+              Solo destacados
+            </label>
+          </AdvancedFilters>
         </div>
         <p className="text-xs text-[#6B7280]">
           Mostrando {filteredVehiculos.length} de {vehiculos.length}

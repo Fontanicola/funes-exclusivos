@@ -1,5 +1,17 @@
 import Link from "next/link";
 
+function getPhotoUrl(fotos: string[] | string | null | undefined) {
+  if (Array.isArray(fotos)) return fotos[0] ?? null;
+  if (typeof fotos !== "string" || !fotos) return null;
+
+  try {
+    const parsed = JSON.parse(fotos);
+    return Array.isArray(parsed) ? parsed[0] ?? null : fotos;
+  } catch {
+    return fotos;
+  }
+}
+
 function normalizeWhatsapp(value: string | null | undefined) {
   return (value ?? "").replace(/[+\s()-]/g, "");
 }
@@ -10,14 +22,23 @@ export function CatalogoHeader({
   vehicleCount,
   whatsappContacto,
   instagramUrl,
+  heroVehicle,
+  heroImageUrl,
 }: {
   title: string | null;
   description: string | null;
   vehicleCount: number;
   whatsappContacto: string | null;
   instagramUrl: string | null;
+  heroVehicle?: {
+    marca: string | null;
+    modelo: string | null;
+    fotos: string[] | string | null;
+  } | null;
+  heroImageUrl?: string | null;
 }) {
   const phone = normalizeWhatsapp(whatsappContacto);
+  const heroPhoto = heroImageUrl ?? getPhotoUrl(heroVehicle?.fotos);
   const whatsappHref = phone
     ? `https://wa.me/${phone}?text=${encodeURIComponent(
         "Hola, vi el catálogo de Funes Exclusivos y quiero consultar por un vehículo."
@@ -26,8 +47,15 @@ export function CatalogoHeader({
 
   return (
     <header className="overflow-hidden rounded-md border border-[#E5E7EB] bg-white">
-      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(17,24,39,0.04),_transparent_34%),linear-gradient(180deg,#FFFFFF_0%,#F9FAFB_100%)] px-6 py-8 sm:px-8 lg:px-10">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+      <div className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(138,21,56,0.08),_transparent_34%),linear-gradient(180deg,#FFFFFF_0%,#F9FAFB_100%)] px-6 py-8 sm:px-8 lg:px-10">
+        {heroPhoto ? (
+          <div className="absolute inset-x-0 top-0 h-40 overflow-hidden opacity-20">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={heroPhoto} alt="" aria-hidden="true" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/70 to-white" />
+          </div>
+        ) : null}
+        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-5">
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex h-14 w-14 items-center justify-center rounded-md border border-[#E5E7EB] bg-white">

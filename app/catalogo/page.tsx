@@ -3,6 +3,7 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockCatalogoConfig, mockVehiculos } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
+import { getCatalogoHeroUrl } from "@/lib/catalogo/hero";
 import { CatalogoHeader } from "@/components/catalogo-publico/catalogo-header";
 import { CatalogoVehicleGrid } from "@/components/catalogo-publico/catalogo-vehicle-grid";
 import { CatalogoEmptyState } from "@/components/catalogo-publico/catalogo-empty-state";
@@ -53,11 +54,12 @@ async function loadCatalogoPublico() {
       vehiculos: (mockVehiculos as unknown as Vehiculo[]).filter(
         (vehicle) => vehicle.estado === "en_stock" && vehicle.catalogo_publicado
       ),
+      heroImageUrl: null,
     };
   }
 
   const supabase = createSupabaseServerClient();
-  const [configResult, vehiculosResult] = await Promise.all([
+  const [configResult, vehiculosResult, heroResult] = await Promise.all([
     supabase
       .from("catalogo_config")
       .select(
@@ -65,7 +67,7 @@ async function loadCatalogoPublico() {
       )
       .eq("id", true)
       .maybeSingle<CatalogoConfig>(),
-    fetchAllSupabaseRows((from, to) =>
+      fetchAllSupabaseRows((from, to) =>
       supabase
         .from("vehiculos")
         .select(
@@ -78,11 +80,13 @@ async function loadCatalogoPublico() {
         .order("created_at", { ascending: false })
         .range(from, to)
     ),
+    getCatalogoHeroUrl(supabase),
   ]);
 
   return {
     config: configResult.data ?? (mockCatalogoConfig as CatalogoConfig),
     vehiculos: (vehiculosResult.data ?? []) as Vehiculo[],
+    heroImageUrl: heroResult,
   };
 }
 
@@ -96,7 +100,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PublicCatalogPage() {
-  const { config, vehiculos } = await loadCatalogoPublico();
+  const { config, vehiculos, heroImageUrl } = await loadCatalogoPublico();
 
   if (!config.activo) {
     return (
@@ -120,6 +124,8 @@ export default async function PublicCatalogPage() {
           vehicleCount={vehiculos.length}
           whatsappContacto={config.whatsapp_contacto}
           instagramUrl={config.instagram_url}
+          heroVehicle={vehiculos.find((vehicle) => vehicle.catalogo_destacado) ?? vehiculos[0] ?? null}
+          heroImageUrl={heroImageUrl}
         />
 
         <CatalogoVehicleGrid vehiculos={vehiculos} config={config} />

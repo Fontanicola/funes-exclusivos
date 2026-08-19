@@ -1982,6 +1982,48 @@ Además, el mismo desplegable permite filtrar por vehículo de interés. Las opc
 
 - `npm run build` ejecutado luego del ajuste.
 
+## Catálogo: preset de stock y editor visual
+
+### Qué se construyó
+
+- El panel interno de Catálogo ahora abre por defecto las unidades `en_stock`, igual que Inventario, sin impedir consultar el resto desde el filtro.
+- Se consolidaron los filtros dentro del botón de ícono: stock, publicación, preparación, rango de año, rango de precio y destacados.
+- Se agregó `Editar vidriera`, un modal con preview de portada, orden de unidades destacadas y la configuración pública existente.
+- Se agregó carga de portada panorámica en JPG, PNG o WEBP de hasta 8 MB.
+- El catálogo público usa la portada cargada y, si todavía no existe, toma como fallback la foto de la primera unidad destacada.
+- La portada y el bloque de destacadas se mantienen alineados con el inventario publicado y en stock.
+
+### Paths creados/modificados
+
+- `app/(dashboard)/dashboard/catalogo/page.tsx`
+- `app/(dashboard)/catalogo/actions.ts`
+- `app/catalogo/page.tsx`
+- `components/catalogo/catalogo-hero-upload-form.tsx`
+- `components/catalogo/catalogo-visual-editor.tsx`
+- `components/catalogo/catalogo-vehiculos-table.tsx`
+- `components/catalogo-publico/catalogo-header.tsx`
+- `lib/catalogo/hero.ts`
+
+### Tablas y Storage involucrados
+
+- `public.catalogo_config`
+- `public.vehiculos`
+- Bucket `vehiculos`, path `catalogo/hero.jpg`
+
+### Decisiones técnicas
+
+- No se agregaron columnas ni SQL: la portada se guarda en un path determinístico del bucket existente y se detecta mediante Storage.
+- El carousel de destacadas reutiliza `catalogo_destacado` y `catalogo_orden` de `vehiculos`, evitando duplicar información.
+- El preset inicial es visual/client-side para conservar la posibilidad de revisar todo el inventario sin ampliar queries ni cambiar reglas de publicación.
+
+### Validación
+
+- `npm run build` ejecutado correctamente sin errores TypeScript ni de generación de rutas.
+
+### Pendiente
+
+- Si se necesita una portada independiente por ambiente o múltiples banners editables, conviene agregar una entidad de configuración de bloques en Supabase en una siguiente etapa.
+
 ## Badges sin saltos de línea
 
 ### Qué se corrigió

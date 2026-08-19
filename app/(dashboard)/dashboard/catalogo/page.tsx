@@ -4,8 +4,9 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockCatalogoConfig, mockVehiculos } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
-import { CatalogoSettingsForm } from "@/components/catalogo/catalogo-settings-form";
+import { getCatalogoHeroUrl } from "@/lib/catalogo/hero";
 import { CatalogoVehiculosTable } from "@/components/catalogo/catalogo-vehiculos-table";
+import { CatalogoVisualEditor } from "@/components/catalogo/catalogo-visual-editor";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
@@ -44,6 +45,7 @@ type Vehiculo = {
   catalogo_titulo: string | null;
   catalogo_descripcion: string | null;
   catalogo_orden: number | null;
+  estado_preparacion?: string | null;
   created_at: string | null;
 };
 
@@ -80,10 +82,11 @@ function KpiCard({
 export default async function CatalogoPage() {
   let config: CatalogoConfig = mockCatalogoConfig as CatalogoConfig;
   let vehiculos: Vehiculo[] = mockVehiculos as Vehiculo[];
+  let heroImageUrl: string | null = null;
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
-    const [configResult, vehiculosResult] = await Promise.all([
+    const [configResult, vehiculosResult, heroResult] = await Promise.all([
       supabase
         .from("catalogo_config")
         .select(
@@ -95,17 +98,19 @@ export default async function CatalogoPage() {
         supabase
           .from("vehiculos")
           .select(
-            "id,marca,modelo,version,anio,color,km,dominio,precio_venta,precio_moneda,estado,fotos,catalogo_publicado,catalogo_destacado,catalogo_titulo,catalogo_descripcion,catalogo_orden,created_at"
+            "id,marca,modelo,version,anio,color,km,dominio,precio_venta,precio_moneda,estado,estado_preparacion,fotos,catalogo_publicado,catalogo_destacado,catalogo_titulo,catalogo_descripcion,catalogo_orden,created_at"
           )
           .order("catalogo_destacado", { ascending: false, nullsFirst: false })
           .order("catalogo_orden", { ascending: true, nullsFirst: false })
           .order("created_at", { ascending: false })
           .range(from, to)
       ),
+      getCatalogoHeroUrl(supabase),
     ]);
 
     config = configResult.data ?? config;
     vehiculos = (vehiculosResult.data ?? []) as Vehiculo[];
+    heroImageUrl = heroResult;
   }
 
   const publishedCount = vehiculos.filter((vehicle) => vehicle.catalogo_publicado).length;
@@ -113,6 +118,9 @@ export default async function CatalogoPage() {
   const stockWithoutPublication = vehiculos.filter(
     (vehicle) => vehicle.estado === "en_stock" && !vehicle.catalogo_publicado
   ).length;
+  const destacados = vehiculos
+    .filter((vehicle) => vehicle.estado === "en_stock" && vehicle.catalogo_publicado && vehicle.catalogo_destacado)
+    .sort((a, b) => (a.catalogo_orden ?? Number.MAX_SAFE_INTEGER) - (b.catalogo_orden ?? Number.MAX_SAFE_INTEGER));
 
   return (
     <section className="space-y-6">
@@ -127,14 +135,24 @@ export default async function CatalogoPage() {
             </p>
           </div>
           <div className="space-y-2 text-right">
-            <Link
-              href="/catalogo"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-            >
-              Abrir catálogo público
-            </Link>
+            <div className="flex flex-wrap justify-end gap-2">
+              <DataEntryModal
+                triggerLabel="Editar vidriera"
+                title="Editor visual del catálogo"
+                description="Configurá la portada, los destacados y la información pública de la vidriera."
+                size="wide"
+              >
+                <CatalogoVisualEditor config={config} destacados={destacados} heroImageUrl={heroImageUrl} />
+              </DataEntryModal>
+              <Link
+                href="/catalogo"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+              >
+                Abrir catálogo público
+              </Link>
+            </div>
             <p className="text-xs text-[#6B7280]">Vista previa comercial de la vidriera online.</p>
           </div>
         </div>
@@ -157,13 +175,6 @@ export default async function CatalogoPage() {
       </div>
 
       <div className="space-y-6">
-        <DataEntryModal
-          triggerLabel="Editar configuración del catálogo"
-          title="Configuración del catálogo"
-          description="Definí cómo se presenta la vidriera pública."
-        >
-          <CatalogoSettingsForm config={config} />
-        </DataEntryModal>
         <CatalogoVehiculosTable vehiculos={vehiculos} />
       </div>
     </section>

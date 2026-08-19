@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { isDemoMode } from "@/lib/demo-mode";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { CATALOGO_BUCKET, CATALOGO_HERO_PATH } from "@/lib/catalogo/hero";
 
 type ActionState = {
   error?: string;
@@ -138,5 +139,47 @@ export async function updateVehiculoCatalogoAction(
   }
 
   revalidatePath("/catalogo");
+  return { success: true };
+}
+
+export async function uploadCatalogoHeroAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  if (isDemoMode) {
+    return { error: "Modo demo activo: conectá el entorno real para guardar cambios." };
+  }
+
+  const supabase = createSupabaseServerClient();
+  const authResult = await ensureAdmin(supabase);
+  if ("error" in authResult) return { error: authResult.error };
+
+  const file = formData.get("hero_image");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Elegí una imagen para la portada." };
+  }
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    return { error: "La portada debe ser JPG, PNG o WEBP." };
+  }
+
+  if (file.size > 8 * 1024 * 1024) {
+    return { error: "La imagen no puede superar los 8 MB." };
+  }
+
+  const { error } = await supabase.storage.from(CATALOGO_BUCKET).upload(CATALOGO_HERO_PATH, file, {
+    upsert: true,
+    contentType: file.type,
+    cacheControl: "3600",
+  });
+
+  if (error) {
+    console.error("Catalog hero upload failed", error);
+    return { error: "No pudimos guardar la imagen de portada." };
+  }
+
+  revalidatePath("/catalogo");
+  revalidatePath("/dashboard/catalogo");
   return { success: true };
 }
