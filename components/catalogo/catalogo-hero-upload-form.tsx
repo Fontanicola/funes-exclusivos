@@ -52,14 +52,15 @@ export function CatalogoHeroUploadForm({ heroImageUrl }: { heroImageUrl: string 
       URL.revokeObjectURL(objectUrl);
 
       let blob: Blob | null = null;
-      for (const quality of [0.78, 0.64, 0.5, 0.38]) {
+      // Leave room for multipart/server limits and Storage policies.
+      for (const quality of [0.7, 0.52, 0.38, 0.28]) {
         const candidate = await new Promise<Blob | null>((resolve) =>
           canvas.toBlob(resolve, "image/jpeg", quality)
         );
         if (candidate) blob = candidate;
-        if (candidate && candidate.size <= 3 * 1024 * 1024) break;
+        if (candidate && candidate.size <= 2 * 1024 * 1024) break;
       }
-      if (!blob || blob.size > 3 * 1024 * 1024) {
+      if (!blob || blob.size > 2 * 1024 * 1024) {
         throw new Error("La imagen sigue siendo demasiado pesada. Elegí una imagen más liviana.");
       }
 

@@ -3782,6 +3782,8 @@ Tabla/bucket involucrado: `public.catalogo_config`, Storage bucket `vehiculos`.
 
 No se modificó el schema ni se requiere SQL. Validación: `npm run build` finalizado correctamente. El entorno de producción debe tener configurada `SUPABASE_SERVICE_ROLE_KEY` para que el administrador pueda guardar imágenes.
 
+Se reforzó el flujo para producción: la imagen se comprime por debajo de 2 MB para evitar rechazos `413` del multipart o de Storage, la acción captura errores del cliente admin sin romper la pantalla y utiliza el cliente autenticado como fallback cuando la instalación no tiene disponible la clave de servicio. Los errores de Storage quedan registrados solo en servidor y se muestra un mensaje operativo al administrador.
+
 ### Shell fijo de la plataforma
 
 Se corrigió el scroll general del panel privado. El sidebar, el breadcrumb/header de plataforma y la subbarra contextual ahora ocupan una estructura fija de viewport (`100dvh`) y no se desplazan junto con el contenido. El scroll vertical queda confinado al área central de cada sección, mientras que los scrolls internos existentes de WhatsApp, CRM, tablas y columnas se mantienen.

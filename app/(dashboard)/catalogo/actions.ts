@@ -170,21 +170,42 @@ export async function uploadCatalogoHeroAction(
     return { error: "La imagen preparada no puede superar los 3 MB. Elegí una imagen más liviana." };
   }
 
-  // Storage no permite uploads con la clave anonima. La sesion ya fue
-  // validada como admin arriba; usar service role solo para este archivo.
-  const admin = createSupabaseAdminClient();
-  const { error } = await admin.storage.from(CATALOGO_BUCKET).upload(CATALOGO_HERO_PATH, file, {
-    upsert: true,
-    contentType: file.type,
-    cacheControl: "3600",
-  });
+  // La sesion ya fue validada como admin. Preferimos service role para evitar
+  // depender de una policy de Storage, pero dejamos fallback al cliente
+  // autenticado para instalaciones donde esa clave no este disponible.
+  const storageClients = [];
+  try {
+    storageClients.push(createSupabaseAdminClient());
+  } catch (error) {
+    console.error(
+      "Catalog hero admin storage unavailable",
+      error instanceof Error ? error.message : error
+    );
+  }
+  storageClients.push(supabase);
 
-  if (error) {
-    console.error("Catalog hero upload failed", error);
-    return { error: "No pudimos guardar la imagen de portada." };
+  let lastError: { message?: string; statusCode?: string } | null = null;
+  for (const storageClient of storageClients) {
+    const { error } = await storageClient.storage.from(CATALOGO_BUCKET).upload(CATALOGO_HERO_PATH, file, {
+      upsert: true,
+      contentType: file.type,
+      cacheControl: "3600",
+    });
+
+    if (!error) {
+      revalidatePath("/catalogo");
+      revalidatePath("/dashboard/catalogo");
+      return { success: true };
+    }
+
+    lastError = { message: error.message, statusCode: error.statusCode };
   }
 
-  revalidatePath("/catalogo");
-  revalidatePath("/dashboard/catalogo");
-  return { success: true };
+  console.error("Catalog hero upload failed", lastError);
+  return {
+    error:
+      lastError?.statusCode === "413"
+        ? "La imagen supera el límite permitido por Storage. Elegí una imagen más liviana."
+        : "No pudimos guardar la imagen de portada. Revisá la configuración de Storage e intentá nuevamente.",
+  };
 }
