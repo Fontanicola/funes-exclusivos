@@ -3681,3 +3681,11 @@ Path creado: `components/common/collapsible-summary.tsx`.
 Paths modificados: `app/(dashboard)/inventario/page.tsx`, `app/(dashboard)/ventas/page.tsx`, `app/(dashboard)/ventas/renta/page.tsx`, `app/(dashboard)/caja/page.tsx`, `app/(dashboard)/crm/page.tsx`, `app/(dashboard)/gestoria/page.tsx`, `app/(dashboard)/gestoria/presupuestos/page.tsx`, `app/(dashboard)/dashboard/catalogo/page.tsx`, `app/(dashboard)/empleados/page.tsx`, `app/(dashboard)/recordatorios/page.tsx`.
 
 No se modificaron tablas ni lógica de negocio. Validación: `npm run build` finalizado correctamente.
+
+### Compactación del gráfico de comisiones
+
+Se ajustó el gráfico de rendimiento por vendedor para reducir su presencia visual: menor altura, padding y tipografías, controles más compactos, líneas y puntos más finos y tooltip reducido. Se mantuvieron la comparación mensual, el cambio de métrica, la selección de moneda y la información al pasar el cursor.
+
+Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`.
+
+No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.

@@ -20,11 +20,11 @@ export type VendorSeries = {
 type Metric = "sold" | "units" | "commission";
 
 const CHART_WIDTH = 820;
-const CHART_HEIGHT = 280;
-const PLOT_LEFT = 38;
-const PLOT_RIGHT = 16;
-const PLOT_TOP = 18;
-const PLOT_BOTTOM = 34;
+const CHART_HEIGHT = 220;
+const PLOT_LEFT = 34;
+const PLOT_RIGHT = 14;
+const PLOT_TOP = 14;
+const PLOT_BOTTOM = 28;
 const COLORS = ["#8A1538", "#64748B", "#0F766E", "#B45309", "#475569", "#9F1239"];
 
 function formatAmount(value: number, metric: Metric, currency: string) {
@@ -81,14 +81,14 @@ export function ComisionesVendedoresChart({
   if (!series.length || !months.length) return null;
 
   return (
-    <section className="rounded-md border border-[#E5E7EB] bg-white p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#E5E7EB] pb-4">
+    <section className="rounded-md border border-[#E5E7EB] bg-white p-3">
+      <div className="flex flex-wrap items-start justify-between gap-2 border-b border-[#E5E7EB] pb-3">
         <div>
-          <h2 className="text-base font-semibold text-[#111827]">Rendimiento por vendedor</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">Comparativa mensual de los últimos 12 meses.</p>
+          <h2 className="text-sm font-semibold text-[#111827]">Rendimiento por vendedor</h2>
+          <p className="mt-0.5 text-xs text-[#6B7280]">Comparativa mensual de los últimos 12 meses.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <div className="inline-flex rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-1" role="group" aria-label="Métrica del gráfico">
+        <div className="flex flex-wrap gap-1.5">
+          <div className="inline-flex rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-0.5" role="group" aria-label="Métrica del gráfico">
             {([
               ["sold", "Monto vendido"],
               ["units", "Unidades"],
@@ -98,7 +98,7 @@ export function ComisionesVendedoresChart({
                 key={value}
                 type="button"
                 onClick={() => setMetric(value)}
-                className={`rounded px-2.5 py-1.5 text-xs font-medium transition ${metric === value ? "bg-white text-[#8A1538] shadow-sm" : "text-[#6B7280] hover:text-[#111827]"}`}
+                className={`rounded px-2 py-1 text-[11px] font-medium transition ${metric === value ? "bg-white text-[#8A1538] shadow-sm" : "text-[#6B7280] hover:text-[#111827]"}`}
               >
                 {label}
               </button>
@@ -108,7 +108,7 @@ export function ComisionesVendedoresChart({
             <select
               value={activeCurrency}
               onChange={(event) => setCurrency(event.target.value)}
-              className="h-9 rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#111827] outline-none focus:border-[#8A1538]"
+              className="h-7 rounded-md border border-[#E5E7EB] bg-white px-2 text-[11px] font-medium text-[#111827] outline-none focus:border-[#8A1538]"
               aria-label="Moneda del gráfico"
             >
               {currencies.map((item) => <option key={item} value={item}>{item}</option>)}
@@ -117,15 +117,15 @@ export function ComisionesVendedoresChart({
         </div>
       </div>
 
-      <div className="relative mt-4 overflow-x-auto">
-        <div className="relative min-w-[680px]">
+      <div className="relative mt-3 overflow-x-auto">
+        <div className="relative min-w-[620px]">
           <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className="h-auto w-full" role="img" aria-label="Comparativa mensual por vendedor">
             {yTicks.map((tick, index) => {
               const y = yFor(tick);
               return (
                 <g key={index}>
-                  <line x1={PLOT_LEFT} x2={CHART_WIDTH - PLOT_RIGHT} y1={y} y2={y} stroke="#E5E7EB" strokeDasharray="3 4" />
-                  <text x={PLOT_LEFT - 8} y={y + 4} textAnchor="end" fontSize="10" fill="#94A3B8">
+                  <line x1={PLOT_LEFT} x2={CHART_WIDTH - PLOT_RIGHT} y1={y} y2={y} stroke="#E5E7EB" strokeWidth="0.75" strokeDasharray="2 3" />
+                  <text x={PLOT_LEFT - 7} y={y + 3} textAnchor="end" fontSize="9" fill="#94A3B8">
                     {metric === "units" ? Math.round(tick) : new Intl.NumberFormat("es-AR", { notation: "compact", maximumFractionDigits: 1 }).format(tick)}
                   </text>
                 </g>
@@ -135,9 +135,9 @@ export function ComisionesVendedoresChart({
               const points = vendor.points.map((point, index) => ({ x: xFor(index), y: yFor(getValue(point, metric, activeCurrency)) }));
               return (
                 <g key={vendor.id}>
-                  <path d={getPath(points)} fill="none" stroke={vendor.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d={getPath(points)} fill="none" stroke={vendor.color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
                   {points.map((point, index) => (
-                    <circle key={`${vendor.id}-${index}`} cx={point.x} cy={point.y} r={hoveredIndex === index ? 5 : 3.5} fill="white" stroke={vendor.color} strokeWidth="2" />
+                    <circle key={`${vendor.id}-${index}`} cx={point.x} cy={point.y} r={hoveredIndex === index ? 4 : 2.75} fill="white" stroke={vendor.color} strokeWidth="1.5" />
                   ))}
                 </g>
               );
@@ -145,15 +145,15 @@ export function ComisionesVendedoresChart({
             {months.map((month, index) => (
               <g key={month.key} onMouseEnter={() => setHoveredIndex(index)} onMouseLeave={() => setHoveredIndex(null)}>
                 <rect x={xFor(index) - 22} y={PLOT_TOP} width="44" height={plotHeight} fill="transparent" className="cursor-crosshair" />
-                <text x={xFor(index)} y={CHART_HEIGHT - 9} textAnchor="middle" fontSize="10" fill="#64748B">{month.label}</text>
+                <text x={xFor(index)} y={CHART_HEIGHT - 7} textAnchor="middle" fontSize="9" fill="#64748B">{month.label}</text>
               </g>
             ))}
-            {hoveredIndex != null ? <line x1={xFor(hoveredIndex)} x2={xFor(hoveredIndex)} y1={PLOT_TOP} y2={PLOT_TOP + plotHeight} stroke="#CBD5E1" strokeDasharray="3 4" /> : null}
+            {hoveredIndex != null ? <line x1={xFor(hoveredIndex)} x2={xFor(hoveredIndex)} y1={PLOT_TOP} y2={PLOT_TOP + plotHeight} stroke="#CBD5E1" strokeWidth="0.75" strokeDasharray="2 3" /> : null}
           </svg>
           {hoveredIndex != null ? (
-            <div className="pointer-events-none absolute top-2 z-10 w-52 rounded-md border border-[#E5E7EB] bg-white p-3 text-xs shadow-sm" style={{ left: `${tooltipLeft}%` }}>
+            <div className="pointer-events-none absolute top-1 z-10 w-48 rounded-md border border-[#E5E7EB] bg-white p-2 text-[11px] shadow-sm" style={{ left: `${tooltipLeft}%` }}>
               <p className="font-semibold text-[#111827]">{months[hoveredIndex].label}</p>
-              <div className="mt-2 space-y-1.5">
+              <div className="mt-1.5 space-y-1">
                 {hoveredValues.length ? hoveredValues.map(({ vendor, value }) => (
                   <div key={vendor.id} className="flex items-center justify-between gap-2">
                     <span className="flex min-w-0 items-center gap-1.5 text-[#6B7280]"><span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: vendor.color }} /> <span className="truncate">{vendor.name}</span></span>
@@ -165,8 +165,8 @@ export function ComisionesVendedoresChart({
           ) : null}
         </div>
       </div>
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#6B7280]">
-        {series.map((vendor) => <span key={vendor.id} className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: vendor.color }} />{vendor.name}</span>)}
+      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-[#6B7280]">
+        {series.map((vendor) => <span key={vendor.id} className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: vendor.color }} />{vendor.name}</span>)}
       </div>
     </section>
   );
