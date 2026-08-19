@@ -3689,3 +3689,11 @@ Se ajustó el gráfico de rendimiento por vendedor para reducir su presencia vis
 Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`.
 
 No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
+
+### Ajuste visual de hitos de gestoría
+
+Se mejoró la lectura de los hitos operativos dentro de las tarjetas de gestoría: más separación vertical, íconos y estados ligeramente más legibles, y mayor espacio entre la información económica y el checklist. Se mantuvo el scroll interno de cada columna para conservar la densidad general de la vista.
+
+Path modificado: `components/gestoria/gestoria-kanban.tsx`.
+
+No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.

@@ -237,21 +237,21 @@ function MilestoneRow({
   const nextValue = completed ? "pendiente" : "completado";
 
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] py-2 last:border-b-0">
-      <span className="inline-flex min-w-0 items-center gap-2 text-xs font-medium text-[#111827]">
+    <div className="flex items-center justify-between gap-4 border-b border-[#E5E7EB] py-3 last:border-b-0">
+      <span className="inline-flex min-w-0 items-center gap-2.5 text-sm font-medium text-[#111827]">
         <button
           type="button"
           onClick={() => setCurrentValue(nextValue)}
-          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition hover:bg-[#FDF2F5]"
+          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition hover:bg-[#FDF2F5]"
           aria-label={`${completed ? "Marcar como pendiente" : "Marcar como completado"}: ${label}`}
           title={completed ? "Marcar como pendiente" : "Marcar como completado"}
         >
-          <Icon className={["h-4 w-4", statusTone(currentValue)].join(" ")} />
+          <Icon className={["h-5 w-5", statusTone(currentValue)].join(" ")} />
         </button>
         <span className="truncate">{label}</span>
       </span>
       <input type="hidden" name={name} value={currentValue} />
-      <span className={["shrink-0 text-[11px]", statusTone(currentValue)].join(" ")}>
+      <span className={["shrink-0 text-xs", statusTone(currentValue)].join(" ")}>
         {completed ? "Completado" : "Pendiente"}
       </span>
     </div>
@@ -302,7 +302,7 @@ function OperationCard({ tramite }: { tramite: GestoriaTramite }) {
         </div>
       </div>
 
-      <form action={updateGestoriaOperacionFormAction} className="mt-4 space-y-3 border-t border-[#E5E7EB] pt-3">
+      <form action={updateGestoriaOperacionFormAction} className="mt-5 space-y-4 border-t border-[#E5E7EB] pt-4">
         <input type="hidden" name="id" value={tramite.id} />
 
         <input type="hidden" name="etapa" value={tramite.etapa ?? "presupuesto"} />
@@ -332,7 +332,7 @@ function OperationCard({ tramite }: { tramite: GestoriaTramite }) {
           Presupuesto confirmado
         </label>
 
-        <div className="grid gap-2">
+        <div className="grid gap-0">
           <MilestoneRow label="CAT" name="cat_estado" value={tramite.cat_estado} />
           <MilestoneRow label="Documentación física" name="documentacion_fisica_estado" value={tramite.documentacion_fisica_estado} />
           <MilestoneRow label="Escribanía / retiro" name="escribania_estado" value={tramite.escribania_estado} />
