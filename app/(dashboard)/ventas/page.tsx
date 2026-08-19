@@ -174,13 +174,6 @@ function resolveAmount(value: Record<string, any>) {
   return typeof raw === "number" ? raw : Number(raw) || 0;
 }
 
-function formatDeliveryState(estado: string | null | undefined) {
-  const normalized = (estado ?? "").toLowerCase();
-  if (["entregada", "entregado"].includes(normalized)) return "Entregada";
-  if (["observada", "observado"].includes(normalized)) return "Observada";
-  return "Pendiente";
-}
-
 export default async function VentasPage() {
   let ventas: Venta[] = mockVentas as Venta[];
   let canCreateSale = canManageSales(mockEmpleado.rol);
@@ -262,9 +255,6 @@ export default async function VentasPage() {
   const ventasRegistradas = ventas.filter((venta) => venta.estado === "registrada");
   const currencyGroups = groupByCurrency(ventas);
   const totalRegistradas = ventasRegistradas.length;
-  const entregasPendientes = ventas.filter((venta) => !venta.entrega || formatDeliveryState(venta.entrega?.estado) === "Pendiente").length;
-  const entregasObservadas = ventas.filter((venta) => formatDeliveryState(venta.entrega?.estado) === "Observada").length;
-  const entregasCompletadas = ventas.filter((venta) => formatDeliveryState(venta.entrega?.estado) === "Entregada").length;
 
   const totalPorMoneda = currencyGroups;
 
@@ -299,27 +289,6 @@ export default async function VentasPage() {
           </p>
           <p className="mt-2 text-xs text-[#6B7280]">
             {formatAverageBreakdown(totalPorMoneda)}
-          </p>
-        </article>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <article className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-          <p className="text-sm font-medium text-[#6B7280]">Pendientes de entrega</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
-            {entregasPendientes}
-          </p>
-        </article>
-        <article className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-          <p className="text-sm font-medium text-[#6B7280]">Entregadas</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
-            {entregasCompletadas}
-          </p>
-        </article>
-        <article className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-          <p className="text-sm font-medium text-[#6B7280]">Observadas</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
-            {entregasObservadas}
           </p>
         </article>
       </div>

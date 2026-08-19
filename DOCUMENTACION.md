@@ -1941,6 +1941,28 @@ Además, el mismo desplegable permite filtrar por vehículo de interés. Las opc
 - `npm run build` ejecutado al cierre del rediseño.
 - Build finalizado correctamente sin errores.
 
+## Simplificación de Ventas
+
+### Qué se ajustó
+
+- Se eliminaron las tres tarjetas secundarias de `Pendientes de entrega`, `Entregadas` y `Observadas` de la pantalla principal de Ventas.
+- Se mantuvo el acceso operativo a `Pendientes de entrega` desde la toolbar y no se modificó la tabla de ventas ni la gestión de entregas.
+- También se retiraron los cálculos exclusivos de esas tarjetas para reducir trabajo durante el render de la página.
+
+### Paths modificados
+
+- `app/(dashboard)/ventas/page.tsx`
+
+### Tablas de Supabase involucradas
+
+- `public.ventas`
+- `public.ventas_pagos`
+- `public.ventas_entregas`
+
+### Validación
+
+- `npm run build` ejecutado correctamente sin errores TypeScript ni de generación de rutas.
+
 ## Badges sin saltos de línea
 
 ### Qué se corrigió
