@@ -3690,6 +3690,14 @@ Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`.
 
 No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
 
+### Pipeline CRM con columnas amplias
+
+Se ajustó la vista de columnas del pipeline para usar un ancho mínimo cómodo por etapa y scroll horizontal en el carril completo. Cada columna conserva su scroll vertical interno y la paginación `Ver más`, evitando comprimir las tarjetas cuando se muestran todas las etapas.
+
+Path modificado: `components/crm/crm-pipeline.tsx`.
+
+No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
+
 ### Ajuste visual de hitos de gestoría
 
 Se mejoró la lectura de los hitos operativos dentro de las tarjetas de gestoría: más separación vertical, íconos y estados ligeramente más legibles, y mayor espacio entre la información económica y el checklist. Se mantuvo el scroll interno de cada columna para conservar la densidad general de la vista.

@@ -83,7 +83,8 @@ export function CrmPipeline({
 
   return (
     <div className="min-w-0">
-      <div className="grid min-w-0 grid-cols-1 gap-3 pb-2 md:grid-cols-2 xl:grid-cols-7">
+      <div className="overflow-x-auto pb-3">
+        <div className="flex min-w-max gap-4">
         {states
           .slice()
           .sort((left, right) => left.orden - right.orden)
@@ -120,7 +121,7 @@ export function CrmPipeline({
                   });
                 }}
                 className={[
-                  "flex h-[min(62vh,680px)] min-h-[420px] min-w-0 flex-col overflow-hidden rounded-md border bg-[#FAFAFA] p-3 transition",
+                  "flex h-[min(62vh,680px)] min-h-[420px] w-[300px] shrink-0 flex-col overflow-hidden rounded-md border bg-[#FAFAFA] p-3 transition",
                   draggedLeadId ? "border-[#D8A1B2]" : "border-[#E5E7EB]",
                 ].join(" ")}
               >
@@ -190,6 +191,7 @@ export function CrmPipeline({
               </div>
             );
           })}
+        </div>
       </div>
       {isPending ? <p className="mt-2 text-xs text-[#6B7280]">Guardando cambio de etapa...</p> : null}
       {dragError ? <p className="mt-2 text-xs text-rose-700">{dragError}</p> : null}
