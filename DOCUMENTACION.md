@@ -1418,6 +1418,35 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Tarjeta de vehículo de interés en CRM
+
+### Qué se mejoró
+
+- En la vista de tabla del CRM, el vehículo de interés ahora se muestra como una tarjeta compacta e interactiva.
+- La tarjeta incluye miniatura cuando el vehículo tiene fotos, marca/modelo, versión, año y dominio.
+- Al seleccionarla, se abre un modal con la foto, precio comercial, color, kilómetros, dominio y lead asociado.
+- Si la unidad no tiene foto, se muestra un placeholder sobrio sin romper la tabla.
+
+### Paths modificados
+
+- `app/(dashboard)/crm/page.tsx`
+- `components/crm/leads-table.tsx`
+
+### Tablas de Supabase involucradas
+
+- `public.leads`
+- `public.vehiculos`
+
+### Decisiones técnicas
+
+- Se reutilizó `DataEntryModal`, que ya soporta cierre con clic fuera y tecla Escape.
+- Se agregaron a la relación del vehículo únicamente los datos necesarios para la tarjeta y el detalle visual.
+- No se modificó la lógica de leads, filtros, paginación ni navegación al detalle del lead.
+
+### Validación
+
+- `npm run build` ejecutado y finalizado correctamente sin errores.
+
 ## Filtro global por período
 
 ### Qué se construyó

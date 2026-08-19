@@ -8,6 +8,7 @@ import { LeadOriginBadge } from "./lead-origin-badge";
 import { LeadStatusBadge } from "./lead-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 type Lead = {
   id: string;
@@ -30,6 +31,11 @@ type Lead = {
     version: string | null;
     anio: number | null;
     dominio: string | null;
+    color: string | null;
+    km: number | null;
+    precio_venta: number | null;
+    precio_moneda: string | null;
+    fotos: string[] | string | null;
   } | null;
   vendedor: {
     id: string;
@@ -74,6 +80,68 @@ function getVehicleSummary(lead: Lead) {
     .join(" · ");
 
   return { title, subtitle };
+}
+
+function getPrimaryPhoto(value: string[] | string | null | undefined) {
+  if (Array.isArray(value)) return value.find((photo) => typeof photo === "string" && photo.trim()) ?? null;
+  if (typeof value !== "string" || !value.trim()) return null;
+  if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:image/")) return value;
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed) ? parsed.find((photo) => typeof photo === "string" && photo.trim()) ?? null : null;
+  } catch {
+    return null;
+  }
+}
+
+function formatVehiclePrice(vehicle: NonNullable<Lead["vehiculo"]>) {
+  if (vehicle.precio_venta == null) return null;
+  const currency = (vehicle.precio_moneda ?? "ARS").toLowerCase() === "usd" ? "USD" : "ARS";
+  const symbol = currency === "USD" ? "US$" : "$";
+  return `${symbol} ${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(vehicle.precio_venta)}`;
+}
+
+function VehicleInterestCard({ lead }: { lead: Lead }) {
+  const vehicle = lead.vehiculo;
+  if (!vehicle) return <span className="text-sm text-[#6B7280]">—</span>;
+
+  const title = `${vehicle.marca ?? "Sin marca"} ${vehicle.modelo ?? ""}`.trim();
+  const subtitle = [vehicle.version, vehicle.anio ? String(vehicle.anio) : null, vehicle.dominio]
+    .filter(Boolean)
+    .join(" · ");
+  const photo = getPrimaryPhoto(vehicle.fotos);
+  const price = formatVehiclePrice(vehicle);
+
+  return (
+    <DataEntryModal
+      triggerLabel=""
+      title="Vehículo de interés"
+      description="Información comercial de la unidad asociada al lead."
+      size="default"
+      triggerClassName="group flex w-full max-w-[300px] items-center gap-3 rounded-md border border-[#E5E7EB] bg-white p-2 text-left transition hover:border-[#D8A1B2] hover:bg-[#FDF8F9]"
+    >
+      <div className="space-y-4">
+        <div className="flex items-start gap-4">
+          {photo ? (
+            <img src={photo} alt="" className="h-24 w-32 rounded-md object-cover" />
+          ) : (
+            <div className="flex h-24 w-32 shrink-0 items-center justify-center rounded-md bg-[#FDF2F5] text-xs font-semibold uppercase tracking-[0.12em] text-[#8A1538]">Sin foto</div>
+          )}
+          <div className="min-w-0 space-y-1">
+            <p className="text-base font-semibold text-[#111827]">{title}</p>
+            {subtitle ? <p className="text-sm text-[#6B7280]">{subtitle}</p> : null}
+            {price ? <p className="pt-2 text-sm font-semibold text-[#8A1538]">{price}</p> : null}
+          </div>
+        </div>
+        <div className="grid gap-3 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3 text-sm sm:grid-cols-2">
+          <div><span className="text-[#6B7280]">Color</span><p className="font-medium text-[#111827]">{vehicle.color ?? "—"}</p></div>
+          <div><span className="text-[#6B7280]">Kilómetros</span><p className="font-medium text-[#111827]">{vehicle.km != null ? new Intl.NumberFormat("es-AR").format(vehicle.km) : "—"}</p></div>
+          <div><span className="text-[#6B7280]">Dominio</span><p className="font-medium text-[#111827]">{vehicle.dominio ?? "—"}</p></div>
+          <div><span className="text-[#6B7280]">Lead</span><p className="font-medium text-[#111827]">{lead.nombre ?? "Sin nombre"}</p></div>
+        </div>
+      </div>
+    </DataEntryModal>
+  );
 }
 
 function getContactLine(lead: Lead) {
@@ -204,8 +272,6 @@ export function LeadsTable({ leads, toolbarAction }: { leads: Lead[]; toolbarAct
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
             {visibleLeads.length ? (
               visibleLeads.map((lead) => {
-                const vehicle = getVehicleSummary(lead);
-
                 return (
                   <tr key={lead.id} className="transition hover:bg-[#F9FAFB]">
                     <td className="px-4 py-3 align-middle">
@@ -221,12 +287,7 @@ export function LeadsTable({ leads, toolbarAction }: { leads: Lead[]; toolbarAct
                       <LeadStatusBadge status={lead.estado} />
                     </td>
                     <td className="px-4 py-3 align-middle">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-[#111827]">{vehicle.title}</p>
-                        {vehicle.subtitle ? (
-                          <p className="text-sm text-[#6B7280]">{vehicle.subtitle}</p>
-                        ) : null}
-                      </div>
+                      <VehicleInterestCard lead={lead} />
                     </td>
                     <td className="px-4 py-3 align-middle text-sm text-[#111827]">
                       {getSellerName(lead)}

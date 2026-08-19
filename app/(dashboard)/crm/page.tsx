@@ -36,6 +36,11 @@ type Lead = {
     version: string | null;
     anio: number | null;
     dominio: string | null;
+    color: string | null;
+    km: number | null;
+    precio_venta: number | null;
+    precio_moneda: string | null;
+    fotos: string[] | string | null;
   } | null;
   vendedor: {
     id: string;
@@ -140,7 +145,7 @@ export default async function CrmPage({ searchParams }: { searchParams?: { from?
         supabase
           .from("leads")
           .select(
-            "id,nombre,telefono,email,origen,estado,presupuesto_min,presupuesto_max,presupuesto_moneda,nivel_interes,proximo_contacto,created_at,vehiculo:vehiculos!leads_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio),vendedor:empleados!leads_vendedor_id_fkey(id,nombre,email,rol)"
+            "id,nombre,telefono,email,origen,estado,presupuesto_min,presupuesto_max,presupuesto_moneda,nivel_interes,proximo_contacto,created_at,vehiculo:vehiculos!leads_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio,color,km,precio_venta,precio_moneda,fotos),vendedor:empleados!leads_vendedor_id_fkey(id,nombre,email,rol)"
           )
           .order("created_at", { ascending: false })
           .range(from, to)
