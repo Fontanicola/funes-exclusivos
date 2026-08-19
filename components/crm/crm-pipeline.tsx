@@ -80,7 +80,7 @@ export function CrmPipeline({
 
   return (
     <div className="min-w-0">
-      <div className="grid auto-cols-[240px] grid-flow-col gap-3 overflow-x-auto pb-2">
+      <div className="grid min-w-0 grid-cols-1 gap-3 pb-2 md:grid-cols-2 xl:grid-cols-7">
         {states
           .slice()
           .sort((left, right) => left.orden - right.orden)
@@ -117,7 +117,7 @@ export function CrmPipeline({
                   });
                 }}
                 className={[
-                  "flex h-[min(62vh,680px)] min-h-[420px] min-w-0 flex-col rounded-md border bg-[#FAFAFA] p-3 transition",
+                  "flex h-[min(62vh,680px)] min-h-[420px] min-w-0 flex-col overflow-hidden rounded-md border bg-[#FAFAFA] p-3 transition",
                   draggedLeadId ? "border-[#D8A1B2]" : "border-[#E5E7EB]",
                 ].join(" ")}
               >

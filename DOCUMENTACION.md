@@ -1473,6 +1473,12 @@
 
 - `npm run build` ejecutado correctamente.
 
+## Ajuste de scroll en CRM
+
+- La vista de columnas ahora distribuye las etapas dentro del ancho disponible, sin scroll horizontal del bloque general.
+- Cada columna mantiene su propio scroll vertical para recorrer los leads sin mover toda la sección.
+- La vista de tabla limita el scroll al listado y mantiene la toolbar y el encabezado de columnas visibles.
+
 ## Polish visual de Recordatorios
 
 Se compactó la pantalla de Recordatorios para alinearla con el lenguaje visual de la plataforma. Los KPIs ahora tienen menor altura y una intensidad más equilibrada, mientras que la alerta de alta prioridad usa un tono ámbar en lugar de ocupar toda la atención con un bloque bordó.

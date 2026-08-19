@@ -255,9 +255,9 @@ export function LeadsTable({ leads, toolbarAction }: { leads: Lead[]; toolbarAct
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="max-h-[min(68vh,760px)] overflow-auto">
         <table className="min-w-full divide-y divide-[#E5E7EB]">
-          <thead className="bg-[#FAFAFA]">
+          <thead className="sticky top-0 z-10 bg-[#FAFAFA]">
             <tr className="text-left text-xs font-medium uppercase tracking-[0.08em] text-[#6B7280]">
               <th className="px-4 py-3">Lead</th>
               <th className="px-4 py-3">Origen</th>
