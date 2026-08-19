@@ -1418,6 +1418,26 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Scroll interno de la bandeja WhatsApp
+
+### Qué se corrigió
+
+- La bandeja ahora ocupa la altura disponible de la pantalla sin permitir scroll general de la sección.
+- La lista de contactos tiene scroll vertical independiente.
+- El hilo de mensajes tiene scroll vertical independiente.
+- Se eliminaron alturas máximas rígidas que provocaban doble scrollbar y desplazamiento de toda la página.
+
+### Paths modificados
+
+- `app/(dashboard)/whatsapp/page.tsx`
+- `components/whatsapp/whatsapp-inbox.tsx`
+- `components/whatsapp/messages-list.tsx`
+
+### Validación
+
+- `npx tsc --noEmit` ejecutado correctamente.
+- `npm run build` ejecutado correctamente.
+
 ## Ajuste de bandeja WhatsApp
 
 ### Qué se mejoró

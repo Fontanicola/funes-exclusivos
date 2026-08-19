@@ -138,10 +138,10 @@ export function WhatsappInbox({
   const selectedMessages = selected ? mensajes[selected.id] ?? [] : [];
 
   return (
-    <section className="overflow-hidden rounded-md border border-[#E5E7EB] bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
-      <div className="grid min-h-[680px] lg:grid-cols-[340px_minmax(0,1fr)]">
-        <aside className="border-b border-[#E5E7EB] bg-[#FCFCFC] lg:border-b-0 lg:border-r">
-          <div className="border-b border-[#E5E7EB] p-4">
+    <section className="flex min-h-0 flex-1 overflow-hidden rounded-md border border-[#E5E7EB] bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
+      <div className="grid min-h-0 flex-1 lg:grid-cols-[340px_minmax(0,1fr)]">
+        <aside className="flex min-h-0 flex-col border-b border-[#E5E7EB] bg-[#FCFCFC] lg:border-b-0 lg:border-r">
+          <div className="shrink-0 border-b border-[#E5E7EB] p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-base font-semibold text-[#111827]">Conversaciones</h2>
@@ -182,7 +182,7 @@ export function WhatsappInbox({
             </div>
           </div>
 
-          <div className="max-h-[590px] overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto">
             {filtered.length ? (
               filtered.map((conversation) => {
                 const isSelected = conversation.id === selectedId;
@@ -234,10 +234,10 @@ export function WhatsappInbox({
           </div>
         </aside>
 
-        <main className="min-w-0 bg-[#F8FAFC]">
+        <main className="flex min-h-0 min-w-0 flex-col bg-[#F8FAFC]">
           {selected ? (
             <>
-              <header className="border-b border-[#E5E7EB] bg-white px-4 py-3">
+              <header className="shrink-0 border-b border-[#E5E7EB] bg-white px-4 py-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3E1E7] text-[#8A1538]">
@@ -266,12 +266,12 @@ export function WhatsappInbox({
                 </div>
               </header>
 
-              <div className="p-3 sm:p-4">
-                <MessagesList messages={selectedMessages} lastMessagePreview={selected.last_message_preview} hasRecentActivity={Boolean(selected.last_message_preview)} paginate={false} showHeader={false} />
+              <div className="min-h-0 flex-1 overflow-hidden p-3 sm:p-4">
+                <MessagesList messages={selectedMessages} lastMessagePreview={selected.last_message_preview} hasRecentActivity={Boolean(selected.last_message_preview)} paginate={false} showHeader={false} fillHeight />
               </div>
             </>
           ) : (
-            <div className="flex min-h-[680px] items-center justify-center px-6 text-center">
+            <div className="flex min-h-0 flex-1 items-center justify-center px-6 text-center">
               <div>
                 <MessageCircle className="mx-auto h-10 w-10 text-[#CBD5E1]" />
                 <h3 className="mt-4 text-base font-semibold text-[#111827]">Seleccioná una conversación</h3>

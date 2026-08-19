@@ -66,12 +66,14 @@ export function MessagesList({
   hasRecentActivity,
   paginate = true,
   showHeader = true,
+  fillHeight = false,
 }: {
   messages: Message[];
   lastMessagePreview?: string | null;
   hasRecentActivity?: boolean;
   paginate?: boolean;
   showHeader?: boolean;
+  fillHeight?: boolean;
 }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(messages.length / PAGE_SIZE));
@@ -81,7 +83,7 @@ export function MessagesList({
     : messages;
 
   return (
-    <section className="rounded-md border border-[#E5E7EB] bg-white">
+    <section className={["rounded-md border border-[#E5E7EB] bg-white", fillHeight ? "flex h-full min-h-0 flex-col" : ""].join(" ")}>
       {showHeader ? (
         <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] px-4 py-3">
           <h2 className="text-base font-semibold text-[#111827]">Mensajes</h2>
@@ -93,7 +95,7 @@ export function MessagesList({
         </div>
       ) : null}
 
-      <div className="max-h-[74vh] space-y-3 overflow-y-auto bg-[#FAFAFA] p-4">
+      <div className={["space-y-3 overflow-y-auto bg-[#FAFAFA] p-4", fillHeight ? "min-h-0 flex-1" : "max-h-[74vh]"].join(" ")}>
         {messages.length ? (
           visibleMessages.map((message) => {
             const isOutgoing = getDirection(message) === "saliente";

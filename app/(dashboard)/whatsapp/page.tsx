@@ -227,14 +227,16 @@ export default async function WhatsappPage() {
   );
 
   return (
-    <section className="space-y-6">
+    <section className="flex h-[calc(100dvh-5rem)] min-h-0 flex-col gap-3 overflow-hidden">
       {isDemoMode ? (
-        <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+        <div className="shrink-0 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
           Modo demo: la bandeja usa datos simulados y no consultará el servicio real.
         </div>
       ) : null}
 
-      <WhatsappConnectionAlert instancias={problematicInstances} />
+      <div className="shrink-0">
+        <WhatsappConnectionAlert instancias={problematicInstances} />
+      </div>
 
       <WhatsappInbox
         conversaciones={conversaciones}
