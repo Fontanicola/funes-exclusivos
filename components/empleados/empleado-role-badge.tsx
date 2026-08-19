@@ -13,7 +13,7 @@ export function EmpleadoRoleBadge({ role }: { role: Role }) {
   return (
     <span
       className={[
-        "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium",
+        "inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium",
         normalized === "admin"
           ? "border-slate-200 bg-slate-50 text-slate-700"
           : normalized === "vendedor"

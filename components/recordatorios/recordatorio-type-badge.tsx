@@ -43,7 +43,7 @@ export function RecordatorioTypeBadge({ type }: { type: RecordatorioType }) {
   const config = typeStyles[normalized] ?? typeStyles.otro;
 
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${config.className}`}>
+    <span className={`inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold ${config.className}`}>
       {config.label}
     </span>
   );

@@ -1941,6 +1941,26 @@ Además, el mismo desplegable permite filtrar por vehículo de interés. Las opc
 - `npm run build` ejecutado al cierre del rediseño.
 - Build finalizado correctamente sin errores.
 
+## Badges sin saltos de línea
+
+### Qué se corrigió
+
+- Se evitó que las etiquetas de estado, prioridad, tipo, método de pago e interés se partan en dos líneas dentro de tablas y cards.
+- El cambio mejora especialmente estados como `En stock`, `Sin preparar`, `Requiere atención` y otros textos compuestos.
+
+### Paths modificados
+
+- Componentes de badges en `components/caja`, `components/catalogo`, `components/comisiones`, `components/crm`, `components/empleados`, `components/gestoria`, `components/inventario`, `components/recordatorios`, `components/ventas` y `components/whatsapp`.
+
+### Decisión técnica
+
+- Se agregó `whitespace-nowrap` a la base visual de los badges. No se modificaron valores, lógica de negocio, permisos ni tablas de Supabase.
+
+### Validación
+
+- Se verificó que todos los badges semánticos mantengan sus etiquetas en una sola línea.
+- `npm run build` ejecutado luego del ajuste.
+
 ## Filtros compactos en toolbar
 
 Se ajustó el patrón compartido de filtros para que el buscador y el acceso a filtros convivan en la misma línea. El botón ahora muestra únicamente el ícono de filtros, con tooltip y etiqueta accesible, y abre un popover pequeño flotante en lugar de expandir los controles hacia abajo dentro del contenido. En WhatsApp se mantuvieron los filtros por vendedor y vehículo de interés dentro de ese popover.

@@ -43,7 +43,7 @@ export function RentaMarginBadge({ status }: { status: RentaMarginStatus }) {
   return (
     <span
       className={[
-        "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium",
+        "inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium",
         config.classes,
       ].join(" ")}
     >
@@ -51,4 +51,3 @@ export function RentaMarginBadge({ status }: { status: RentaMarginStatus }) {
     </span>
   );
 }
-

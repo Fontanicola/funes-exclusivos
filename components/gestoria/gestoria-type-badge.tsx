@@ -16,7 +16,7 @@ export function GestoriaTypeBadge({ type }: { type: GestoriaType }) {
   };
 
   return (
-    <span className="inline-flex items-center rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1 text-xs font-medium text-[#111827]">
+    <span className="inline-flex items-center whitespace-nowrap rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1 text-xs font-medium text-[#111827]">
       {labels[normalized] ?? "Otro"}
     </span>
   );
