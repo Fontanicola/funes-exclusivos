@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { isDemoMode } from "@/lib/demo-mode";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CATALOGO_BUCKET, CATALOGO_HERO_PATH } from "@/lib/catalogo/hero";
 
@@ -169,7 +170,10 @@ export async function uploadCatalogoHeroAction(
     return { error: "La imagen preparada no puede superar los 3 MB. Elegí una imagen más liviana." };
   }
 
-  const { error } = await supabase.storage.from(CATALOGO_BUCKET).upload(CATALOGO_HERO_PATH, file, {
+  // Storage no permite uploads con la clave anonima. La sesion ya fue
+  // validada como admin arriba; usar service role solo para este archivo.
+  const admin = createSupabaseAdminClient();
+  const { error } = await admin.storage.from(CATALOGO_BUCKET).upload(CATALOGO_HERO_PATH, file, {
     upsert: true,
     contentType: file.type,
     cacheControl: "3600",

@@ -3771,3 +3771,13 @@ La navegación se considera coherente con la operación actual: Dashboard como a
 Tablas Supabase involucradas en las consultas auditadas: `vehiculos`, `compras_vehiculos`, `ventas`, `ventas_pagos`, `ventas_entregas`, `caja_movimientos`, `comisiones`, `comision_liquidaciones`, `leads`, `conversaciones`, `conversacion_mensajes`, `whatsapp_instancias`, `gestoria_tramites`, `gestoria_presupuestos`, `recordatorios` y `empleados`.
 
 Pendientes de validación antes de una certificación operativa definitiva: ejecutar con una cuenta real un alta/edición por cada rol, confirmar políticas RLS y relaciones de foreign keys en el proyecto Supabase de producción, verificar subida de portada con archivos reales dentro del límite de 3 MB y probar el webhook de Evolution con un mensaje entrante. El build no presentó errores; los warnings de caché observados pertenecen al servidor de desarrollo y no bloquean el bundle de producción.
+
+### Corrección de guardado de portada del catálogo
+
+Se corrigió el error que impedía guardar la portada panorámica. El bucket `vehiculos` es público para lectura, pero sus políticas de Storage rechazaban el upload realizado con la clave anónima (`403`). La Server Action ahora valida primero la sesión y el rol administrador con el cliente normal, y usa el cliente admin exclusivamente para subir `catalogo/hero.jpg`. La verificación de existencia de la portada en server también usa ese cliente cuando está configurado, con fallback para entornos locales.
+
+Paths modificados: `app/(dashboard)/catalogo/actions.ts`, `lib/catalogo/hero.ts`.
+
+Tabla/bucket involucrado: `public.catalogo_config`, Storage bucket `vehiculos`.
+
+No se modificó el schema ni se requiere SQL. Validación: `npm run build` finalizado correctamente. El entorno de producción debe tener configurada `SUPABASE_SERVICE_ROLE_KEY` para que el administrador pueda guardar imágenes.
