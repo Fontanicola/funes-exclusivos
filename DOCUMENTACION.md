@@ -3789,3 +3789,13 @@ Se corrigió el scroll general del panel privado. El sidebar, el breadcrumb/head
 Paths modificados: `app/(dashboard)/layout.tsx`, `components/dashboard/breadcrumb-header.tsx`, `components/dashboard/sidebar.tsx`.
 
 No se modificaron tablas Supabase ni reglas de negocio. Validación: `npm run build` finalizado correctamente.
+
+### Gráficos en métricas por sección
+
+Se incorporó un patrón visual compacto para mostrar gráficos dentro del desplegable `Métricas` de las secciones que ya cuentan con resúmenes operativos. Inventario muestra la distribución por estado; Compras, la situación de las unidades; Ventas, los estados de operación; Rentabilidad, el resultado por operación; CRM, las etapas del pipeline; Gestoría y Presupuestos, sus etapas y estados; Comisiones, la comisión por vendedor; Empleados, la composición del equipo por rol; Catálogo, el estado de publicación; y Recordatorios, la prioridad de los pendientes. Caja conserva sus visualizaciones existentes de saldos y medios.
+
+Se creó el componente reutilizable `components/common/summary-chart.tsx`, que utiliza las barras CSS existentes y mantiene una lectura compacta, sin librerías nuevas. Los gráficos se calculan sobre los datos que cada página ya consulta o recibe en modo demo; no se agregaron queries, tablas ni cambios de schema.
+
+Paths modificados: `app/(dashboard)/inventario/page.tsx`, `app/(dashboard)/compras/page.tsx`, `app/(dashboard)/ventas/page.tsx`, `app/(dashboard)/ventas/renta/page.tsx`, `app/(dashboard)/crm/page.tsx`, `app/(dashboard)/gestoria/page.tsx`, `app/(dashboard)/gestoria/presupuestos/page.tsx`, `app/(dashboard)/comisiones/page.tsx`, `app/(dashboard)/empleados/page.tsx`, `app/(dashboard)/dashboard/catalogo/page.tsx`, `app/(dashboard)/recordatorios/page.tsx` y `components/common/summary-chart.tsx`.
+
+Tablas involucradas indirectamente: `vehiculos`, `compras_vehiculos`, `ventas`, `leads`, `gestoria_tramites`, `gestoria_presupuestos`, `comisiones`, `empleados`, `catalogo_config`, `recordatorios` y `caja_movimientos`. Validación: `npm run build`.

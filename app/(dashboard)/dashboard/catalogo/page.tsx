@@ -11,6 +11,7 @@ import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const metadata: Metadata = {
   title: "Catálogo | Funes Exclusivos",
@@ -148,6 +149,15 @@ export default async function CatalogoPage({ searchParams }: { searchParams?: { 
         <KpiCard label="Vehículos destacados" value={featuredCount} />
         <KpiCard label="En stock sin publicar" value={stockWithoutPublication} />
         </div>
+        <SummaryChart
+          title="Estado de publicación"
+          description="Unidades visibles y pendientes de publicar."
+          items={[
+            { label: "Publicados", value: publishedCount, tone: "emerald" },
+            { label: "Destacados", value: featuredCount, tone: "zinc" },
+            { label: "En stock sin publicar", value: stockWithoutPublication, tone: "amber" },
+          ]}
+        />
       </CollapsibleSummary>
 
       <SectionSubheaderActions>

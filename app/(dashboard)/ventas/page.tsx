@@ -10,6 +10,7 @@ import { VentasTable } from "@/components/ventas/ventas-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const metadata: Metadata = {
   title: "Ventas | Funes Exclusivos",
@@ -268,6 +269,11 @@ export default async function VentasPage({ searchParams }: { searchParams?: { fr
   const totalRegistradas = ventasRegistradas.length;
 
   const totalPorMoneda = currencyGroups;
+  const ventasPorEstado = ["registrada", "entregada", "anulada"].map((estado) => ({
+    label: estado === "registrada" ? "Registradas" : estado === "entregada" ? "Entregadas" : "Anuladas",
+    value: ventas.filter((venta) => venta.estado === estado).length,
+    tone: estado === "anulada" ? "rose" as const : estado === "entregada" ? "emerald" as const : "zinc" as const,
+  }));
 
   return (
     <section className="space-y-6">
@@ -320,6 +326,11 @@ export default async function VentasPage({ searchParams }: { searchParams?: { fr
           </p>
         </article>
         </div>
+        <SummaryChart
+          title="Ventas por estado"
+          description="Distribución de las operaciones cargadas."
+          items={ventasPorEstado}
+        />
       </CollapsibleSummary>
 
       <VentasTable

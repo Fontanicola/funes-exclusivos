@@ -10,6 +10,7 @@ import { KpiCard } from "@/components/dashboard/kpi-card";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const dynamic = "force-dynamic";
 
@@ -157,6 +158,7 @@ function getKpis(recordatorios: Recordatorio[]) {
     pendientes: recordatorios.filter(isPending).length,
     vencidos: recordatorios.filter(isOverdue).length,
     hoy: recordatorios.filter(isToday).length,
+    critica: recordatorios.filter((item) => (item.prioridad ?? "").toLowerCase() === "critica" && isPending(item)).length,
     altaPrioridad: recordatorios.filter(isHighPriority).length,
     completadosMes: recordatorios.filter((item) => {
       if ((item.estado ?? "").toLowerCase() !== "completado") return false;
@@ -300,6 +302,15 @@ export default async function RecordatoriosPage({ searchParams }: { searchParams
         <KpiCard compact title="Alta prioridad" value={String(kpis.altaPrioridad)} description="Críticos o urgentes" variant="warning" />
         <KpiCard compact title="Completados del mes" value={String(kpis.completadosMes)} description="Cerrados este mes" variant="positive" />
         </div>
+        <SummaryChart
+          title="Recordatorios por prioridad"
+          description="Pendientes agrupados según urgencia."
+          items={[
+            { label: "Crítica", value: kpis.critica, tone: "rose" },
+            { label: "Alta", value: kpis.altaPrioridad, tone: "amber" },
+            { label: "Media", value: Math.max(0, kpis.pendientes - kpis.critica - kpis.altaPrioridad), tone: "slate" },
+          ]}
+        />
       </CollapsibleSummary>
 
       <RecordatoriosTable

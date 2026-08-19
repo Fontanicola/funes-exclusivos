@@ -12,6 +12,7 @@ import { ComisionesTable } from "@/components/comisiones/comisiones-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const metadata: Metadata = {
   title: "Comisiones | Funes Exclusivos",
@@ -302,6 +303,16 @@ export default async function ComisionesPage({ searchParams }: { searchParams?: 
   const unidadesVendidas = getUniqueSoldUnits(comisionesValidas);
   const montoTotalVendido = aggregateByCurrency(comisionesValidas, "base_comision");
   const comisionGenerada = aggregateByCurrency(comisionesValidas, "monto_comision");
+  const comisionesPorVendedor = Array.from(
+    comisionesValidas.reduce((groups, comision) => {
+      const label = comision.vendedor?.nombre ?? "Sin vendedor";
+      groups.set(label, (groups.get(label) ?? 0) + (comision.monto_comision ?? 0));
+      return groups;
+    }, new Map<string, number>())
+  )
+    .map(([label, value]) => ({ label, value, tone: "zinc" as const }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 6);
 
   return (
     <section className="space-y-6">
@@ -346,6 +357,12 @@ export default async function ComisionesPage({ searchParams }: { searchParams?: 
           </p>
         </article>
         </div>
+        <SummaryChart
+          title="Comisión generada por vendedor"
+          description="Comparativa del período seleccionado, sin convertir monedas."
+          items={comisionesPorVendedor}
+          emptyLabel="Todavía no hay comisiones para graficar."
+        />
       </CollapsibleSummary>
 
       <ComisionesVendedoresChart {...chartData} />

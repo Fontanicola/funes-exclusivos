@@ -9,6 +9,8 @@ import { CompraKpis } from "@/components/compras/compra-kpis";
 import { ComprasTable } from "@/components/compras/compras-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const metadata: Metadata = {
   title: "Compras | Funes Exclusivos",
@@ -87,6 +89,11 @@ export default async function ComprasPage({ searchParams }: { searchParams?: { f
   }
 
   compras = filterByDateRange(compras, dateRange, (compra) => compra.fecha);
+  const comprasPorEstado = [
+    { label: "En stock", value: compras.filter((compra) => compra.vehiculo?.estado === "en_stock").length, tone: "emerald" as const },
+    { label: "Vendidas", value: compras.filter((compra) => compra.vehiculo?.estado === "vendido").length, tone: "slate" as const },
+    { label: "Consignación", value: compras.filter((compra) => compra.vehiculo?.estado === "en_consignacion").length, tone: "amber" as const },
+  ];
 
   return (
     <section className="space-y-6">
@@ -96,7 +103,12 @@ export default async function ComprasPage({ searchParams }: { searchParams?: { f
           Nueva compra
         </Link>
       </SectionSubheaderActions>
-      <CompraKpis compras={compras} />
+      <CollapsibleSummary sectionKey="compras">
+        <div className="grid gap-4 md:grid-cols-2">
+          <CompraKpis compras={compras} />
+          <SummaryChart title="Compras por situación" description="Estado actual de las unidades incorporadas." items={comprasPorEstado} />
+        </div>
+      </CollapsibleSummary>
       <ComprasTable compras={compras} />
     </section>
   );

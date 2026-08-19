@@ -9,6 +9,7 @@ import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
 import { EmpleadoCreateForm } from "@/components/empleados/empleado-create-form";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const metadata: Metadata = {
   title: "Empleados | Funes Exclusivos",
@@ -161,6 +162,15 @@ export default async function EmpleadosPage({ searchParams }: { searchParams?: {
           description="Perfiles de gestoria y documentación."
         />
         </div>
+        <SummaryChart
+          title="Equipo por rol"
+          description="Distribución de perfiles activos."
+          items={[
+            { label: "Administradores", value: admins.length, tone: "zinc" },
+            { label: "Vendedores", value: sellers.length, tone: "emerald" },
+            { label: "Gestores", value: managers.length, tone: "amber" },
+          ]}
+        />
       </CollapsibleSummary>
 
       <EmpleadosTable

@@ -10,6 +10,7 @@ import { InventarioTable } from "@/components/inventario/inventario-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const metadata: Metadata = {
   title: "Inventario | Funes Exclusivos",
@@ -123,6 +124,15 @@ export default async function InventarioPage({ searchParams }: { searchParams?: 
   const totalVehiculos = vehiculos.length;
   const enStock = vehiculos.filter((vehiculo) => vehiculo.estado === "en_stock").length;
   const valorPublicadoTotal = formatPublishedTotal(vehiculos);
+  const inventarioPorEstado = [
+    ["En stock", "en_stock", "emerald"],
+    ["Vendidos", "vendido", "slate"],
+    ["En consignación", "en_consignacion", "amber"],
+  ].map(([label, estado, tone]) => ({
+    label,
+    value: vehiculos.filter((vehiculo) => vehiculo.estado === estado).length,
+    tone: tone as "emerald" | "slate" | "amber",
+  }));
   const toolbarAction = canEditInventory ? (
     <Link
       href="/inventario/nuevo"
@@ -170,6 +180,11 @@ export default async function InventarioPage({ searchParams }: { searchParams?: 
           </p>
         </article>
         </div>
+        <SummaryChart
+          title="Distribución del inventario"
+          description="Unidades agrupadas por estado actual."
+          items={inventarioPorEstado}
+        />
       </CollapsibleSummary>
 
       <InventarioTable

@@ -13,6 +13,7 @@ import { PresupuestosTable } from "@/components/gestoria/presupuestos-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const metadata: Metadata = {
   title: "Presupuestos de gestoría | Funes Exclusivos",
@@ -211,6 +212,15 @@ export default async function GestoriaPresupuestosPage({ searchParams }: { searc
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">{borradores}</p>
         </article>
         </div>
+        <SummaryChart
+          title="Presupuestos por estado"
+          description="Seguimiento de presupuestos del período seleccionado."
+          items={[
+            { label: "Aprobados", value: aprobados, tone: "emerald" },
+            { label: "Pendientes / borrador", value: borradores, tone: "amber" },
+            { label: "Resto", value: Math.max(0, presupuestos.length - aprobados - borradores), tone: "slate" },
+          ]}
+        />
       </CollapsibleSummary>
 
       <PresupuestosTable presupuestos={presupuestos} />

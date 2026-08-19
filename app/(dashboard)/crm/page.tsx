@@ -10,6 +10,7 @@ import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { AnalyzeNewLeadsButton } from "@/components/crm/analyze-new-leads-button";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const metadata: Metadata = {
   title: "CRM | Funes Exclusivos",
@@ -167,6 +168,17 @@ export default async function CrmPage({ searchParams }: { searchParams?: { from?
   const activeLeads = getActiveLeads(leads);
   const negotiationLeads = getNegotiationLeads(leads);
   const upcomingLeads = getUpcomingLeads(leads);
+  const leadsPorEstado = [
+    ["Nuevos", "nuevo", "zinc"],
+    ["Contactados", "contactado", "slate"],
+    ["Interesados", "interesado", "emerald"],
+    ["Negociación", "negociacion", "amber"],
+    ["Ganados", "ganado", "emerald"],
+  ].map(([label, estado, tone]) => ({
+    label,
+    value: leads.filter((lead) => lead.estado === estado).length,
+    tone: tone as "zinc" | "slate" | "emerald" | "amber",
+  }));
   const presupuestoTotal = aggregateByCurrency(activeLeads, "presupuesto_min");
   const newLeadAction = (
     <Link
@@ -210,6 +222,11 @@ export default async function CrmPage({ searchParams }: { searchParams?: { from?
           <p className="mt-2 text-xs text-[#6B7280]">{formatCurrencyBreakdown(presupuestoTotal)}</p>
         </article>
         </div>
+        <SummaryChart
+          title="Leads por etapa"
+          description="Volumen actual del pipeline comercial."
+          items={leadsPorEstado}
+        />
       </CollapsibleSummary>
 
       <CrmViews

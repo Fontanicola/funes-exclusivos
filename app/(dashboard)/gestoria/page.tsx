@@ -9,6 +9,7 @@ import { GestoriaKanban } from "@/components/gestoria/gestoria-kanban";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const metadata: Metadata = {
   title: "Gestoría | Funes Exclusivos",
@@ -239,6 +240,16 @@ export default async function GestoriaPage({ searchParams }: { searchParams?: { 
         <KpiCard label="Gestoría" value={kpis.gestoria} />
         <KpiCard label="Vencidos" value={kpis.vencidos} />
         </div>
+        <SummaryChart
+          title="Trámites por etapa"
+          description="Operaciones agrupadas por flujo de gestoría."
+          items={[
+            { label: "Presupuesto", value: kpis.presupuesto, tone: "zinc" },
+            { label: "Escribanía", value: kpis.escribania, tone: "slate" },
+            { label: "Gestoría", value: kpis.gestoria, tone: "amber" },
+            { label: "Vencidos", value: kpis.vencidos, tone: "rose" },
+          ]}
+        />
       </CollapsibleSummary>
 
       <GestoriaKanban

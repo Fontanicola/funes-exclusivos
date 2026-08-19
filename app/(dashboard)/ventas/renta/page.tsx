@@ -24,6 +24,7 @@ import { RentaKpis } from "@/components/ventas/renta-kpis";
 import { RentaTable } from "@/components/ventas/renta-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
+import { SummaryChart } from "@/components/common/summary-chart";
 
 export const metadata: Metadata = {
   title: "Rentabilidad | Funes Exclusivos",
@@ -159,6 +160,18 @@ export default async function VentaRentaPage({ searchParams }: { searchParams?: 
   const rows = calculateRentaRows(ventas, gastos, pagos, entregas);
   const metrics = calculateRentaKpis(rows);
   const canSeeFinancials = canViewMargins(currentRole);
+  const rentabilidadPorResultado = [
+    {
+      label: "Resultado positivo",
+      value: rows.filter((row) => (row.resultadoOperativo ?? 0) > 0).length,
+      tone: "emerald" as const,
+    },
+    {
+      label: "Resultado neutral o negativo",
+      value: rows.filter((row) => (row.resultadoOperativo ?? 0) <= 0).length,
+      tone: "amber" as const,
+    },
+  ];
 
   return (
     <section className="space-y-6">
@@ -176,7 +189,14 @@ export default async function VentaRentaPage({ searchParams }: { searchParams?: 
       ) : null}
 
       <CollapsibleSummary sectionKey="ventas-rentabilidad">
-        <RentaKpis metrics={metrics} canViewFinancials={canSeeFinancials} />
+        <div className="grid gap-4 md:grid-cols-2">
+          <RentaKpis metrics={metrics} canViewFinancials={canSeeFinancials} />
+          <SummaryChart
+            title="Resultado por operación"
+            description="Lectura rápida de las operaciones cargadas."
+            items={rentabilidadPorResultado}
+          />
+        </div>
       </CollapsibleSummary>
       <RentaTable rows={rows} canViewFinancials={canSeeFinancials} />
     </section>
