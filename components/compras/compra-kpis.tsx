@@ -25,7 +25,7 @@ export function CompraKpis({ compras }: { compras: Compra[] }) {
   const stockUnits = currentMonthPurchases.filter((compra) => compra.vehiculo?.estado === "en_stock").length || currentMonthPurchases.length;
 
   return (
-    <div className="grid gap-4 md:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2">
       <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
         <p className="text-sm font-medium text-[#6B7280]">Compras del mes</p>
         <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">{formatNumber(currentMonthPurchases.length)}</p>

@@ -3817,3 +3817,9 @@ Tablas Supabase involucradas: `peritaje_plantillas`, `peritaje_plantilla_seccion
 Decisión técnica: se implementó primero una representación 2D interactiva, sin librerías externas ni SQL ejecutado automáticamente. La estructura deja separado el catálogo de paneles y el checklist para poder sumar una vista 3D en una etapa posterior sin migrar nuevamente los datos. La plantilla solicita códigos únicos por ítem para evitar conflictos al agregar varios ítems dentro de una misma sección.
 
 Pendiente operativo: ejecutar `PERITAJES.sql` manualmente en Supabase, verificar las políticas RLS y probar una creación/edición real con un usuario admin y uno gestor. Validación local: `npm run build` finalizado correctamente.
+
+### Ajuste de métricas de Compras
+
+Las cuatro métricas superiores de Compras ahora se muestran en una grilla de dos columnas, formando dos filas de dos cards en tablet y desktop. En mobile se mantienen apiladas en una sola columna. No se modificó la lógica, las consultas ni el schema de Supabase.
+
+Path modificado: `components/compras/compra-kpis.tsx`. Validación: `npm run build`.
