@@ -3655,3 +3655,9 @@ Paths modificados: `components/common/data-entry-modal.tsx`, `components/crm/lea
 Se corrigió la carga de la portada panorámica para evitar errores `413` por imágenes pesadas: la imagen se redimensiona y comprime en el navegador antes de enviarse, con un límite seguro para el entorno de producción. También se hizo tolerante el estado del formulario para que un fallo de red no provoque una excepción de cliente ni deje la pantalla en blanco.
 
 Paths modificados: `components/catalogo/catalogo-hero-upload-form.tsx`, `app/(dashboard)/catalogo/actions.ts`.
+
+### Limpieza de headers internos
+
+Se eliminó el header interno redundante de la pantalla administrativa de Catálogo. Las acciones `Editar vidriera` y `Abrir catálogo público` ahora comparten la misma toolbar que la búsqueda y los filtros, reduciendo espacio sin perder accesibilidad. Se revisaron las páginas del dashboard y no se modificaron headers de detalle o formularios, donde el título contextual sigue siendo necesario para orientar la tarea.
+
+Paths modificados: `app/(dashboard)/dashboard/catalogo/page.tsx`, `components/catalogo/catalogo-vehiculos-table.tsx`.

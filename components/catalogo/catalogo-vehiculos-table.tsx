@@ -328,7 +328,13 @@ function CatalogoCard({
   );
 }
 
-export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] }) {
+export function CatalogoVehiculosTable({
+  vehiculos,
+  toolbarAction,
+}: {
+  vehiculos: Vehiculo[];
+  toolbarAction?: ReactNode;
+}) {
   const [query, setQuery] = useState("");
   const [publicationFilter, setPublicationFilter] = useState<(typeof publicationFilters)[number]["value"]>("");
   const [preparationFilter, setPreparationFilter] = useState<(typeof preparationFilters)[number]["value"]>("");
@@ -379,7 +385,8 @@ export function CatalogoVehiculosTable({ vehiculos }: { vehiculos: Vehiculo[] })
     <section className="rounded-md border border-[#E5E7EB] bg-white">
       <div className="border-b border-[#E5E7EB] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {toolbarAction ? <div className="flex flex-wrap gap-2">{toolbarAction}</div> : null}
           <div className="relative min-w-[260px] flex-1 sm:w-[320px] sm:flex-none">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
             <input

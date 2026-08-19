@@ -127,18 +127,30 @@ export default async function CatalogoPage({ searchParams }: { searchParams?: { 
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">
-              Catálogo
-            </h1>
-            <p className="text-sm leading-6 text-[#6B7280]">
-              Configuración de publicación online
-            </p>
+      <div className="space-y-2">
+        {isDemoMode ? (
+          <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
+            Modo demo: el catálogo y las publicaciones usan datos simulados y no se guardarán cambios reales.
           </div>
-          <div className="space-y-2 text-right">
-            <div className="flex flex-wrap justify-end gap-2">
+        ) : null}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <KpiCard
+          label="Catálogo"
+          value={config.activo ? "Activo" : "Inactivo"}
+          detail={config.activo ? "Visible públicamente" : "El catálogo público está oculto"}
+        />
+        <KpiCard label="Vehículos publicados" value={publishedCount} />
+        <KpiCard label="Vehículos destacados" value={featuredCount} />
+        <KpiCard label="En stock sin publicar" value={stockWithoutPublication} />
+      </div>
+
+      <div className="space-y-6">
+        <CatalogoVehiculosTable
+          vehiculos={vehiculos}
+          toolbarAction={
+            <div className="flex flex-wrap gap-2">
               <DataEntryModal
                 triggerLabel="Editar vidriera"
                 title="Editor visual del catálogo"
@@ -156,29 +168,8 @@ export default async function CatalogoPage({ searchParams }: { searchParams?: { 
                 Abrir catálogo público
               </Link>
             </div>
-            <p className="text-xs text-[#6B7280]">Vista previa comercial de la vidriera online.</p>
-          </div>
-        </div>
-        {isDemoMode ? (
-          <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-            Modo demo: el catálogo y las publicaciones usan datos simulados y no se guardarán cambios reales.
-          </div>
-        ) : null}
-      </header>
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <KpiCard
-          label="Catálogo"
-          value={config.activo ? "Activo" : "Inactivo"}
-          detail={config.activo ? "Visible públicamente" : "El catálogo público está oculto"}
+          }
         />
-        <KpiCard label="Vehículos publicados" value={publishedCount} />
-        <KpiCard label="Vehículos destacados" value={featuredCount} />
-        <KpiCard label="En stock sin publicar" value={stockWithoutPublication} />
-      </div>
-
-      <div className="space-y-6">
-        <CatalogoVehiculosTable vehiculos={vehiculos} />
       </div>
     </section>
   );
