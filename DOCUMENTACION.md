@@ -226,6 +226,12 @@
 - Se incorporó la foto principal como elemento visual, con placeholder cuando no existe, y se mantuvieron filtros y paginación.
 - No se modificó el schema ni las acciones de Supabase; el cambio es exclusivamente de presentación en `components/catalogo/catalogo-vehiculos-table.tsx`.
 
+## Corrección de carga de portada
+
+- Se corrigió el error `413` al guardar la portada del catálogo: Next.js rechazaba imágenes válidas antes de ejecutar la acción por el límite predeterminado de tamaño de Server Actions.
+- Se configuró un límite de `10 MB` en `next.config.js`, manteniendo la validación de negocio de la acción en `8 MB` para el archivo final.
+- También se hizo tolerante el mensaje de error del formulario para evitar una excepción del cliente cuando la petición es rechazada.
+
 - Se integró el flujo de nueva venta para que, luego de `registrar_venta`, Next complete automáticamente los pasos operativos posteriores.
 - La acción de ventas ahora registra pagos iniciales con `ventas_pagos`, genera movimientos de `caja_movimientos` para pagos monetarios, asegura la entrega pendiente en `ventas_entregas` y llama `generar_comision_por_venta` con porcentaje tomado del vendedor o de `configuracion_general`.
 - El pago `usado` queda solo en `ventas_pagos` y no genera caja, porque representa una unidad recibida y no un ingreso líquido.

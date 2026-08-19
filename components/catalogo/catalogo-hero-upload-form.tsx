@@ -35,7 +35,7 @@ export function CatalogoHeroUploadForm({ heroImageUrl }: { heroImageUrl: string 
         <SubmitButton />
       </div>
       {heroImageUrl ? <p className="mt-2 text-[11px] font-medium text-[#166534]">Portada guardada y visible en el catálogo.</p> : null}
-      {state.error ? <p className="mt-2 text-xs text-[#B45309]">{state.error}</p> : null}
+      {state?.error ? <p className="mt-2 text-xs text-[#B45309]">{state.error}</p> : null}
       {state.success ? <p className="mt-2 text-xs text-[#166534]">Portada guardada.</p> : null}
     </form>
   );
