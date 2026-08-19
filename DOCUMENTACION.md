@@ -3751,3 +3751,11 @@ Path creado: `components/dashboard/section-subheader-actions.tsx`.
 Paths modificados: `components/dashboard/section-subheader.tsx`, `components/common/collapsible-summary.tsx`, `app/(dashboard)/compras/page.tsx`, `app/(dashboard)/ventas/page.tsx`, `app/(dashboard)/inventario/page.tsx`, `app/(dashboard)/caja/page.tsx`, `app/(dashboard)/crm/page.tsx`, `app/(dashboard)/gestoria/page.tsx`, `app/(dashboard)/gestoria/presupuestos/page.tsx`, `app/(dashboard)/dashboard/catalogo/page.tsx`, `app/(dashboard)/comisiones/page.tsx`, `app/(dashboard)/empleados/page.tsx`, `app/(dashboard)/recordatorios/page.tsx`, `components/empleados/empleados-table.tsx`.
 
 Decisión técnica: se usa un portal React hacia un contenedor único del subheader para mantener acciones y métricas alineadas sin duplicar toolbars ni alterar las tablas. No se modificaron tablas Supabase ni reglas de negocio. Validación: `npm run build` finalizado correctamente.
+
+### Gráfico de comisiones a ancho completo
+
+Se ajustó el gráfico comparativo de vendedores para que el área de trazado ocupe todo el ancho disponible de la sección, sin dejar márgenes laterales innecesarios. Se mantuvo la altura, la escala de datos, el hover mensual y el comportamiento responsive.
+
+Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`.
+
+No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.

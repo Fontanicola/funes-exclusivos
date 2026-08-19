@@ -117,9 +117,15 @@ export function ComisionesVendedoresChart({
         </div>
       </div>
 
-      <div className="relative mt-3 overflow-x-auto">
-        <div className="relative min-w-[620px]">
-          <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className="h-[280px] w-full" role="img" aria-label="Comparativa mensual por vendedor">
+      <div className="relative mt-3 w-full overflow-x-auto">
+        <div className="relative w-full min-w-[620px]">
+          <svg
+            viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+            preserveAspectRatio="none"
+            className="block h-[280px] w-full"
+            role="img"
+            aria-label="Comparativa mensual por vendedor"
+          >
             {yTicks.map((tick, index) => {
               const y = yFor(tick);
               return (
