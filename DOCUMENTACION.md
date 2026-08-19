@@ -1437,6 +1437,32 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Gráfico histórico de vendedores en Comisiones
+
+### Qué se construyó
+- Se agregó una comparativa lineal de los últimos 12 meses por vendedor.
+- La visualización permite alternar entre monto vendido, unidades vendidas y comisión generada.
+- Para importes se puede seleccionar ARS o USD sin convertir monedas.
+- Al pasar el mouse por un mes se muestra el detalle de cada vendedor activo en ese período.
+
+### Paths creados o modificados
+- `components/comisiones/comisiones-vendedores-chart.tsx`
+- `app/(dashboard)/comisiones/page.tsx`
+- `DOCUMENTACION.md`
+
+### Tablas de Supabase involucradas
+- `comisiones`
+- `ventas`
+- `empleados`
+
+### Decisiones técnicas
+- El gráfico usa SVG y CSS propios, sin agregar dependencias de visualización.
+- Las unidades se deduplican por venta y vendedor para evitar contar dos veces una operación.
+- Las métricas monetarias se agrupan por moneda y se muestran separadas.
+
+### Validación
+- `npm run build` ejecutado correctamente.
+
 ## Clasificación masiva de leads con IA
 
 ### Qué se construyó

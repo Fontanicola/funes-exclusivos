@@ -7,6 +7,7 @@ import { mockComisiones, mockLeads } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { ComisionesComparativa } from "@/components/comisiones/comisiones-comparativa";
+import { ComisionesVendedoresChart, type VendorSeries } from "@/components/comisiones/comisiones-vendedores-chart";
 import { ComisionesTable } from "@/components/comisiones/comisiones-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
@@ -90,6 +91,70 @@ type CurrencyTotal = {
   currency: string;
   total: number;
 };
+
+const chartColors = ["#8A1538", "#64748B", "#0F766E", "#B45309", "#475569", "#9F1239"];
+
+function buildVendorChart(comisiones: Comision[]) {
+  const now = new Date();
+  const months = Array.from({ length: 12 }, (_, index) => {
+    const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11 + index, 1));
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    return {
+      key: `${year}-${month}`,
+      label: new Intl.DateTimeFormat("es-AR", { month: "short", year: "2-digit", timeZone: "UTC" })
+        .format(date)
+        .replace(".", "")
+        .toUpperCase(),
+    };
+  });
+  const monthKeys = new Set(months.map((month) => month.key));
+  const currencies = new Set<string>();
+  const vendors = new Map<string, { name: string; units: Map<string, Set<string>>; sold: Map<string, Map<string, number>>; commission: Map<string, Map<string, number>> }>();
+
+  for (const comision of comisiones) {
+    if (comision.estado === "anulada" || comision.venta?.estado === "anulada") continue;
+    const rawDate = comision.venta?.fecha_venta ?? comision.fecha_generada ?? comision.created_at;
+    const monthKey = rawDate?.slice(0, 7);
+    if (!monthKey || !monthKeys.has(monthKey)) continue;
+    const vendorId = comision.vendedor?.id ?? comision.vendedor_id ?? "sin-vendedor";
+    const vendor = vendors.get(vendorId) ?? {
+      name: comision.vendedor?.nombre ?? "Sin vendedor",
+      units: new Map(),
+      sold: new Map(),
+      commission: new Map(),
+    };
+    const units = vendor.units.get(monthKey) ?? new Set<string>();
+    units.add(comision.venta_id ?? comision.venta?.id ?? comision.id);
+    vendor.units.set(monthKey, units);
+    const saleCurrency = (comision.venta?.moneda ?? comision.moneda ?? "ARS").toUpperCase();
+    currencies.add(saleCurrency);
+    const sold = vendor.sold.get(monthKey) ?? new Map<string, number>();
+    sold.set(saleCurrency, (sold.get(saleCurrency) ?? 0) + (comision.venta?.precio_venta ?? comision.base_comision ?? 0));
+    vendor.sold.set(monthKey, sold);
+    const commissionCurrency = (comision.moneda ?? "ARS").toUpperCase();
+    currencies.add(commissionCurrency);
+    const commission = vendor.commission.get(monthKey) ?? new Map<string, number>();
+    commission.set(commissionCurrency, (commission.get(commissionCurrency) ?? 0) + (comision.monto_comision ?? 0));
+    vendor.commission.set(monthKey, commission);
+    vendors.set(vendorId, vendor);
+  }
+
+  const series: VendorSeries[] = Array.from(vendors.entries()).map(([id, vendor], index) => ({
+    id,
+    name: vendor.name,
+    color: chartColors[index % chartColors.length],
+    points: months.map((month) => ({
+      key: month.key,
+      label: month.label,
+      units: vendor.units.get(month.key)?.size ?? 0,
+      soldByCurrency: Object.fromEntries(vendor.sold.get(month.key) ?? []),
+      commissionByCurrency: Object.fromEntries(vendor.commission.get(month.key) ?? []),
+    })),
+  }));
+
+  return { series, currencies: Array.from(currencies).sort() };
+}
 
 function normalizeSingleRelation<T>(value: T | T[] | null | undefined) {
   if (Array.isArray(value)) {
@@ -227,6 +292,7 @@ export default async function ComisionesPage({ searchParams }: { searchParams?: 
     }
   }
 
+  const chartData = buildVendorChart(comisiones);
   comisiones = filterByDateRange(comisiones, dateRange, (comision) => comision.fecha_generada ?? comision.created_at);
   const comisionesValidas = comisiones.filter(
     (comision) => comision.estado !== "anulada" && comision.venta?.estado !== "anulada"
@@ -270,6 +336,7 @@ export default async function ComisionesPage({ searchParams }: { searchParams?: 
         </article>
       </div>
 
+      <ComisionesVendedoresChart {...chartData} />
       <ComisionesComparativa comisiones={comisiones} potenciales={potenciales} />
       <ComisionesTable
         comisiones={comisiones}
