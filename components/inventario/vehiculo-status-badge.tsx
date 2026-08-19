@@ -10,11 +10,11 @@ const statusMap: Record<
   },
   vendido: {
     label: "Vendido",
-    classes: "border-[#E5E7EB] bg-[#F9FAFB] text-[#374151]",
+    classes: "border-blue-200 bg-blue-50 text-blue-800",
   },
   en_consignacion: {
     label: "Consignación",
-    classes: "border-[#E5E7EB] bg-[#FAFAFA] text-[#4B5563]",
+    classes: "border-amber-200 bg-amber-50 text-amber-800",
   },
 };
 

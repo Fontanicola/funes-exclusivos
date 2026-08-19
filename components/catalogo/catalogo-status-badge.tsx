@@ -10,9 +10,9 @@ export function CatalogoStatusBadge({ status }: { status: CatalogoStatus }) {
   };
 
   const styles: Record<string, string> = {
-    publicado: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
-    no_publicado: "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]",
-    destacado: "border-[#E5E7EB] bg-[#F3F4F6] text-[#111827]",
+    publicado: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    no_publicado: "border-slate-200 bg-slate-50 text-slate-700",
+    destacado: "border-amber-200 bg-amber-50 text-amber-800",
   };
 
   return (

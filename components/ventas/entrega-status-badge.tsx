@@ -18,11 +18,11 @@ const statusMap: Record<
   },
   en_proceso: {
     label: "En proceso",
-    classes: "border-[#E5E7EB] bg-[#FAFAFA] text-[#374151]",
+    classes: "border-blue-200 bg-blue-50 text-blue-800",
   },
   lista_para_entregar: {
     label: "Lista para entregar",
-    classes: "border-[#E5E7EB] bg-[#FAFAFA] text-[#374151]",
+    classes: "border-amber-200 bg-amber-50 text-amber-800",
   },
   entregada: {
     label: "Entregada",
@@ -30,7 +30,7 @@ const statusMap: Record<
   },
   observada: {
     label: "Observada",
-    classes: "border-[#FEF3C7] bg-[#FFFBEB] text-[#92400E]",
+    classes: "border-rose-200 bg-rose-50 text-rose-800",
   },
   cancelada: {
     label: "Cancelada",

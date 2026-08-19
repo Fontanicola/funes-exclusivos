@@ -1941,6 +1941,35 @@ Además, el mismo desplegable permite filtrar por vehículo de interés. Las opc
 - `npm run build` ejecutado al cierre del rediseño.
 - Build finalizado correctamente sin errores.
 
+## Sistema de colores semánticos para etiquetas
+
+Se unificó el tratamiento visual de las etiquetas de estado para que comuniquen rápidamente la situación operativa: verde suave para estados positivos o activos, ámbar para estados pendientes o intermedios, rojo suave para estados negativos o anulados, azul para estados informativos/en curso y slate para estados neutros. También se incorporaron colores sutiles para roles, orígenes comerciales, interés de compra, conexión de WhatsApp y publicación de catálogo. Las etiquetas puramente descriptivas, como tipos de documento y medios de pago, se mantienen neutras para preservar la jerarquía visual.
+
+### Paths modificados
+
+- `components/catalogo/catalogo-status-badge.tsx`
+- `components/comisiones/comision-status-badge.tsx`
+- `components/crm/lead-origin-badge.tsx`
+- `components/crm/lead-status-badge.tsx`
+- `components/empleados/empleado-role-badge.tsx`
+- `components/empleados/empleado-status-badge.tsx`
+- `components/gestoria/gestoria-status-badge.tsx`
+- `components/gestoria/presupuesto-status-badge.tsx`
+- `components/inventario/vehiculo-status-badge.tsx`
+- `components/ventas/entrega-status-badge.tsx`
+- `components/ventas/venta-status-badge.tsx`
+- `components/whatsapp/conversacion-interest-badge.tsx`
+- `components/whatsapp/conversacion-status-badge.tsx`
+- `components/whatsapp/whatsapp-instance-status-badge.tsx`
+
+### Tablas involucradas
+
+No se modificaron consultas, columnas ni reglas de negocio. Los componentes representan visualmente estados provenientes de `empleados`, `leads`, `vehiculos`, `ventas`, `ventas_entregas`, `gestoria_tramites`, `gestoria_presupuestos`, `comisiones`, `conversaciones`, `whatsapp_instancias` y `catalogo_config`.
+
+### Decisión técnica
+
+El cambio se limitó a clases visuales dentro de badges existentes, sin alterar valores, filtros, permisos ni persistencia. Esto permite mejorar la lectura operativa sin riesgo para los datos ni para el modo demo.
+
 ## Perfil y conexión WhatsApp desde Empleados
 
 La edición de cada empleado ahora permite cargar una foto de perfil y administrar su conexión individual de WhatsApp desde la misma pantalla. Si ya existe una instancia, se muestran su estado, teléfono, QR y acciones de sincronización; si no existe, se puede iniciar la conexión para ese empleado sin volver a `Conexiones WhatsApp`.

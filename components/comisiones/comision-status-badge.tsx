@@ -4,10 +4,10 @@ export function ComisionStatusBadge({ status }: { status: ComisionStatus }) {
   const normalized = (status ?? "").toLowerCase();
 
   const styles: Record<string, string> = {
-    pendiente: "border-[#E5E7EB] bg-[#FAFAFA] text-[#111827]",
-    aprobada: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
-    pagada: "border-[#D1FAE5] bg-[#F0FDF4] text-[#166534]",
-    anulada: "border-[#F3F4F6] bg-[#F9FAFB] text-[#6B7280]",
+    pendiente: "border-amber-200 bg-amber-50 text-amber-800",
+    aprobada: "border-blue-200 bg-blue-50 text-blue-800",
+    pagada: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    anulada: "border-rose-200 bg-rose-50 text-rose-800",
   };
 
   const labels: Record<string, string> = {

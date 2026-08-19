@@ -14,13 +14,13 @@ export function LeadStatusBadge({ status }: { status: LeadStatus }) {
   };
 
   const styles: Record<string, string> = {
-    nuevo: "border-[#E5E7EB] bg-[#FAFAFA] text-[#111827]",
-    contactado: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
-    interesado: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
-    negociacion: "border-[#E5E7EB] bg-[#F3F4F6] text-[#111827]",
-    reservado: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
-    ganado: "border-[#BBF7D0] bg-[#ECFDF5] text-[#166534]",
-    perdido: "border-[#F3F4F6] bg-[#FAFAFA] text-[#6B7280]",
+    nuevo: "border-sky-200 bg-sky-50 text-sky-800",
+    contactado: "border-blue-200 bg-blue-50 text-blue-800",
+    interesado: "border-amber-200 bg-amber-50 text-amber-800",
+    negociacion: "border-orange-200 bg-orange-50 text-orange-800",
+    reservado: "border-violet-200 bg-violet-50 text-violet-800",
+    ganado: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    perdido: "border-rose-200 bg-rose-50 text-rose-800",
   };
 
   return (

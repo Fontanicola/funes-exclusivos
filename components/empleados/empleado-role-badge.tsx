@@ -15,8 +15,10 @@ export function EmpleadoRoleBadge({ role }: { role: Role }) {
       className={[
         "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium",
         normalized === "admin"
-          ? "border-[#E5E7EB] bg-[#FAFAFA] text-[#111827]"
-          : "border-[#E5E7EB] bg-white text-[#111827]",
+          ? "border-slate-200 bg-slate-50 text-slate-700"
+          : normalized === "vendedor"
+            ? "border-blue-200 bg-blue-50 text-blue-800"
+            : "border-amber-200 bg-amber-50 text-amber-800",
       ].join(" ")}
     >
       {label}

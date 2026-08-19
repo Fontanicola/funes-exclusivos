@@ -7,7 +7,7 @@ const statusMap: Record<"registrada" | "anulada", { label: string; classes: stri
   },
   anulada: {
     label: "Anulada",
-    classes: "border-[#E5E7EB] bg-[#F9FAFB] text-[#374151]",
+    classes: "border-rose-200 bg-rose-50 text-rose-700",
   },
 };
 

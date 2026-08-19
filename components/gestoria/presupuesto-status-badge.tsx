@@ -12,7 +12,7 @@ type PresupuestoStatus =
 const statusMap: Record<string, { label: string; classes: string }> = {
   borrador: {
     label: "Borrador",
-    classes: "border-[#E5E7EB] bg-[#FAFAFA] text-[#111827]",
+    classes: "border-amber-200 bg-amber-50 text-amber-800",
   },
   enviado: {
     label: "Enviado",
@@ -32,7 +32,7 @@ const statusMap: Record<string, { label: string; classes: string }> = {
   },
   anulado: {
     label: "Anulado",
-    classes: "border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280]",
+    classes: "border-rose-200 bg-rose-50 text-rose-700",
   },
 };
 
@@ -51,4 +51,3 @@ export function PresupuestoStatusBadge({ status }: { status: PresupuestoStatus }
     </span>
   );
 }
-

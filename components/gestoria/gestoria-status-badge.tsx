@@ -12,11 +12,11 @@ export function GestoriaStatusBadge({ status }: { status: GestoriaStatus }) {
   };
 
   const styles: Record<string, string> = {
-    pendiente: "border-[#E5E7EB] bg-[#FAFAFA] text-[#111827]",
-    en_proceso: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
-    observado: "border-[#E5E7EB] bg-[#F3F4F6] text-[#111827]",
-    completado: "border-[#D1FAE5] bg-[#F0FDF4] text-[#166534]",
-    cancelado: "border-[#F3F4F6] bg-[#FAFAFA] text-[#6B7280]",
+    pendiente: "border-amber-200 bg-amber-50 text-amber-800",
+    en_proceso: "border-blue-200 bg-blue-50 text-blue-800",
+    observado: "border-rose-200 bg-rose-50 text-rose-800",
+    completado: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    cancelado: "border-rose-200 bg-rose-50 text-rose-800",
   };
 
   return (

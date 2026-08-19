@@ -20,11 +20,11 @@ export function ConversacionInterestBadge({ interest }: { interest: Conversacion
   };
 
   const styles: Record<string, string> = {
-    alto: "border-[#E5E7EB] bg-[#F0FDF4] text-[#166534]",
-    medio: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
-    bajo: "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]",
-    sin_interes: "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]",
-    no_detectado: "border-[#E5E7EB] bg-[#F3F4F6] text-[#111827]",
+    alto: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    medio: "border-amber-200 bg-amber-50 text-amber-800",
+    bajo: "border-slate-200 bg-slate-50 text-slate-700",
+    sin_interes: "border-rose-200 bg-rose-50 text-rose-800",
+    no_detectado: "border-slate-200 bg-slate-50 text-slate-700",
   };
 
   return (

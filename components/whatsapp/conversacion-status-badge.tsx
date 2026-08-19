@@ -18,10 +18,10 @@ export function ConversacionStatusBadge({ status }: { status: ConversacionStatus
   };
 
   const styles: Record<string, string> = {
-    abierta: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
-    en_seguimiento: "border-[#E5E7EB] bg-[#F3F4F6] text-[#111827]",
-    cerrada: "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]",
-    archivada: "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]",
+    abierta: "border-amber-200 bg-amber-50 text-amber-800",
+    en_seguimiento: "border-blue-200 bg-blue-50 text-blue-800",
+    cerrada: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    archivada: "border-slate-200 bg-slate-50 text-slate-700",
   };
 
   return (

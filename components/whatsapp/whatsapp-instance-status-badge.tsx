@@ -22,12 +22,12 @@ export function WhatsappInstanceStatusBadge({ status }: { status: WhatsappInstan
   };
 
   const styles: Record<string, string> = {
-    desconectado: "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]",
-    qr_pendiente: "border-[#E5E7EB] bg-[#F9FAFB] text-[#111827]",
-    conectando: "border-[#E5E7EB] bg-[#F3F4F6] text-[#111827]",
-    conectado: "border-[#E5E7EB] bg-[#F0FDF4] text-[#166534]",
-    error: "border-[#E5E7EB] bg-[#FAFAFA] text-[#111827]",
-    pausado: "border-[#E5E7EB] bg-[#FAFAFA] text-[#6B7280]",
+    desconectado: "border-slate-200 bg-slate-50 text-slate-700",
+    qr_pendiente: "border-amber-200 bg-amber-50 text-amber-800",
+    conectando: "border-blue-200 bg-blue-50 text-blue-800",
+    conectado: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    error: "border-rose-200 bg-rose-50 text-rose-800",
+    pausado: "border-amber-200 bg-amber-50 text-amber-800",
   };
 
   return (
