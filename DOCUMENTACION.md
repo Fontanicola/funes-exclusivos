@@ -3823,3 +3823,9 @@ Pendiente operativo: ejecutar `PERITAJES.sql` manualmente en Supabase, verificar
 Las cuatro métricas superiores de Compras ahora se muestran en una grilla de dos columnas, formando dos filas de dos cards en tablet y desktop. En mobile se mantienen apiladas en una sola columna. No se modificó la lógica, las consultas ni el schema de Supabase.
 
 Path modificado: `components/compras/compra-kpis.tsx`. Validación: `npm run build`.
+
+### Ajuste de ancho del gráfico de Comisiones
+
+El gráfico de rendimiento por vendedor dejó de limitarse a un ancho máximo interno y ahora ocupa todo el ancho disponible del módulo. Se mantienen sus métricas, tooltip y comportamiento responsive sin cambios de datos.
+
+Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`. Validación: `npm run build`.

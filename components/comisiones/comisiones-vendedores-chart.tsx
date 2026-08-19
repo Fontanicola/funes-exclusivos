@@ -118,7 +118,7 @@ export function ComisionesVendedoresChart({
       </div>
 
       <div className="relative mt-3 w-full overflow-x-auto">
-        <div className="relative mx-auto w-full max-w-[1440px] min-w-[760px]">
+        <div className="relative w-full min-w-[760px]">
           <svg
             viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
             className="block h-[320px] w-full"
