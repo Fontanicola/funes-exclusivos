@@ -3649,3 +3649,9 @@ No hace falta ejecutar SQL. Si el proyecto tiene políticas de Storage que impid
 Se corrigió la celda de vehículo de interés en la vista de tabla del CRM. El disparador del detalle ya no queda vacío: ahora muestra una tarjeta compacta con miniatura, nombre y datos resumidos; cuando la unidad no tiene foto, se muestra un ícono de cámara como indicador visual. El modal con la ficha comercial del vehículo se mantiene disponible al hacer clic.
 
 Paths modificados: `components/common/data-entry-modal.tsx`, `components/crm/leads-table.tsx`.
+
+### Corrección de carga de portada del catálogo
+
+Se corrigió la carga de la portada panorámica para evitar errores `413` por imágenes pesadas: la imagen se redimensiona y comprime en el navegador antes de enviarse, con un límite seguro para el entorno de producción. También se hizo tolerante el estado del formulario para que un fallo de red no provoque una excepción de cliente ni deje la pantalla en blanco.
+
+Paths modificados: `components/catalogo/catalogo-hero-upload-form.tsx`, `app/(dashboard)/catalogo/actions.ts`.

@@ -164,8 +164,8 @@ export async function uploadCatalogoHeroAction(
     return { error: "La portada debe ser JPG, PNG o WEBP." };
   }
 
-  if (file.size > 8 * 1024 * 1024) {
-    return { error: "La imagen no puede superar los 8 MB." };
+  if (file.size > 4 * 1024 * 1024) {
+    return { error: "La imagen preparada no puede superar los 4 MB. Elegí una imagen más liviana." };
   }
 
   const { error } = await supabase.storage.from(CATALOGO_BUCKET).upload(CATALOGO_HERO_PATH, file, {
