@@ -245,7 +245,6 @@ export async function updateGestoriaOperacionAction(formData: FormData) {
   const fechaVencimiento = normalizeNullableString(formData.get("fecha_vencimiento"));
   const costoFinalTransferencia = toOptionalNumber(formData.get("costo_final_transferencia"));
   const costoFinalMoneda = toOptionalString(formData.get("costo_final_moneda")).toUpperCase() || "ARS";
-  const seguimientoComentarios = normalizeNullableString(formData.get("seguimiento_comentarios"));
 
   if (etapa && !allowedStages.has(etapa)) return { error: "La etapa no es válida." };
   if (estado && !allowedStates.has(estado)) return { error: "El estado no es válido." };
@@ -277,7 +276,10 @@ export async function updateGestoriaOperacionAction(formData: FormData) {
   updatePayload.costo_final_transferencia = costoFinalTransferencia;
   updatePayload.costo_final_moneda = costoFinalMoneda;
   updatePayload.presupuesto_confirmado = isChecked(formData.get("presupuesto_confirmado"));
-  updatePayload.seguimiento_comentarios = seguimientoComentarios;
+  // Las notas ya no se editan desde el tablero; si el campo no llega, se conserva su valor existente.
+  if (formData.has("seguimiento_comentarios")) {
+    updatePayload.seguimiento_comentarios = normalizeNullableString(formData.get("seguimiento_comentarios"));
+  }
 
   for (const field of milestoneFields) {
     const value = toLowerTrimmed(formData.get(field));

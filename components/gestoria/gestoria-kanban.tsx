@@ -7,6 +7,7 @@ import { CalendarDays, CheckCircle2, Circle, FileText, Search, Send, UserRound }
 import { updateGestoriaOperacionFormAction } from "@/app/(dashboard)/gestoria/actions";
 import { GestoriaStatusBadge } from "./gestoria-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 
 type Employee = {
   id: string;
@@ -97,15 +98,7 @@ const stages = [
   },
 ] as const;
 
-const PAGE_SIZE = 10;
-
-const milestoneOptions = [
-  { value: "pendiente", label: "Pendiente" },
-  { value: "en_proceso", label: "En proceso" },
-  { value: "completado", label: "Completado" },
-  { value: "observado", label: "Observado" },
-  { value: "no_aplica", label: "No aplica" },
-];
+const PAGE_SIZE = 20;
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "—";
@@ -240,22 +233,29 @@ function MilestoneRow({
   name: string;
   value: string | null | undefined;
 }) {
-  const completed = (value ?? "").toLowerCase() === "completado";
+  const [currentValue, setCurrentValue] = useState(value ?? "pendiente");
+  const completed = currentValue.toLowerCase() === "completado";
   const Icon = completed ? CheckCircle2 : Circle;
+  const nextValue = completed ? "pendiente" : "completado";
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-md border border-[#E5E7EB] bg-white px-3 py-2">
+    <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] py-2 last:border-b-0">
       <span className="inline-flex min-w-0 items-center gap-2 text-xs font-medium text-[#111827]">
-        <Icon className={["h-3.5 w-3.5 shrink-0", statusTone(value)].join(" ")} />
+        <button
+          type="button"
+          onClick={() => setCurrentValue(nextValue)}
+          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition hover:bg-[#FDF2F5]"
+          aria-label={`${completed ? "Marcar como pendiente" : "Marcar como completado"}: ${label}`}
+          title={completed ? "Marcar como pendiente" : "Marcar como completado"}
+        >
+          <Icon className={["h-4 w-4", statusTone(currentValue)].join(" ")} />
+        </button>
         <span className="truncate">{label}</span>
       </span>
-      <SelectField name={name} defaultValue={value ?? "pendiente"} className="max-w-[128px]">
-        {milestoneOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </SelectField>
+      <input type="hidden" name={name} value={currentValue} />
+      <span className={["shrink-0 text-[11px]", statusTone(currentValue)].join(" ")}>
+        {completed ? "Completado" : "Pendiente"}
+      </span>
     </div>
   );
 }
@@ -297,7 +297,7 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-3 py-2">
-          <p className="text-[10px] uppercase tracking-[0.14em] text-[#6B7280]">Presupuesto</p>
+          <p className="text-[11px] font-medium text-[#6B7280]">Presupuesto</p>
           <p className="mt-1 text-sm font-semibold text-[#111827]">
             {formatMoney(tramite.presupuesto?.total, tramite.presupuesto?.moneda)}
           </p>
@@ -306,7 +306,7 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
           </p>
         </div>
         <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-3 py-2">
-          <p className="text-[10px] uppercase tracking-[0.14em] text-[#6B7280]">Costo final</p>
+          <p className="text-[11px] font-medium text-[#6B7280]">Costo final</p>
           <p className="mt-1 text-sm font-semibold text-[#111827]">
             {formatMoney(tramite.costo_final_transferencia, tramite.costo_final_moneda)}
           </p>
@@ -316,12 +316,12 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
         </div>
       </div>
 
-      <form action={updateGestoriaOperacionFormAction} className="mt-4 space-y-3 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+      <form action={updateGestoriaOperacionFormAction} className="mt-4 space-y-3 border-t border-[#E5E7EB] pt-3">
         <input type="hidden" name="id" value={tramite.id} />
 
         <div className="grid gap-2 sm:grid-cols-2">
           <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Etapa</p>
+            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Etapa</p>
             <SelectField name="etapa" defaultValue={tramite.etapa ?? "presupuesto"}>
               {stages.map((stage) => (
                 <option key={stage.key} value={stage.key}>
@@ -331,7 +331,7 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
             </SelectField>
           </div>
           <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Estado</p>
+            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Estado</p>
             <SelectField name="estado" defaultValue={tramite.estado ?? "pendiente"}>
               <option value="pendiente">Pendiente</option>
               <option value="en_proceso">En proceso</option>
@@ -344,7 +344,7 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
 
         <div className="grid gap-2 sm:grid-cols-2">
           <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Gestor</p>
+            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Gestor</p>
             <SelectField name="responsable_id" defaultValue={tramite.responsable?.id ?? ""}>
               <option value="">Sin gestor</option>
               {gestores.map((gestor) => (
@@ -355,7 +355,7 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
             </SelectField>
           </div>
           <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Gestión</p>
+            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Gestión</p>
             <SelectField name="gestion_tipo" defaultValue={gestionTipo}>
               <option value="interna">Interna</option>
               <option value="cliente">Cliente</option>
@@ -366,26 +366,26 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
 
         <div className="grid gap-2 sm:grid-cols-3">
           <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Fecha envío</p>
+            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Fecha de envío</p>
             <InputField name="fecha_envio" type="date" defaultValue={tramite.fecha_envio} />
           </div>
           <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Firma</p>
+            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Firma</p>
             <InputField name="fecha_firma" type="date" defaultValue={tramite.fecha_firma} />
           </div>
           <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Vencimiento</p>
+            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Vencimiento</p>
             <InputField name="fecha_vencimiento" type="date" defaultValue={tramite.fecha_vencimiento} />
           </div>
         </div>
 
         <div className="grid gap-2 sm:grid-cols-[1fr_90px]">
           <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Costo final transferencia</p>
+            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Costo final de transferencia</p>
             <InputField name="costo_final_transferencia" type="number" defaultValue={tramite.costo_final_transferencia} placeholder="0" />
           </div>
           <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Moneda</p>
+            <p className="mb-1 text-[11px] font-medium text-[#6B7280]">Moneda</p>
             <SelectField name="costo_final_moneda" defaultValue={tramite.costo_final_moneda ?? "ARS"}>
               <option value="ARS">ARS</option>
               <option value="USD">USD</option>
@@ -406,13 +406,6 @@ function OperationCard({ tramite, gestores }: { tramite: GestoriaTramite; gestor
           <MilestoneRow label="Retiro documentación cliente" name="retiro_documentacion_cliente_estado" value={tramite.retiro_documentacion_cliente_estado} />
           <MilestoneRow label="Transferencia municipal" name="transferencia_municipal_estado" value={tramite.transferencia_municipal_estado} />
         </div>
-
-        <textarea
-          name="seguimiento_comentarios"
-          defaultValue={tramite.seguimiento_comentarios ?? ""}
-          placeholder="Seguimiento interno del trámite"
-          className="min-h-[72px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-xs text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
-        />
 
         <input type="hidden" name="cat_fecha" value={tramite.cat_fecha ?? ""} />
         <input type="hidden" name="documentacion_fisica_fecha" value={tramite.documentacion_fisica_fecha ?? ""} />
@@ -485,8 +478,8 @@ export function GestoriaKanban({
   }, [gestorFilter, gestionFilter, onlyPendingBudget, query, tramites]);
 
   return (
-    <section className="rounded-md border border-[#E5E7EB] bg-white">
-      <div className="border-b border-[#E5E7EB] p-4">
+    <section>
+      <div className="border-y border-[#E5E7EB] py-4">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             {toolbarAction ? <div className="shrink-0">{toolbarAction}</div> : null}
@@ -501,39 +494,41 @@ export function GestoriaKanban({
               />
             </div>
 
-            <select
-              value={gestorFilter}
-              onChange={(event) => setGestorFilter(event.target.value)}
-              className="h-10 min-w-[190px] rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
-            >
-              <option value="">Todos los gestores</option>
-              {gestores.map((gestor) => (
-                <option key={gestor.id} value={gestor.id}>
-                  {gestor.nombre ?? gestor.email ?? "Gestor"}
-                </option>
-              ))}
-            </select>
+            <AdvancedFilters>
+              <select
+                value={gestorFilter}
+                onChange={(event) => setGestorFilter(event.target.value)}
+                className="h-10 min-w-[190px] rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
+              >
+                <option value="">Todos los gestores</option>
+                {gestores.map((gestor) => (
+                  <option key={gestor.id} value={gestor.id}>
+                    {gestor.nombre ?? gestor.email ?? "Gestor"}
+                  </option>
+                ))}
+              </select>
 
-            <select
-              value={gestionFilter}
-              onChange={(event) => setGestionFilter(event.target.value)}
-              className="h-10 min-w-[170px] rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
-            >
-              <option value="">Tipo gestión</option>
-              <option value="interna">Interna</option>
-              <option value="cliente">Cliente</option>
-              <option value="mixta">Mixta</option>
-            </select>
+              <select
+                value={gestionFilter}
+                onChange={(event) => setGestionFilter(event.target.value)}
+                className="h-10 min-w-[170px] rounded-md border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
+              >
+                <option value="">Tipo de gestión</option>
+                <option value="interna">Interna</option>
+                <option value="cliente">Cliente</option>
+                <option value="mixta">Mixta</option>
+              </select>
 
-            <label className="inline-flex h-10 items-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827]">
-              <input
-                type="checkbox"
-                checked={onlyPendingBudget}
-                onChange={(event) => setOnlyPendingBudget(event.target.checked)}
-                className="h-4 w-4 accent-[#8A1538]"
-              />
-              Presupuesto pendiente
-            </label>
+              <label className="inline-flex h-10 items-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827]">
+                <input
+                  type="checkbox"
+                  checked={onlyPendingBudget}
+                  onChange={(event) => setOnlyPendingBudget(event.target.checked)}
+                  className="h-4 w-4 accent-[#8A1538]"
+                />
+                Presupuesto pendiente
+              </label>
+            </AdvancedFilters>
           </div>
 
           <p className="text-xs text-[#6B7280]">Mostrando {filtered.length} de {tramites.length}</p>
@@ -541,7 +536,7 @@ export function GestoriaKanban({
       </div>
 
       {filtered.length ? (
-        <div className="grid gap-4 p-4 xl:grid-cols-4">
+        <div className="grid gap-4 py-4 xl:grid-cols-4">
           {stages.map((stage) => {
             const stageItems = filtered.filter((tramite) => (tramite.etapa ?? "presupuesto") === stage.key);
             const totalPages = Math.max(1, Math.ceil(stageItems.length / PAGE_SIZE));
@@ -549,7 +544,7 @@ export function GestoriaKanban({
             const visibleStageItems = stageItems.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
             return (
-              <section key={stage.key} className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA]">
+              <section key={stage.key} className="flex h-[calc(100vh-280px)] min-h-[560px] min-w-0 flex-col rounded-md border border-[#E5E7EB] bg-[#FAFAFA]">
                 <div className="border-b border-[#E5E7EB] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -561,7 +556,7 @@ export function GestoriaKanban({
                     </span>
                   </div>
                 </div>
-                <div className="space-y-3 p-3">
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
                   {stageItems.length ? (
                     visibleStageItems.map((tramite) => (
                       <OperationCard key={tramite.id} tramite={tramite} gestores={gestores} />

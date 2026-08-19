@@ -1435,6 +1435,27 @@ El alta de recordatorios pasó a integrarse en la misma toolbar que la búsqueda
 
 - `npm run build` ejecutado correctamente.
 
+## Polish visual de Gestoría
+
+Se reorganizó el tablero principal de Gestoría para evitar la sensación de tarjetas anidadas. Las etapas Presupuesto, Escribanía, Gestoría y Terminado ahora se presentan como columnas independientes, con altura estable y scroll interno para recorrer sus operaciones sin desplazar toda la pantalla.
+
+La búsqueda se mantiene visible y los filtros de gestor, tipo de gestión y presupuesto pendiente quedaron agrupados en el botón de filtros. La paginación por etapa se ajustó a 20 trámites. Los hitos de CAT, documentación, escribanía y transferencias dejaron de usar desplegables: ahora se alternan directamente entre pendiente y completado desde un círculo clickeable. Se retiró la edición de notas del tablero; las notas existentes se conservan si se actualiza una operación desde esta vista.
+
+### Paths modificados
+
+- `components/gestoria/gestoria-kanban.tsx`
+- `app/(dashboard)/gestoria/actions.ts`
+
+### Tablas involucradas
+
+- `public.gestoria_tramites`
+- `public.gestoria_presupuestos`
+- `public.empleados`
+
+### Validación
+
+- `npm run build` ejecutado correctamente.
+
 ## Comparativa comercial de Comisiones
 
 Se mejoró la comparativa comercial para que la lectura por vendedor sea más clara y útil para dirección. Cada vendedor ahora muestra en paralelo el volumen vendido y la comisión generada, con barras independientes, importes por moneda y una tasa efectiva cuando los valores están expresados en la misma moneda.
