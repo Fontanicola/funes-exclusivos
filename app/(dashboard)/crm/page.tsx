@@ -8,6 +8,7 @@ import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CrmViews } from "@/components/crm/crm-views";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { AnalyzeNewLeadsButton } from "@/components/crm/analyze-new-leads-button";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 
 export const metadata: Metadata = {
   title: "CRM | Funes Exclusivos",
@@ -175,7 +176,8 @@ export default async function CrmPage({ searchParams }: { searchParams?: { from?
         </div>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <CollapsibleSummary sectionKey="crm">
+        <div className="grid gap-4 md:grid-cols-3">
         <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">Leads activos</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
@@ -195,7 +197,8 @@ export default async function CrmPage({ searchParams }: { searchParams?: { from?
           </p>
           <p className="mt-2 text-xs text-[#6B7280]">{formatCurrencyBreakdown(presupuestoTotal)}</p>
         </article>
-      </div>
+        </div>
+      </CollapsibleSummary>
 
       <CrmViews
         leads={leads}

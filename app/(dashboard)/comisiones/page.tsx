@@ -10,6 +10,7 @@ import { ComisionesComparativa } from "@/components/comisiones/comisiones-compar
 import { ComisionesVendedoresChart, type VendorSeries } from "@/components/comisiones/comisiones-vendedores-chart";
 import { ComisionesTable } from "@/components/comisiones/comisiones-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 
 export const metadata: Metadata = {
   title: "Comisiones | Funes Exclusivos",
@@ -309,7 +310,8 @@ export default async function ComisionesPage({ searchParams }: { searchParams?: 
         </div>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <CollapsibleSummary sectionKey="comisiones">
+        <div className="grid gap-4 md:grid-cols-3">
         <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">Unidades vendidas</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
@@ -334,7 +336,8 @@ export default async function ComisionesPage({ searchParams }: { searchParams?: 
             {formatBreakdown(comisionGenerada)}
           </p>
         </article>
-      </div>
+        </div>
+      </CollapsibleSummary>
 
       <ComisionesVendedoresChart {...chartData} />
       <ComisionesComparativa comisiones={comisiones} potenciales={potenciales} />

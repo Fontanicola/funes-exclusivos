@@ -14,6 +14,7 @@ import { CajaMovimientosTable } from "@/components/caja/caja-movimientos-table";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { CajaSummary } from "@/components/caja/caja-summary";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 
 export const metadata: Metadata = {
   title: "Caja | Funes Exclusivos",
@@ -354,14 +355,16 @@ export default async function CajaPage({ searchParams }: { searchParams?: { from
         </div>
       ) : null}
 
-      <CajaSummary
-        ingresos={ingresos}
-        egresos={egresos}
-        saldo={saldo}
-        movimientosCount={movimientos.length}
-        medios={medios}
-        saldos={saldos}
-      />
+      <CollapsibleSummary sectionKey="caja">
+        <CajaSummary
+          ingresos={ingresos}
+          egresos={egresos}
+          saldo={saldo}
+          movimientosCount={movimientos.length}
+          medios={medios}
+          saldos={saldos}
+        />
+      </CollapsibleSummary>
 
       <div className="space-y-6">
         <div>

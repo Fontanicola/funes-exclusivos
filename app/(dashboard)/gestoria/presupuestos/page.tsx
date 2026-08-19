@@ -11,6 +11,7 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PresupuestosTable } from "@/components/gestoria/presupuestos-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 
 export const metadata: Metadata = {
   title: "Presupuestos de gestoría | Funes Exclusivos",
@@ -191,7 +192,8 @@ export default async function GestoriaPresupuestosPage({ searchParams }: { searc
         ) : null}
       </header>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <CollapsibleSummary sectionKey="gestoria-presupuestos">
+        <div className="grid gap-4 md:grid-cols-4">
         <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">Presupuestos del mes</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">{presupuestosMes.length}</p>
@@ -210,7 +212,8 @@ export default async function GestoriaPresupuestosPage({ searchParams }: { searc
           <p className="text-sm font-medium text-[#6B7280]">Pendientes / borrador</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">{borradores}</p>
         </article>
-      </div>
+        </div>
+      </CollapsibleSummary>
 
       <PresupuestosTable presupuestos={presupuestos} />
     </section>

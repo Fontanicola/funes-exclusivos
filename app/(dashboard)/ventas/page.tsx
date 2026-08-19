@@ -8,6 +8,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { VentasTable } from "@/components/ventas/ventas-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 
 export const metadata: Metadata = {
   title: "Ventas | Funes Exclusivos",
@@ -269,7 +270,8 @@ export default async function VentasPage({ searchParams }: { searchParams?: { fr
         </div>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <CollapsibleSummary sectionKey="ventas">
+        <div className="grid gap-4 md:grid-cols-3">
         <article className="rounded-md border border-[#E5E7EB] bg-white p-4">
           <p className="text-sm font-medium text-[#6B7280]">Ventas registradas</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-[#111827]">
@@ -294,7 +296,8 @@ export default async function VentasPage({ searchParams }: { searchParams?: { fr
             {formatAverageBreakdown(totalPorMoneda)}
           </p>
         </article>
-      </div>
+        </div>
+      </CollapsibleSummary>
 
       <VentasTable
         ventas={ventas}

@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmpleadosTable } from "@/components/empleados/empleados-table";
 import type { WhatsappInstance } from "@/components/whatsapp/whatsapp-instance-card";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 
 export const metadata: Metadata = {
   title: "Empleados | Funes Exclusivos",
@@ -124,7 +125,8 @@ export default async function EmpleadosPage({ searchParams }: { searchParams?: {
 
   return (
     <section className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <CollapsibleSummary sectionKey="empleados">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           title="Total empleados activos"
           value={formatCount(activeEmployees.length)}
@@ -145,7 +147,8 @@ export default async function EmpleadosPage({ searchParams }: { searchParams?: {
           value={formatCount(managers.length)}
           description="Perfiles de gestoria y documentación."
         />
-      </div>
+        </div>
+      </CollapsibleSummary>
 
       <EmpleadosTable
         empleados={empleados}

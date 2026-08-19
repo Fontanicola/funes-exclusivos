@@ -9,6 +9,7 @@ import { CatalogoVehiculosTable } from "@/components/catalogo/catalogo-vehiculos
 import { CatalogoVisualEditor } from "@/components/catalogo/catalogo-visual-editor";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 
 export const metadata: Metadata = {
   title: "Catálogo | Funes Exclusivos",
@@ -135,7 +136,8 @@ export default async function CatalogoPage({ searchParams }: { searchParams?: { 
         ) : null}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <CollapsibleSummary sectionKey="catalogo">
+        <div className="grid gap-4 md:grid-cols-4">
         <KpiCard
           label="Catálogo"
           value={config.activo ? "Activo" : "Inactivo"}
@@ -144,7 +146,8 @@ export default async function CatalogoPage({ searchParams }: { searchParams?: { 
         <KpiCard label="Vehículos publicados" value={publishedCount} />
         <KpiCard label="Vehículos destacados" value={featuredCount} />
         <KpiCard label="En stock sin publicar" value={stockWithoutPublication} />
-      </div>
+        </div>
+      </CollapsibleSummary>
 
       <div className="space-y-6">
         <CatalogoVehiculosTable

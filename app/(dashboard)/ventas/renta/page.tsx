@@ -23,6 +23,7 @@ import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { RentaKpis } from "@/components/ventas/renta-kpis";
 import { RentaTable } from "@/components/ventas/renta-table";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 
 export const metadata: Metadata = {
   title: "Rentabilidad | Funes Exclusivos",
@@ -174,7 +175,9 @@ export default async function VentaRentaPage({ searchParams }: { searchParams?: 
         </div>
       ) : null}
 
-      <RentaKpis metrics={metrics} canViewFinancials={canSeeFinancials} />
+      <CollapsibleSummary sectionKey="ventas-rentabilidad">
+        <RentaKpis metrics={metrics} canViewFinancials={canSeeFinancials} />
+      </CollapsibleSummary>
       <RentaTable rows={rows} canViewFinancials={canSeeFinancials} />
     </section>
   );

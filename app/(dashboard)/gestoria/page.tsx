@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { GestoriaKanban } from "@/components/gestoria/gestoria-kanban";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 
 export const metadata: Metadata = {
   title: "Gestoría | Funes Exclusivos",
@@ -220,12 +221,14 @@ export default async function GestoriaPage({ searchParams }: { searchParams?: { 
         </div>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <CollapsibleSummary sectionKey="gestoria">
+        <div className="grid gap-4 md:grid-cols-4">
         <KpiCard label="Presupuesto" value={kpis.presupuesto} />
         <KpiCard label="Escribanía" value={kpis.escribania} />
         <KpiCard label="Gestoría" value={kpis.gestoria} />
         <KpiCard label="Vencidos" value={kpis.vencidos} />
-      </div>
+        </div>
+      </CollapsibleSummary>
 
       <GestoriaKanban
         tramites={tramites}

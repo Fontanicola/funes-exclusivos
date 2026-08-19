@@ -8,6 +8,7 @@ import { RecordatoriosTable } from "@/components/recordatorios/recordatorios-tab
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
+import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 
 export const dynamic = "force-dynamic";
 
@@ -277,13 +278,15 @@ export default async function RecordatoriosPage({ searchParams }: { searchParams
         </div>
       ) : null}
 
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+      <CollapsibleSummary sectionKey="recordatorios">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
         <KpiCard compact title="Pendientes" value={String(kpis.pendientes)} description="Seguimientos activos" variant="default" />
         <KpiCard compact title="Vencidos" value={String(kpis.vencidos)} description="Requieren atención" variant="danger" />
         <KpiCard compact title="Hoy" value={String(kpis.hoy)} description="Para revisar hoy" variant="warning" />
         <KpiCard compact title="Alta prioridad" value={String(kpis.altaPrioridad)} description="Críticos o urgentes" variant="warning" />
         <KpiCard compact title="Completados del mes" value={String(kpis.completadosMes)} description="Cerrados este mes" variant="positive" />
-      </div>
+        </div>
+      </CollapsibleSummary>
 
       <RecordatoriosTable
         recordatorios={filteredRecordatorios}

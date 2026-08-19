@@ -3671,3 +3671,13 @@ Paths modificados: `app/(dashboard)/crm/actions.ts`, `app/(dashboard)/crm/page.t
 Tablas y servicios involucrados: `leads`, `conversaciones`, `conversacion_mensajes`, `vehiculos`, `empleados` y OpenAI para la clasificación manual solicitada.
 
 Validación: `npm run build` finalizado correctamente.
+
+### Resúmenes de sección colapsables
+
+Se incorporó un patrón común para ocultar por defecto las cards y resúmenes superiores de las secciones operativas. Cada pantalla muestra el botón compacto `Ver resumen` y permite desplegar el contenido con una transición breve; la preferencia se guarda por sección en `localStorage` para conservar la elección del usuario en el mismo navegador. Se aplicó en Inventario, Ventas, Rentabilidad, Caja, CRM, Gestoría, Presupuestos, Catálogo, Empleados y Recordatorios. El Dashboard mantiene sus KPIs visibles por decisión de jerarquía ejecutiva, y las alertas críticas no se colapsaron.
+
+Path creado: `components/common/collapsible-summary.tsx`.
+
+Paths modificados: `app/(dashboard)/inventario/page.tsx`, `app/(dashboard)/ventas/page.tsx`, `app/(dashboard)/ventas/renta/page.tsx`, `app/(dashboard)/caja/page.tsx`, `app/(dashboard)/crm/page.tsx`, `app/(dashboard)/gestoria/page.tsx`, `app/(dashboard)/gestoria/presupuestos/page.tsx`, `app/(dashboard)/dashboard/catalogo/page.tsx`, `app/(dashboard)/empleados/page.tsx`, `app/(dashboard)/recordatorios/page.tsx`.
+
+No se modificaron tablas ni lógica de negocio. Validación: `npm run build` finalizado correctamente.
