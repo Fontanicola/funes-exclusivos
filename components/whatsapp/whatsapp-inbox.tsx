@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search, MessageCircle, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
+import { AdvancedFilters } from "@/components/common/advanced-filters";
 import { ConversacionInterestBadge } from "./conversacion-interest-badge";
 import { ConversationHeaderActions } from "./conversation-header-actions";
 import { ConversacionDetail } from "./conversacion-detail";
@@ -195,18 +196,20 @@ export function WhatsappInbox({
             </div>
 
             <div className="mt-2">
-              <select
-                value={sellerId}
-                onChange={(event) => setSellerId(event.target.value)}
-                className="h-9 min-w-0 rounded-md border border-[#E5E7EB] bg-white px-2 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
-              >
-                <option value="">Todos los vendedores</option>
-                {sellers.map((seller) => (
-                  <option key={seller.id} value={seller.id}>
-                    {seller.nombre ?? "Sin vendedor"}
-                  </option>
-                ))}
-              </select>
+              <AdvancedFilters label="Filtros">
+                <select
+                  value={sellerId}
+                  onChange={(event) => setSellerId(event.target.value)}
+                  className="h-9 min-w-[190px] rounded-md border border-[#E5E7EB] bg-white px-3 text-xs text-[#111827] outline-none focus:border-[#8A1538]"
+                >
+                  <option value="">Todos los vendedores</option>
+                  {sellers.map((seller) => (
+                    <option key={seller.id} value={seller.id}>
+                      {seller.nombre ?? "Sin vendedor"}
+                    </option>
+                  ))}
+                </select>
+              </AdvancedFilters>
             </div>
           </div>
 

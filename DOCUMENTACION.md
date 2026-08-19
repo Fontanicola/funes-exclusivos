@@ -1729,6 +1729,14 @@ También se normalizó el estado de preparación al valor válido del esquema (`
 - También se puede abrir con foco de teclado para mantener una interacción accesible.
 - No se agregaron dependencias; se resolvió con CSS y el componente existente.
 
+## Filtro compacto de vendedores en WhatsApp
+
+El filtro de vendedores del inbox se movió junto al buscador como un botón `Filtros` con ícono. El selector queda oculto hasta desplegarlo, optimizando el espacio disponible sin cambiar el comportamiento de búsqueda ni asignación.
+
+### Paths modificados
+
+- `components/whatsapp/whatsapp-inbox.tsx`
+
 ## Paginación global de listados
 
 ### Qué se implementó
