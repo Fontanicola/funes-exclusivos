@@ -2,6 +2,8 @@
 
 ## Qué se construyó
 
+- La ruta pública `/catalogo` evolucionó a una web institucional fija de Funes Exclusivos, con navegación propia, hero comercial, propuesta de valor, servicios, bloque de confianza, CTA de contacto y el inventario sincronizado como sección central.
+
 - Setup inicial de autenticación con Supabase.
 - Middleware para proteger rutas privadas y redirigir sesiones válidas.
 - Login privado con Server Action y sin registro público.
@@ -107,6 +109,7 @@
 - `components/catalogo/catalogo-settings-form.tsx`
 - `components/catalogo/catalogo-vehiculos-table.tsx`
 - `components/catalogo/catalogo-status-badge.tsx`
+- `components/catalogo-publico/catalogo-public-site.tsx`
 - `components/empleados/empleados-table.tsx`
 - `components/empleados/empleado-edit-form.tsx`
 - `components/empleados/empleado-role-badge.tsx`
@@ -174,6 +177,10 @@
 - `public.configuracion_general` (singleton de datos de empresa y parámetros operativos)
 
 ## Decisiones técnicas relevantes
+
+- La nueva portada pública se implementó en código, sin agregar tablas ni dependencias: los bloques institucionales son estables y los datos variables continúan viniendo de `catalogo_config`, `vehiculos` y `empleados`.
+- Se dejaron espacios visuales explícitos para futuras fotos del showroom, equipo o experiencia de entrega. La portada panorámica existente sigue siendo prioritaria cuando está configurada.
+- La estructura toma patrones habituales de sitios profesionales de concesionarias: navegación corta, inventario visible, contacto persistente, servicios y llamadas a la acción, sin copiar una web externa ni inventar prestaciones no confirmadas.
 
 - La sesión se valida en middleware y nuevamente en el layout privado para reforzar la protección.
 - Se usa `public.empleados` como gate de acceso: si no existe registro o `activo = false`, el usuario vuelve a `/login?error=inactive`.

@@ -4,7 +4,7 @@ import { mockCatalogoConfig, mockEmpleados, mockVehiculos } from "@/lib/mock-dat
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { getCatalogoHeroUrl } from "@/lib/catalogo/hero";
-import { CatalogoHeader } from "@/components/catalogo-publico/catalogo-header";
+import { CatalogoPublicSite } from "@/components/catalogo-publico/catalogo-public-site";
 import { CatalogoVehicleGrid } from "@/components/catalogo-publico/catalogo-vehicle-grid";
 import { CatalogoEmptyState } from "@/components/catalogo-publico/catalogo-empty-state";
 import { CatalogoContactFloat } from "@/components/catalogo-publico/catalogo-contact-float";
@@ -140,19 +140,27 @@ export default async function PublicCatalogPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#FFFFFF_0%,#F9FAFB_100%)] px-4 py-8 text-[#111827] sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <CatalogoHeader
-          title={config.titulo}
-          description={config.descripcion}
+    <main className="min-h-screen bg-white px-4 pb-8 text-[#111827] sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col">
+        <CatalogoPublicSite
+          config={config}
           vehicleCount={vehiculos.length}
-          whatsappContacto={config.whatsapp_contacto}
-          instagramUrl={config.instagram_url}
           heroVehicle={vehiculos.find((vehicle) => vehicle.catalogo_destacado) ?? vehiculos[0] ?? null}
           heroImageUrl={heroImageUrl}
         />
 
-        <CatalogoVehicleGrid vehiculos={vehiculos} config={config} />
+        <section id="vehiculos" className="scroll-mt-20 pt-16 sm:pt-20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8A1538]">Stock disponible</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-[#111827] sm:text-4xl">Vehículos para elegir</h2>
+            </div>
+            <p className="text-sm text-[#6B7280]">Actualizado con el inventario publicado.</p>
+          </div>
+          <div className="mt-8">
+            <CatalogoVehicleGrid vehiculos={vehiculos} config={config} />
+          </div>
+        </section>
         <CatalogoContactFloat contacts={contacts} />
       </div>
     </main>

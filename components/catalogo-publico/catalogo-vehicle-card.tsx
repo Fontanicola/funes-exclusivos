@@ -75,7 +75,7 @@ export function CatalogoVehicleCard({
   const hasPrice = Boolean(price);
 
   return (
-    <article className="group overflow-hidden rounded-md border border-[#E5E7EB] bg-white transition duration-300 hover:-translate-y-1 hover:border-[#D1D5DB] hover:">
+    <article className="group overflow-hidden rounded-md border border-[#E5E7EB] bg-white transition duration-300 hover:-translate-y-1 hover:border-[#D1D5DB] hover:shadow-[0_14px_35px_rgba(17,24,39,0.08)]">
       <Link href={`/catalogo/${vehicle.id}`} className="block">
         <div className="relative aspect-[4/3] overflow-hidden bg-[#F9FAFB]">
           {image ? (
