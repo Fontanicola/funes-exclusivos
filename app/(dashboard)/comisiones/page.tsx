@@ -3,7 +3,7 @@ import Link from "next/link";
 import { isDemoMode } from "@/lib/demo-mode";
 import { canManageCommissions } from "@/lib/auth/permissions";
 import { mockEmpleado } from "@/lib/mock-data";
-import { mockComisiones } from "@/lib/mock-data";
+import { mockComisiones, mockLeads } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { ComisionesComparativa } from "@/components/comisiones/comisiones-comparativa";
@@ -57,6 +57,33 @@ type Comision = {
 type RawComision = Omit<Comision, "vendedor" | "venta"> & {
   vendedor: Comision["vendedor"] | Comision["vendedor"][] | null;
   venta: Comision["venta"] | Comision["venta"][] | null;
+};
+
+type PotentialLead = {
+  id: string;
+  nombre: string | null;
+  estado: string | null;
+  origen: string | null;
+  vendedor: {
+    id: string;
+    nombre: string | null;
+    comision_default_porcentaje: number | null;
+  } | null;
+  vehiculo: {
+    id: string;
+    marca: string | null;
+    modelo: string | null;
+    version: string | null;
+    anio: number | null;
+    dominio: string | null;
+    precio_venta: number | null;
+    precio_moneda: string | null;
+  } | null;
+};
+
+type RawPotentialLead = Omit<PotentialLead, "vendedor" | "vehiculo"> & {
+  vendedor: PotentialLead["vendedor"] | PotentialLead["vendedor"][] | null;
+  vehiculo: PotentialLead["vehiculo"] | PotentialLead["vehiculo"][] | null;
 };
 
 type CurrencyTotal = {
@@ -135,15 +162,23 @@ function getUniqueSoldUnits(comisiones: Comision[]) {
 export default async function ComisionesPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
   const dateRange = parseDateRange(searchParams);
   let comisiones: Comision[] = mockComisiones as Comision[];
+  let potenciales: PotentialLead[] = (mockLeads as unknown as RawPotentialLead[])
+    .filter((lead) => !["ganado", "perdido"].includes(lead.estado ?? "") && lead.vehiculo)
+    .map((lead) => ({
+      ...lead,
+      vendedor: normalizeSingleRelation(lead.vendedor),
+      vehiculo: normalizeSingleRelation(lead.vehiculo),
+    }));
   let currentRole: string | null = mockEmpleado.rol;
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
     const [
-      { data },
+      { data: comisionesData },
       {
         data: { user },
       },
+      { data: potentialData },
     ] = await Promise.all([
       fetchAllSupabaseRows((from, to) =>
         supabase
@@ -156,12 +191,29 @@ export default async function ComisionesPage({ searchParams }: { searchParams?: 
           .range(from, to)
       ),
       supabase.auth.getUser(),
+      fetchAllSupabaseRows((from, to) =>
+        supabase
+          .from("leads")
+          .select(
+            "id,nombre,estado,origen,vendedor:empleados!leads_vendedor_id_fkey(id,nombre,comision_default_porcentaje),vehiculo:vehiculos!leads_vehiculo_interes_id_fkey(id,marca,modelo,version,anio,dominio,precio_venta,precio_moneda)"
+          )
+          .in("estado", ["nuevo", "contactado", "interesado", "negociacion", "reservado"])
+          .not("vehiculo_interes_id", "is", null)
+          .order("created_at", { ascending: false })
+          .range(from, to)
+      ),
     ]);
 
-    comisiones = ((data ?? []) as unknown as RawComision[]).map((comision) => ({
+    comisiones = ((comisionesData ?? []) as unknown as RawComision[]).map((comision) => ({
       ...comision,
       vendedor: normalizeSingleRelation(comision.vendedor),
       venta: normalizeSingleRelation(comision.venta),
+    }));
+
+    potenciales = ((potentialData ?? []) as unknown as RawPotentialLead[]).map((lead) => ({
+      ...lead,
+      vendedor: normalizeSingleRelation(lead.vendedor),
+      vehiculo: normalizeSingleRelation(lead.vehiculo),
     }));
 
     if (user) {
@@ -218,7 +270,7 @@ export default async function ComisionesPage({ searchParams }: { searchParams?: 
         </article>
       </div>
 
-      <ComisionesComparativa comisiones={comisiones} />
+      <ComisionesComparativa comisiones={comisiones} potenciales={potenciales} />
       <ComisionesTable
         comisiones={comisiones}
         toolbarAction={

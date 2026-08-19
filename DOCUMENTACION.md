@@ -1479,6 +1479,32 @@
 - Cada columna mantiene su propio scroll vertical para recorrer los leads sin mover toda la sección.
 - La vista de tabla limita el scroll al listado y mantiene la toolbar y el encabezado de columnas visibles.
 
+## Oportunidades potenciales en Comisiones
+
+### Qué se construyó
+
+- La comparativa comercial de `/comisiones` ahora permite expandir cada vendedor con una flecha.
+- La expansión muestra leads activos con vehículo de interés asignado, origen, estado, vehículo, valor estimado de venta y comisión potencial.
+- Se separó visualmente lo efectivamente vendido y comisionado de las oportunidades todavía abiertas.
+
+### Paths modificados
+
+- `app/(dashboard)/comisiones/page.tsx`
+- `components/comisiones/comisiones-comparativa.tsx`
+
+### Tablas involucradas
+
+- `public.comisiones`
+- `public.leads`
+- `public.vehiculos`
+- `public.empleados`
+
+### Decisiones técnicas
+
+- Se consideran oportunidades activas en estados `nuevo`, `contactado`, `interesado`, `negociacion` y `reservado` que tengan vehículo de interés.
+- La comisión potencial se estima con el precio de venta del vehículo y el porcentaje por defecto del vendedor; si falta alguno de esos datos se muestra `A confirmar`.
+- Las oportunidades no modifican comisiones ni ventas reales y no se mezclan con los KPIs históricos.
+
 ## Polish visual de Recordatorios
 
 Se compactó la pantalla de Recordatorios para alinearla con el lenguaje visual de la plataforma. Los KPIs ahora tienen menor altura y una intensidad más equilibrada, mientras que la alerta de alta prioridad usa un tono ámbar en lugar de ocupar toda la atención con un bloque bordó.
