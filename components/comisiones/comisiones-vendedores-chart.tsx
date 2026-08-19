@@ -19,12 +19,12 @@ export type VendorSeries = {
 
 type Metric = "sold" | "units" | "commission";
 
-const CHART_WIDTH = 820;
-const CHART_HEIGHT = 280;
-const PLOT_LEFT = 38;
-const PLOT_RIGHT = 16;
-const PLOT_TOP = 18;
-const PLOT_BOTTOM = 34;
+const CHART_WIDTH = 1100;
+const CHART_HEIGHT = 320;
+const PLOT_LEFT = 48;
+const PLOT_RIGHT = 22;
+const PLOT_TOP = 20;
+const PLOT_BOTTOM = 42;
 const COLORS = ["#8A1538", "#64748B", "#0F766E", "#B45309", "#475569", "#9F1239"];
 
 function formatAmount(value: number, metric: Metric, currency: string) {
@@ -118,11 +118,10 @@ export function ComisionesVendedoresChart({
       </div>
 
       <div className="relative mt-3 w-full overflow-x-auto">
-        <div className="relative w-full min-w-[620px]">
+        <div className="relative mx-auto w-full max-w-[1440px] min-w-[760px]">
           <svg
             viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-            preserveAspectRatio="none"
-            className="block h-[280px] w-full"
+            className="block h-[320px] w-full"
             role="img"
             aria-label="Comparativa mensual por vendedor"
           >

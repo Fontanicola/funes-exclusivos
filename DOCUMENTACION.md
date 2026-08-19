@@ -3754,7 +3754,7 @@ Decisión técnica: se usa un portal React hacia un contenedor único del subhea
 
 ### Gráfico de comisiones a ancho completo
 
-Se ajustó el gráfico comparativo de vendedores para que el área de trazado ocupe todo el ancho disponible de la sección, sin dejar márgenes laterales innecesarios. Se mantuvo la altura, la escala de datos, el hover mensual y el comportamiento responsive.
+Se ajustó el gráfico comparativo de vendedores para que la tarjeta siga ocupando el ancho de la sección, pero el área de trazado mantenga una proporción visual equilibrada. Se amplió el lienzo interno, se eliminó el estiramiento forzado del SVG y se limitó el ancho máximo del gráfico para conservar líneas, puntos y etiquetas legibles en pantallas grandes. Se mantuvo la escala de datos, el hover mensual y el comportamiento responsive.
 
 Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`.
 
