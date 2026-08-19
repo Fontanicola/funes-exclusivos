@@ -4,6 +4,7 @@ type SupabasePageResult<T> = {
 };
 
 export const SUPABASE_PAGE_SIZE = 1000;
+const PAGE_BATCH_SIZE = 4;
 
 /** Loads every page without relying on the API's default 1,000-row cap. */
 export async function fetchAllSupabaseRows<T>(
@@ -11,17 +12,24 @@ export async function fetchAllSupabaseRows<T>(
 ) {
   const rows: T[] = [];
 
-  for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
-    const result = await buildPage(from, from + SUPABASE_PAGE_SIZE - 1);
+  for (let batchStart = 0; ; batchStart += PAGE_BATCH_SIZE) {
+    const results = await Promise.all(
+      Array.from({ length: PAGE_BATCH_SIZE }, (_, index) => {
+        const from = batchStart * SUPABASE_PAGE_SIZE + index * SUPABASE_PAGE_SIZE;
+        return buildPage(from, from + SUPABASE_PAGE_SIZE - 1);
+      })
+    );
 
-    if (result.error) {
-      return { data: [] as T[], error: result.error };
+    for (const result of results) {
+      if (result.error) {
+        return { data: [] as T[], error: result.error };
+      }
+
+      rows.push(...(result.data ?? []));
     }
 
-    const page = result.data ?? [];
-    rows.push(...page);
-
-    if (page.length < SUPABASE_PAGE_SIZE) break;
+    const hasShortPage = results.some((result) => (result.data ?? []).length < SUPABASE_PAGE_SIZE);
+    if (hasShortPage) break;
   }
 
   return { data: rows, error: null };

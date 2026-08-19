@@ -41,7 +41,7 @@ export function CatalogoHeroUploadForm({ heroImageUrl }: { heroImageUrl: string 
         image.onerror = () => reject(new Error("No se pudo leer la imagen."));
       });
 
-      const maxWidth = 2400;
+      const maxWidth = 2000;
       const scale = Math.min(1, maxWidth / image.naturalWidth);
       const canvas = document.createElement("canvas");
       canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
@@ -51,8 +51,17 @@ export function CatalogoHeroUploadForm({ heroImageUrl }: { heroImageUrl: string 
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
       URL.revokeObjectURL(objectUrl);
 
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
-      if (!blob) throw new Error("No se pudo comprimir la imagen.");
+      let blob: Blob | null = null;
+      for (const quality of [0.78, 0.64, 0.5, 0.38]) {
+        const candidate = await new Promise<Blob | null>((resolve) =>
+          canvas.toBlob(resolve, "image/jpeg", quality)
+        );
+        if (candidate) blob = candidate;
+        if (candidate && candidate.size <= 3 * 1024 * 1024) break;
+      }
+      if (!blob || blob.size > 3 * 1024 * 1024) {
+        throw new Error("La imagen sigue siendo demasiado pesada. Elegí una imagen más liviana.");
+      }
 
       const compressed = new File([blob], "hero.jpg", { type: "image/jpeg" });
       const dataTransfer = new DataTransfer();
@@ -71,7 +80,7 @@ export function CatalogoHeroUploadForm({ heroImageUrl }: { heroImageUrl: string 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0 space-y-1">
           <p className="text-xs font-semibold text-[#111827]">Portada panorámica</p>
-          <p className="text-[11px] leading-5 text-[#6B7280]">JPG, PNG o WEBP, hasta 8 MB. Recomendado: formato horizontal.</p>
+          <p className="text-[11px] leading-5 text-[#6B7280]">JPG, PNG o WEBP, hasta 3 MB. Recomendado: formato horizontal.</p>
           <input
             ref={inputRef}
             name="hero_image"

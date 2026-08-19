@@ -217,8 +217,16 @@ export default async function VentasPage({ searchParams }: { searchParams?: { fr
     const saleIds = baseVentas.map((venta) => venta.id);
     const [pagosResult, entregasResult] = saleIds.length
       ? await Promise.all([
-          supabase.from("ventas_pagos").select("*").in("venta_id", saleIds),
-          supabase.from("ventas_entregas").select("*").in("venta_id", saleIds),
+          supabase
+            .from("ventas_pagos")
+            .select("id,venta_id,tipo,importe,moneda,medio,fecha,detalle")
+            .in("venta_id", saleIds)
+            .order("fecha", { ascending: true }),
+          supabase
+            .from("ventas_entregas")
+            .select("id,venta_id,estado,fecha_entrega")
+            .in("venta_id", saleIds)
+            .order("fecha_entrega", { ascending: true, nullsFirst: false }),
         ])
       : [{ data: [] }, { data: [] }];
 

@@ -208,7 +208,10 @@ export function canAccessRoute(role: UserRole, pathname: string) {
   ] as const;
 
   for (const entry of allowed) {
-    if (normalizedPath === entry.prefix || normalizedPath.startsWith(entry.prefix)) {
+    const matchesEntry =
+      normalizedPath === entry.prefix || normalizedPath.startsWith(`${entry.prefix}/`);
+
+    if (matchesEntry) {
       return entry.roles.some((role) => role === normalizedRole);
     }
   }

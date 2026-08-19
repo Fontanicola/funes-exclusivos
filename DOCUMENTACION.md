@@ -3759,3 +3759,15 @@ Se ajustó el gráfico comparativo de vendedores para que el área de trazado oc
 Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`.
 
 No se modificaron tablas ni lógica de negocio. Validación: `npm run build`.
+
+### QA de producción y auditoría integral
+
+Se realizó una pasada de estabilización sobre las rutas públicas y privadas principales, incluyendo login, dashboard, inventario, compras, ventas, caja, comisiones, CRM, WhatsApp, gestoría, catálogo, empleados, configuración y recordatorios. También se verificaron rutas de alta, edición, detalle y submódulos de ventas, liquidaciones, presupuestos y conexiones de WhatsApp en modo demo. Las rutas respondieron correctamente durante la prueba y el build de producción compiló sin errores TypeScript.
+
+Durante la auditoría se corrigieron coincidencias de permisos por prefijo para evitar que una ruta parecida a otra herede acceso incorrectamente, se paralelizó la carga por lotes del paginador común para reducir esperas con datasets grandes, se limitaron las columnas consultadas en pagos y entregas de Ventas a las utilizadas por la tabla y se redujo el límite de imagen de portada del catálogo para evitar rechazos `413` de Server Actions en producción. La pantalla de catálogo mantiene el procesamiento client-side de imágenes para comprimirlas antes de enviarlas.
+
+La navegación se considera coherente con la operación actual: Dashboard como acceso global; Operación para Inventario, Compras, Ventas y Caja; Comercial para CRM, WhatsApp, Catálogo y Recordatorios; y Administración para Comisiones, Gestoría, Empleados y Configuración. Las rutas existentes se conservaron, incluyendo `/ventas/renta` y las rutas públicas `/catalogo`.
+
+Tablas Supabase involucradas en las consultas auditadas: `vehiculos`, `compras_vehiculos`, `ventas`, `ventas_pagos`, `ventas_entregas`, `caja_movimientos`, `comisiones`, `comision_liquidaciones`, `leads`, `conversaciones`, `conversacion_mensajes`, `whatsapp_instancias`, `gestoria_tramites`, `gestoria_presupuestos`, `recordatorios` y `empleados`.
+
+Pendientes de validación antes de una certificación operativa definitiva: ejecutar con una cuenta real un alta/edición por cada rol, confirmar políticas RLS y relaciones de foreign keys en el proyecto Supabase de producción, verificar subida de portada con archivos reales dentro del límite de 3 MB y probar el webhook de Evolution con un mensaje entrante. El build no presentó errores; los warnings de caché observados pertenecen al servidor de desarrollo y no bloquean el bundle de producción.
