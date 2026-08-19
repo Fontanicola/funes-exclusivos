@@ -185,7 +185,7 @@ export function PeritajeWorkspace({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border border-slate-200 bg-white p-4">
+      <div className="rounded-md border border-slate-200 bg-white p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex min-w-0 items-start gap-3">
             <div className="rounded-md bg-rose-50 p-2 text-[#8A1538]"><ClipboardCheck className="h-5 w-5" /></div>
@@ -210,23 +210,30 @@ export function PeritajeWorkspace({
             {!readOnly ? <button type="button" onClick={save} disabled={saving} className="inline-flex h-9 items-center gap-2 rounded-md bg-[#8A1538] px-3 text-sm font-semibold text-white transition hover:bg-[#74122f] disabled:opacity-50"><Save className="h-4 w-4" />{saving ? "Guardando..." : "Guardar"}</button> : null}
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 sm:grid-cols-4">
-          <div><p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Pendientes</p><p className="mt-1 text-sm font-semibold text-slate-700">{panelSummary.pendiente}</p></div>
-          <div><p className="text-[11px] font-medium uppercase tracking-wide text-amber-600">Revisar</p><p className="mt-1 text-sm font-semibold text-amber-700">{panelSummary.revisar}</p></div>
-          <div><p className="text-[11px] font-medium uppercase tracking-wide text-rose-600">Reparar</p><p className="mt-1 text-sm font-semibold text-rose-700">{panelSummary.reparar}</p></div>
-          <div><p className="text-[11px] font-medium uppercase tracking-wide text-emerald-600">Listos</p><p className="mt-1 text-sm font-semibold text-emerald-700">{panelSummary.listo}</p></div>
+        <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 sm:grid-cols-4">
+          {[
+            ["Pendientes", panelSummary.pendiente, "text-slate-500"],
+            ["Revisar", panelSummary.revisar, "text-amber-700"],
+            ["Reparar", panelSummary.reparar, "text-rose-700"],
+            ["Listos", panelSummary.listo, "text-emerald-700"],
+          ].map(([label, count, color]) => (
+            <div key={label} className="rounded-md bg-slate-50 px-3 py-2">
+              <p className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${color}`}>{label}</p>
+              <p className="mt-1 text-base font-semibold text-slate-900">{count}</p>
+            </div>
+          ))}
         </div>
       </div>
 
       {message ? <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{message}</p> : null}
       {error ? <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
 
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(430px,0.9fr)]">
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(440px,0.78fr)]">
         <section className="space-y-4">
           <div className="rounded-md border border-slate-200 bg-white p-4">
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-              <div><h3 className="font-semibold text-slate-900">Datos de la inspección</h3><p className="mt-0.5 text-xs text-slate-500">Completá los datos del cliente y la identificación de la unidad.</p></div>
-              <span className="text-xs font-medium text-slate-400">Información general</span>
+            <div className="mb-4 border-b border-slate-100 pb-3">
+              <h3 className="font-semibold text-slate-900">Datos de la inspección</h3>
+              <p className="mt-0.5 text-xs text-slate-500">Cliente e información general de la unidad.</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="block text-xs font-medium text-slate-600">Cliente<input disabled={readOnly} value={clientName} onChange={(event) => setClientName(event.target.value)} placeholder="Nombre y apellido" className="mt-1 h-9 w-full rounded-md border border-slate-200 px-3 text-sm font-normal text-slate-900" /></label>
@@ -235,11 +242,22 @@ export function PeritajeWorkspace({
             </div>
           </div>
 
-          {groupedSections.filter((section) => section.nombre !== "Datos generales").map((section) => (
-            <div key={section.id} className="rounded-md border border-slate-200 bg-white p-4">
-              <div className="mb-3 flex items-start justify-between gap-3 border-b border-slate-100 pb-3"><div><h3 className="font-semibold text-slate-900">{section.nombre}</h3>{section.descripcion ? <p className="mt-0.5 text-xs text-slate-500">{section.descripcion}</p> : null}</div><span className="rounded-full border border-slate-200 px-2 py-1 text-xs font-medium text-slate-500">{sectionProgress(section.items)}</span></div>
-              {section.items.length > 0 ? <div className="grid gap-2 md:grid-cols-2">{section.items.map(renderItem)}</div> : <p className="py-3 text-sm text-slate-500">No hay elementos configurados en esta sección.</p>}
-            </div>
+          {groupedSections.filter((section) => section.nombre !== "Datos generales").map((section, index) => (
+            <details key={section.id} open={index === 0} className="group rounded-md border border-slate-200 bg-white">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 [&::-webkit-details-marker]:hidden">
+                <span className="min-w-0">
+                  <span className="block font-semibold text-slate-900">{section.nombre}</span>
+                  {section.descripcion ? <span className="mt-0.5 block text-xs text-slate-500">{section.descripcion}</span> : null}
+                </span>
+                <span className="flex shrink-0 items-center gap-2">
+                  <span className="rounded-full border border-slate-200 px-2 py-1 text-xs font-medium text-slate-500">{sectionProgress(section.items)}</span>
+                  <span className="text-lg leading-none text-slate-400 transition group-open:rotate-180">⌄</span>
+                </span>
+              </summary>
+              <div className="border-t border-slate-100 px-4 pb-4 pt-3">
+                {section.items.length > 0 ? <div className="grid gap-2 md:grid-cols-2">{section.items.map(renderItem)}</div> : <p className="py-3 text-sm text-slate-500">No hay elementos configurados en esta sección.</p>}
+              </div>
+            </details>
           ))}
 
           <div className="rounded-md border border-slate-200 bg-white p-4">
@@ -251,7 +269,7 @@ export function PeritajeWorkspace({
           <div className="rounded-md border border-slate-200 bg-white p-4"><h3 className="font-semibold text-slate-900">Observaciones generales</h3><textarea disabled={readOnly} value={observations} onChange={(event) => setObservations(event.target.value)} className="mt-3 min-h-24 w-full rounded-md border border-slate-200 p-3 text-sm" placeholder="Anotá observaciones generales de la unidad..." /></div>
         </section>
 
-        <aside className="space-y-4 xl:sticky xl:top-4">
+        <aside className="space-y-4 xl:sticky xl:top-5">
           <PeritajePanelDiagram panels={panels} onChange={setPanels} readOnly={readOnly} />
           <div className="rounded-md border border-slate-200 bg-white p-4"><div className="flex items-center justify-between"><div><h3 className="font-semibold text-slate-900">Valores de referencia</h3><p className="mt-0.5 text-xs text-slate-500">Compará mercado, publicaciones y tasación.</p></div><span className="text-xs text-slate-400">{currency}</span></div><div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-1">{([['mercado', 'Valor de mercado'], ['sitio1', 'Valor de referencia 1'], ['sitio2', 'Valor de referencia 2'], ['tasado', 'Valor tasado']] as const).map(([key, label]) => <label key={key} className="block text-xs font-medium text-slate-500">{label}<input disabled={readOnly} type="number" min="0" value={values[key] ?? ""} onChange={(event) => setValues((current) => ({ ...current, [key]: event.target.value === "" ? null : Number(event.target.value) }))} className="mt-1 h-9 w-full rounded-md border border-slate-200 px-3 text-sm text-slate-900" /></label>)}</div></div>
         </aside>

@@ -3870,3 +3870,13 @@ Paths modificados: `components/catalogo-publico/catalogo-public-site.tsx`, `publ
 Se conservaron las reglas de publicación, filtros, paginación, contacto por WhatsApp y detalle de vehículo. No se expusieron datos internos ni se modificó el schema. Tablas y recursos involucrados: `catalogo_config`, `vehiculos`, `empleados` y Storage del catálogo.
 
 Decisión técnica: se usaron assets locales para asegurar disponibilidad en producción y evitar dependencias externas. La estructura visual prioriza impacto de marca, stock publicado, servicios, experiencia en showroom y contacto. Validación: `npm run build`.
+
+### Jerarquía operativa del detalle de peritaje
+
+Se ajustó la pantalla de detalle para que la inspección se lea en el orden correcto: identificación y estado general de la unidad, checklist de revisión, carrocería por panel, reparaciones y valores de referencia. Las secciones del checklist ahora pueden plegarse para reducir ruido y la primera sección queda abierta como punto de inicio.
+
+El área de carrocería ganó ancho en desktop, con un mapa 2D más legible y un listado de paneles con scroll interno. El resumen de estados quedó integrado en la cabecera de inspección y las tarjetas de conteo ahora tienen menor peso visual. Se conservaron la edición por panel, notas, estados, guardado, modo demo y permisos existentes.
+
+Paths modificados: `components/peritajes/peritaje-workspace.tsx` y `components/peritajes/peritaje-panel-diagram.tsx`.
+
+Tablas Supabase involucradas: `peritajes`, `peritaje_items`, `peritaje_paneles`, `peritaje_reparaciones`, `peritaje_plantillas`, `peritaje_plantilla_secciones`, `peritaje_plantilla_items` y `vehiculos`. No se modificó el schema ni se agregó SQL. Validación: `npm run build` finalizado correctamente.
