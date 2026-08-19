@@ -232,6 +232,12 @@
 - Se configuró un límite de `10 MB` en `next.config.js`, manteniendo la validación de negocio de la acción en `8 MB` para el archivo final.
 - También se hizo tolerante el mensaje de error del formulario para evitar una excepción del cliente cuando la petición es rechazada.
 
+## Contacto flotante del catálogo público
+
+- Se agregó un botón flotante de contacto en la vidriera pública para elegir un vendedor activo y abrir una conversación de WhatsApp con mensaje prellenado.
+- El catálogo consulta únicamente nombre, teléfono y avatar de vendedores activos; si no hay contactos disponibles, no muestra el botón.
+- Se simplificó la barra de búsqueda pública eliminando el título, la descripción y la caja exterior que ocupaban espacio sin aportar interacción.
+
 - Se integró el flujo de nueva venta para que, luego de `registrar_venta`, Next complete automáticamente los pasos operativos posteriores.
 - La acción de ventas ahora registra pagos iniciales con `ventas_pagos`, genera movimientos de `caja_movimientos` para pagos monetarios, asegura la entrega pendiente en `ventas_entregas` y llama `generar_comision_por_venta` con porcentaje tomado del vendedor o de `configuracion_general`.
 - El pago `usado` queda solo en `ventas_pagos` y no genera caja, porque representa una unidad recibida y no un ingreso líquido.

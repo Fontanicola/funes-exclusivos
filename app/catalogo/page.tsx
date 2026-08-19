@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { isDemoMode } from "@/lib/demo-mode";
-import { mockCatalogoConfig, mockVehiculos } from "@/lib/mock-data";
+import { mockCatalogoConfig, mockEmpleados, mockVehiculos } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { getCatalogoHeroUrl } from "@/lib/catalogo/hero";
 import { CatalogoHeader } from "@/components/catalogo-publico/catalogo-header";
 import { CatalogoVehicleGrid } from "@/components/catalogo-publico/catalogo-vehicle-grid";
 import { CatalogoEmptyState } from "@/components/catalogo-publico/catalogo-empty-state";
+import { CatalogoContactFloat } from "@/components/catalogo-publico/catalogo-contact-float";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,13 @@ type Vehiculo = {
   created_at: string | null;
 };
 
+type Contact = {
+  id: string;
+  nombre: string;
+  telefono: string;
+  avatar_url?: string | null;
+};
+
 async function loadCatalogoPublico() {
   if (isDemoMode) {
     return {
@@ -55,11 +63,19 @@ async function loadCatalogoPublico() {
         (vehicle) => vehicle.estado === "en_stock" && vehicle.catalogo_publicado
       ),
       heroImageUrl: null,
+      contacts: mockEmpleados
+        .filter((employee) => employee.activo && employee.rol === "vendedor" && employee.telefono)
+        .map((employee) => ({
+          id: employee.id,
+          nombre: employee.nombre,
+          telefono: employee.telefono,
+          avatar_url: employee.avatar_url,
+        })),
     };
   }
 
   const supabase = createSupabaseServerClient();
-  const [configResult, vehiculosResult, heroResult] = await Promise.all([
+  const [configResult, vehiculosResult, heroResult, contactsResult] = await Promise.all([
     supabase
       .from("catalogo_config")
       .select(
@@ -81,12 +97,20 @@ async function loadCatalogoPublico() {
         .range(from, to)
     ),
     getCatalogoHeroUrl(supabase),
+    supabase
+      .from("empleados")
+      .select("id,nombre,telefono,avatar_url")
+      .eq("activo", true)
+      .eq("rol", "vendedor")
+      .not("telefono", "is", null)
+      .order("nombre", { ascending: true }),
   ]);
 
   return {
     config: configResult.data ?? (mockCatalogoConfig as CatalogoConfig),
     vehiculos: (vehiculosResult.data ?? []) as Vehiculo[],
     heroImageUrl: heroResult,
+    contacts: (contactsResult.data ?? []) as Contact[],
   };
 }
 
@@ -100,7 +124,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PublicCatalogPage() {
-  const { config, vehiculos, heroImageUrl } = await loadCatalogoPublico();
+  const { config, vehiculos, heroImageUrl, contacts } = await loadCatalogoPublico();
 
   if (!config.activo) {
     return (
@@ -129,6 +153,7 @@ export default async function PublicCatalogPage() {
         />
 
         <CatalogoVehicleGrid vehiculos={vehiculos} config={config} />
+        <CatalogoContactFloat contacts={contacts} />
       </div>
     </main>
   );

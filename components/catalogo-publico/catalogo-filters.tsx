@@ -53,15 +53,7 @@ export function CatalogoFilters({
   anios: number[];
   }) {
   return (
-    <section className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-[#111827]">Filtrar vehículos</p>
-          <p className="mt-1 text-xs text-[#6B7280]">Buscá por modelo, año, precio o destacados.</p>
-        </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-3">
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
@@ -136,6 +128,5 @@ export function CatalogoFilters({
           </div>
         </AdvancedFilters>
       </div>
-    </section>
   );
 }
