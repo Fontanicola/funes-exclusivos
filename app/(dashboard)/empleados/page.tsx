@@ -3,8 +3,6 @@ import { isDemoMode } from "@/lib/demo-mode";
 import { mockEmpleados } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmpleadosTable } from "@/components/empleados/empleados-table";
-import { EmpleadoCreateForm } from "@/components/empleados/empleado-create-form";
-import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const metadata: Metadata = {
   title: "Empleados | Funes Exclusivos",
@@ -79,13 +77,6 @@ export default async function EmpleadosPage() {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-[#111827]">Empleados</h1>
-        <p className="max-w-2xl text-sm leading-6 text-[#6B7280]">
-          Equipo, roles y permisos operativos.
-        </p>
-      </header>
-
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           title="Total empleados activos"
@@ -109,17 +100,6 @@ export default async function EmpleadosPage() {
         />
       </div>
 
-      <div className="rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
-        Desde esta pantalla se gestiona el equipo, sus roles y el estado operativo dentro del sistema.
-      </div>
-
-      <DataEntryModal
-        triggerLabel="Nuevo usuario"
-        title="Nuevo usuario"
-        description="Creá el acceso y asigná el rol operativo dentro de Funes Exclusivos."
-      >
-        <EmpleadoCreateForm />
-      </DataEntryModal>
       <EmpleadosTable empleados={empleados} currentUserId={currentUserId} />
     </section>
   );

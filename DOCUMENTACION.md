@@ -1418,6 +1418,23 @@
 - `npm run build` ejecutado luego del ajuste de jerarquía del dashboard.
 - Build finalizado correctamente sin errores.
 
+## Ajuste de Empleados y headers internos
+
+Se compactó la pantalla de Empleados eliminando el encabezado interno repetido y el bloque descriptivo que duplicaban la identificación de la sección ya presente en el header de plataforma. El botón `Nuevo usuario` ahora vive junto al buscador y al control de filtros de la tabla, reduciendo el espacio vertical y manteniendo la carga de usuarios en un modal. Los filtros de rol y estado continúan agrupados detrás de `Más filtros`.
+
+### Paths modificados
+
+- `app/(dashboard)/empleados/page.tsx`
+- `components/empleados/empleados-table.tsx`
+
+### Tablas involucradas
+
+- `public.empleados`
+
+### Decisión técnica
+
+La lógica de creación, edición, eliminación, permisos y paginación no se modificó; solo se trasladó la apertura del modal al toolbar de la tabla para mejorar la jerarquía visual.
+
 ## Scroll interno de la bandeja WhatsApp
 
 ### Qué se corrigió

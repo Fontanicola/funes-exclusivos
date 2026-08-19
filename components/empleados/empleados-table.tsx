@@ -7,6 +7,8 @@ import { EmpleadoRoleBadge } from "./empleado-role-badge";
 import { EmpleadoStatusBadge } from "./empleado-status-badge";
 import { EmpleadoEditForm } from "./empleado-edit-form";
 import { EmpleadoDeleteButton } from "./empleado-delete-button";
+import { EmpleadoCreateForm } from "./empleado-create-form";
+import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
 
@@ -131,6 +133,14 @@ export function EmpleadosTable({
                 </button>
               ) : null}
             </div>
+
+            <DataEntryModal
+              triggerLabel="Nuevo usuario"
+              title="Nuevo usuario"
+              description="Creá el acceso y asigná el rol operativo dentro de Funes Exclusivos."
+            >
+              <EmpleadoCreateForm />
+            </DataEntryModal>
 
             <AdvancedFilters>
             <select
