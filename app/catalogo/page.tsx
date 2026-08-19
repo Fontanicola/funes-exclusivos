@@ -149,15 +149,15 @@ export default async function PublicCatalogPage() {
           heroImageUrl={heroImageUrl}
         />
 
-        <section id="vehiculos" className="scroll-mt-20 pt-16 sm:pt-20">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <section id="vehiculos" className="scroll-mt-20 pt-16 sm:pt-24">
+          <div className="flex flex-col gap-4 border-b border-[#E5E7EB] pb-7 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8A1538]">Stock disponible</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-[#111827] sm:text-4xl">Vehículos para elegir</h2>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#8A1538]">Inventario publicado</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#111827] sm:text-4xl">Vehículos para elegir</h2>
             </div>
-            <p className="text-sm text-[#6B7280]">Actualizado con el inventario publicado.</p>
+            <p className="max-w-xs text-sm leading-6 text-[#6B7280]">Unidades disponibles, actualizadas con el inventario publicado.</p>
           </div>
-          <div className="mt-8">
+          <div className="mt-7">
             <CatalogoVehicleGrid vehiculos={vehiculos} config={config} />
           </div>
         </section>

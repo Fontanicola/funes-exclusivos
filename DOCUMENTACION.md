@@ -3836,3 +3836,15 @@ Path modificado: `components/compras/compra-kpis.tsx`. Validación: `npm run bui
 El gráfico de rendimiento por vendedor dejó de limitarse a un ancho máximo interno y ahora ocupa todo el ancho disponible del módulo. Se mantienen sus métricas, tooltip y comportamiento responsive sin cambios de datos.
 
 Path modificado: `components/comisiones/comisiones-vendedores-chart.tsx`. Validación: `npm run build`.
+
+### Evolución visual del catálogo público
+
+Se transformó `/catalogo` de una pantalla de catálogo administrativo a una experiencia pública con estructura de sitio comercial: barra de marca, navegación, hero editorial, llamados a la acción, servicios, bloque institucional, contacto y footer. También se renovaron la grilla de stock, las tarjetas de vehículos y el detalle individual para priorizar fotografía, precio, ficha comercial y contacto por WhatsApp sin exponer datos internos.
+
+Paths modificados: `app/catalogo/page.tsx`, `components/catalogo-publico/catalogo-public-site.tsx`, `components/catalogo-publico/catalogo-vehicle-card.tsx` y `components/catalogo-publico/catalogo-vehicle-detail.tsx`.
+
+Tablas y recursos involucrados: `catalogo_config`, `vehiculos`, empleados activos para contactos comerciales y Storage del catálogo para la portada. No se modificaron tablas, reglas de publicación ni la sincronización con inventario.
+
+Decisiones técnicas: se mantuvieron las reglas existentes de catálogo activo, vehículo en stock y publicación habilitada. Cuando todavía no hay una imagen institucional o de showroom cargada, la interfaz utiliza un espacio editorial intencional para que pueda completarse desde la configuración, en lugar de mostrar un bloque roto. Los CTAs existentes de WhatsApp, filtros, paginación y detalle continúan funcionando.
+
+Pendiente no bloqueante: reemplazar los espacios editoriales por fotografías definitivas de Funes cuando estén disponibles. Validación: `npm run build` finalizado correctamente.
