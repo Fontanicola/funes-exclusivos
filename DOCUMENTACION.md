@@ -1958,6 +1958,27 @@ El cambio se realizó sobre el componente compartido `AdvancedFilters`, por lo q
 
 - `npm run build` finalizado correctamente.
 
+## Menús contextuales de acciones
+
+Se creó un patrón compartido de acciones con botón de tres puntos para reducir ruido visual en tablas. Las acciones de cada fila se mantienen disponibles dentro del menú contextual, que se cierra al hacer click afuera o presionar `Escape`; las acciones destructivas conservan su tratamiento visual diferenciado.
+
+### Paths modificados
+
+- `components/common/action-menu.tsx`
+- `components/inventario/inventario-table.tsx`
+- `components/empleados/empleados-table.tsx`
+- `components/recordatorios/recordatorios-table.tsx`
+- `components/caja/caja-movimientos-table.tsx`
+- `components/ventas/pendientes-entrega-table.tsx`
+
+### Decisión técnica
+
+Se centralizó únicamente la presentación y apertura/cierre del menú. No se cambiaron las acciones, permisos, formularios ni reglas de negocio existentes.
+
+### Validación
+
+- `npm run build` finalizado correctamente.
+
 ## Cierre de modales y filtros
 
 Los popovers de filtros ahora se cierran al hacer click fuera de su contenido o al presionar `Escape`, igual que las ventanas de carga. Los clicks dentro de los controles siguen funcionando sin cerrar el panel accidentalmente.

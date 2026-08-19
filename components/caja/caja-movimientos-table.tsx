@@ -5,6 +5,7 @@ import type { ChangeEvent } from "react";
 import { CajaTipoBadge } from "./caja-tipo-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
+import { ActionMenu } from "@/components/common/action-menu";
 
 type Proveedor = {
   id: string;
@@ -346,13 +347,15 @@ export function CajaMovimientosTable({ movimientos }: { movimientos: Movimiento[
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <button
-                          type="button"
-                          onClick={() => setExpandedId(isExpanded ? null : movimiento.id)}
-                          className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-3 py-1 text-xs font-medium text-[#111827] transition hover:bg-white"
-                        >
-                          {isExpanded ? "Ocultar" : "Ver detalle"}
-                        </button>
+                        <ActionMenu>
+                          <button
+                            type="button"
+                            onClick={() => setExpandedId(isExpanded ? null : movimiento.id)}
+                            className="flex w-full items-center rounded px-3 py-2 text-left text-xs font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+                          >
+                            {isExpanded ? "Ocultar" : "Ver detalle"}
+                          </button>
+                        </ActionMenu>
                       </td>
                     </tr>
                     {isExpanded ? (

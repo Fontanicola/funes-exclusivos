@@ -4,6 +4,7 @@ import { Fragment, useMemo, useState } from "react";
 import { Edit3, Search, SlidersHorizontal, X } from "lucide-react";
 import { EntregaStatusBadge } from "./entrega-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { ActionMenu } from "@/components/common/action-menu";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
 import { EntregaEditForm } from "./entrega-edit-form";
 
@@ -404,14 +405,16 @@ export function PendientesEntregaTable({ entregas }: { entregas: Entrega[] }) {
                         <EntregaStatusBadge status={entrega.estado} />
                       </td>
                       <td className="px-4 py-3 align-top">
-                        <button
-                          type="button"
-                          onClick={() => setOpenId(isOpen ? null : entrega.id)}
-                          className="inline-flex items-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                          {isOpen ? "Cerrar" : "Editar"}
-                        </button>
+                        <ActionMenu>
+                          <button
+                            type="button"
+                            onClick={() => setOpenId(isOpen ? null : entrega.id)}
+                            className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                            {isOpen ? "Cerrar" : "Editar"}
+                          </button>
+                        </ActionMenu>
                       </td>
                     </tr>
                     {isOpen ? (

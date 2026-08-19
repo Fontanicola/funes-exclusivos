@@ -12,6 +12,7 @@ import { RecordatorioStatusBadge } from "./recordatorio-status-badge";
 import { RecordatorioPriorityBadge } from "./recordatorio-priority-badge";
 import { RecordatorioTypeBadge } from "./recordatorio-type-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { ActionMenu } from "@/components/common/action-menu";
 
 type Employee = {
   id: string;
@@ -467,19 +468,19 @@ export function RecordatoriosTable({
 
                     <td className="px-4 py-4 align-top">
                       {canAct ? (
-                        <div className="space-y-3">
+                        <ActionMenu>
                           <form action={completeAction} className="flex items-center gap-2">
                             <input type="hidden" name="id" value={recordatorio.id} />
                             <button
                               type="submit"
-                              className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                              className="flex w-full items-center gap-1 rounded px-3 py-2 text-left text-xs font-semibold text-emerald-800 transition hover:bg-emerald-50"
                             >
                               <Check className="h-3.5 w-3.5" />
                               Completar
                             </button>
                           </form>
 
-                          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-3">
+                          <div className="rounded-md border border-[#E5E7EB] bg-[#FAFAFA] p-2">
                             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
                               <CalendarClock className="h-3.5 w-3.5" />
                               Posponer
@@ -509,13 +510,13 @@ export function RecordatoriosTable({
                             <input type="hidden" name="id" value={recordatorio.id} />
                             <button
                               type="submit"
-                              className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-800 transition hover:bg-rose-100"
+                              className="flex w-full items-center gap-1 rounded px-3 py-2 text-left text-xs font-semibold text-rose-800 transition hover:bg-rose-50"
                             >
                               <Ban className="h-3.5 w-3.5" />
                               Cancelar
                             </button>
                           </form>
-                        </div>
+                        </ActionMenu>
                       ) : (
                         <span className="text-sm text-[#6B7280]">—</span>
                       )}

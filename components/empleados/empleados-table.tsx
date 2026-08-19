@@ -9,6 +9,7 @@ import { EmpleadoEditForm } from "./empleado-edit-form";
 import { EmpleadoDeleteButton } from "./empleado-delete-button";
 import { EmpleadoCreateForm } from "./empleado-create-form";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
+import { ActionMenu } from "@/components/common/action-menu";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
 import type { WhatsappInstance } from "@/components/whatsapp/whatsapp-instance-card";
@@ -229,21 +230,18 @@ export function EmpleadosTable({
                         {formatDate(employee.fecha_ingreso)}
                       </td>
                       <td className="border-b border-[#E5E7EB] px-4 py-4">
-                        <div className="flex flex-wrap items-center gap-2">
+                        <ActionMenu>
                           <button
                             type="button"
                             onClick={() => setEditingId((current) => (current === employee.id ? null : employee.id))}
-                            className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
+                            className="flex w-full items-center rounded px-3 py-2 text-left text-sm font-medium text-[#111827] transition hover:bg-[#F9FAFB]"
                           >
                             {isEditing ? "Cerrar" : "Editar"}
                           </button>
                           {currentUserId !== employee.id ? (
-                            <EmpleadoDeleteButton
-                              employeeId={employee.id}
-                              employeeName={employee.nombre ?? employee.email}
-                            />
+                            <div className="px-1 py-1"><EmpleadoDeleteButton employeeId={employee.id} employeeName={employee.nombre ?? employee.email} /></div>
                           ) : null}
-                        </div>
+                        </ActionMenu>
                       </td>
                     </tr>
                     {isEditing ? (
