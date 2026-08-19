@@ -44,13 +44,13 @@ export default async function DashboardLayout({
     const pathname = resolvePathname();
 
     return (
-      <div className="min-h-screen bg-white text-[#111827]">
-        <div className="flex min-h-screen">
+      <div className="h-dvh overflow-hidden bg-white text-[#111827]">
+        <div className="flex h-dvh min-h-0">
           <Sidebar employee={mockEmpleado} />
-            <main className="min-w-0 flex-1 overflow-x-hidden">
+            <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             <BreadcrumbHeader pathname={pathname} />
             <SectionSubheader employee={mockEmpleado} />
-            <div className="px-5 py-4">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 py-4">{children}</div>
           </main>
         </div>
       </div>
@@ -91,13 +91,13 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#111827]">
-      <div className="flex min-h-screen">
+    <div className="h-dvh overflow-hidden bg-white text-[#111827]">
+      <div className="flex h-dvh min-h-0">
         <Sidebar employee={employee} />
-        <main className="min-w-0 flex-1 overflow-x-hidden">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <BreadcrumbHeader pathname={pathname} />
           <SectionSubheader employee={employee} />
-          <div className="px-5 py-4">{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 py-4">{children}</div>
         </main>
       </div>
     </div>

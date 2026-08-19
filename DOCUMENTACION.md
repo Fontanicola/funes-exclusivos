@@ -3781,3 +3781,11 @@ Paths modificados: `app/(dashboard)/catalogo/actions.ts`, `lib/catalogo/hero.ts`
 Tabla/bucket involucrado: `public.catalogo_config`, Storage bucket `vehiculos`.
 
 No se modificó el schema ni se requiere SQL. Validación: `npm run build` finalizado correctamente. El entorno de producción debe tener configurada `SUPABASE_SERVICE_ROLE_KEY` para que el administrador pueda guardar imágenes.
+
+### Shell fijo de la plataforma
+
+Se corrigió el scroll general del panel privado. El sidebar, el breadcrumb/header de plataforma y la subbarra contextual ahora ocupan una estructura fija de viewport (`100dvh`) y no se desplazan junto con el contenido. El scroll vertical queda confinado al área central de cada sección, mientras que los scrolls internos existentes de WhatsApp, CRM, tablas y columnas se mantienen.
+
+Paths modificados: `app/(dashboard)/layout.tsx`, `components/dashboard/breadcrumb-header.tsx`, `components/dashboard/sidebar.tsx`.
+
+No se modificaron tablas Supabase ni reglas de negocio. Validación: `npm run build` finalizado correctamente.
