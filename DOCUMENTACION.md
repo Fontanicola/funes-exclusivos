@@ -3883,6 +3883,20 @@ Se conservaron las reglas de publicación, filtros, paginación, contacto por Wh
 
 Decisión técnica: se usaron assets locales para asegurar disponibilidad en producción y evitar dependencias externas. La estructura visual prioriza impacto de marca, stock publicado, servicios, experiencia en showroom y contacto. Validación: `npm run build`.
 
+### Expansión de la web pública de Funes
+
+La vidriera pública ahora tiene navegación entre páginas dedicadas para `Nosotros`, `Servicios` y `Contacto`, además del catálogo de vehículos existente. Se incorporó una galería editorial con fotografías reales del showroom, stock, taller, eventos y autos clásicos para reforzar la identidad de Funes Exclusivos.
+
+Paths creados: `app/nosotros/page.tsx`, `app/servicios/page.tsx`, `app/contacto/page.tsx`, `components/catalogo-publico/catalogo-public-nav.tsx`, `components/catalogo-publico/catalogo-gallery.tsx` y `lib/catalogo/public-data.ts`.
+
+Path modificado: `components/catalogo-publico/catalogo-public-site.tsx`.
+
+Assets agregados: `public/catalogo/galeria/` con 14 fotografías provistas para la web pública.
+
+Decisiones técnicas: se reutilizan el modo demo, la configuración pública de `catalogo_config`, los vendedores activos y los enlaces de WhatsApp/Instagram existentes. No se agregaron dependencias, no se modificaron tablas ni permisos, y no se exponen datos internos.
+
+Validación: `npm run build` finalizado correctamente.
+
 ### Jerarquía operativa del detalle de peritaje
 
 Se ajustó la pantalla de detalle para que la inspección se lea en el orden correcto: identificación y estado general de la unidad, checklist de revisión, carrocería por panel, reparaciones y valores de referencia. Las secciones del checklist ahora pueden plegarse para reducir ruido y la primera sección queda abierta como punto de inicio.
