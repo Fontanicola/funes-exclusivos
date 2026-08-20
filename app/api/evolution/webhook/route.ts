@@ -9,7 +9,11 @@ import {
   normalizeQrPayload,
 } from "@/lib/evolution/payload-normalizer";
 import { persistConversationMessage } from "@/lib/whatsapp/conversations";
-import { findVehicleInterestMatch, type VehicleInterestCandidate } from "@/lib/whatsapp/vehicle-interest";
+import {
+  findVehicleInterestMatch,
+  recordLeadVehicleInterestChange,
+  type VehicleInterestCandidate,
+} from "@/lib/whatsapp/vehicle-interest";
 import type { EvolutionWebhookPayload } from "@/lib/evolution/types";
 
 export const dynamic = "force-dynamic";
@@ -195,7 +199,7 @@ export async function POST(request: NextRequest) {
     const contactNumber = normalizePhone(fromNumber ?? toNumber);
     const contactName = normalized.contactName ?? contactNumber ?? "Sin nombre";
 
-    let vehicleInterestId: string | null = null;
+    let matchedVehicle: VehicleInterestCandidate | null = null;
     if (isInboundMessage(normalized.direction) && normalized.body) {
       const { data: vehicleCandidates } = await supabase
         .from("vehiculos")
@@ -203,10 +207,10 @@ export async function POST(request: NextRequest) {
         .in("estado", ["en_stock", "en_consignacion"])
         .limit(300);
 
-      vehicleInterestId = findVehicleInterestMatch(
+      matchedVehicle = findVehicleInterestMatch(
         normalized.body,
         (vehicleCandidates ?? []) as VehicleInterestCandidate[]
-      )?.id ?? null;
+      );
     }
 
     let lead = await findLeadByPhone(supabase, contactNumber);
@@ -219,7 +223,7 @@ export async function POST(request: NextRequest) {
           telefono: contactNumber,
           origen: "whatsapp",
           estado: "nuevo",
-          vehiculo_interes_id: vehicleInterestId,
+          vehiculo_interes_id: matchedVehicle?.id ?? null,
           vendedor_id: instance.empleado_id,
           created_by: instance.empleado_id,
           updated_by: instance.empleado_id,
@@ -228,7 +232,25 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!leadError) {
-        lead = createdLead as typeof lead;
+        const createdLeadRecord = createdLead as { id: string; vehiculo_interes_id: string | null } | null;
+        lead = createdLeadRecord as typeof lead;
+
+        if (createdLeadRecord?.id && matchedVehicle) {
+          const historyResult = await recordLeadVehicleInterestChange(supabase, {
+            leadId: createdLeadRecord.id,
+            previousVehicleId: null,
+            nextVehicle: matchedVehicle,
+            actorId: instance.empleado_id,
+            source: "WhatsApp automático",
+          });
+
+          if (historyResult.error) {
+            console.warn("[Evolution webhook] no pudimos registrar el interés inicial", {
+              leadId: createdLeadRecord.id,
+              error: historyResult.error.message,
+            });
+          }
+        }
       }
     }
 
@@ -257,7 +279,8 @@ export async function POST(request: NextRequest) {
       | { id: string; lead_id: string | null; vehiculo_interes_id: string | null; contacto_numero_normalizado: string | null }
       | null;
 
-    vehicleInterestId = vehicleInterestId ?? conversation?.vehiculo_interes_id ?? null;
+    const previousConversationVehicleId = conversation?.vehiculo_interes_id ?? null;
+    const vehicleInterestId = matchedVehicle?.id ?? previousConversationVehicleId ?? null;
 
     let conversationId = conversation?.id ?? null;
 
@@ -296,19 +319,34 @@ export async function POST(request: NextRequest) {
         updated_by: instance.empleado_id,
       };
       if (lead?.id && !conversation?.lead_id) conversationUpdates.lead_id = lead.id;
-      if (vehicleInterestId && !conversation?.vehiculo_interes_id) {
-        conversationUpdates.vehiculo_interes_id = vehicleInterestId;
+      if (matchedVehicle && matchedVehicle.id !== previousConversationVehicleId) {
+        conversationUpdates.vehiculo_interes_id = matchedVehicle.id;
       }
       if (Object.keys(conversationUpdates).length > 1) {
         await supabase.from("conversaciones").update(conversationUpdates).eq("id", conversationId);
       }
     }
 
-    if (lead?.id && vehicleInterestId && !lead.vehiculo_interes_id) {
+    if (lead?.id && matchedVehicle && matchedVehicle.id !== lead.vehiculo_interes_id) {
       await supabase
         .from("leads")
-        .update({ vehiculo_interes_id: vehicleInterestId, updated_by: instance.empleado_id })
+        .update({ vehiculo_interes_id: matchedVehicle.id, updated_by: instance.empleado_id })
         .eq("id", lead.id);
+
+      const historyResult = await recordLeadVehicleInterestChange(supabase, {
+        leadId: lead.id,
+        previousVehicleId: lead.vehiculo_interes_id,
+        nextVehicle: matchedVehicle,
+        actorId: instance.empleado_id,
+        source: "WhatsApp automático",
+      });
+
+      if (historyResult.error) {
+        console.warn("[Evolution webhook] no pudimos registrar el cambio de interés", {
+          leadId: lead.id,
+          error: historyResult.error.message,
+        });
+      }
     }
 
     const { data: currentConversation } = await supabase

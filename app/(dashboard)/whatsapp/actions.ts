@@ -17,6 +17,7 @@ import { summarizeWhatsappConversation } from "@/lib/ai/conversation-summary";
 import {
   findVehicleInterestById,
   findVehicleInterestMatch,
+  recordLeadVehicleInterestChange,
   type VehicleInterestCandidate,
 } from "@/lib/whatsapp/vehicle-interest";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -761,7 +762,7 @@ export async function generateConversationAiSummaryAction(
       updated_by: auth.user.id,
     };
 
-    if (!conversation.vehiculo_interes_id && vehicleInterestId) {
+    if (vehicleInterestId && vehicleInterestId !== conversation.vehiculo_interes_id) {
       updates.vehiculo_interes_id = vehicleInterestId;
     }
 
@@ -782,7 +783,7 @@ export async function generateConversationAiSummaryAction(
         nivel_interes: nextLeadLevel,
         updated_by: auth.user.id,
       };
-      if (!conversation.lead?.vehiculo_interes_id && vehicleInterestId) {
+      if (vehicleInterestId && vehicleInterestId !== conversation.lead?.vehiculo_interes_id) {
         leadUpdates.vehiculo_interes_id = vehicleInterestId;
       }
 
@@ -800,7 +801,12 @@ export async function generateConversationAiSummaryAction(
       }
     }
 
-    if (conversation.lead_id && !conversation.lead?.vehiculo_interes_id && vehicleInterestId && !shouldEscalateLead) {
+    if (
+      conversation.lead_id &&
+      vehicleInterestId &&
+      vehicleInterestId !== conversation.lead?.vehiculo_interes_id &&
+      !shouldEscalateLead
+    ) {
       const { error: leadVehicleError } = await auth.supabase
         .from("leads")
         .update({ vehiculo_interes_id: vehicleInterestId, updated_by: auth.user.id })
@@ -813,6 +819,30 @@ export async function generateConversationAiSummaryAction(
           vehicleId: vehicleInterestId,
           error: leadVehicleError.message,
         });
+      }
+    }
+
+    if (
+      conversation.lead_id &&
+      vehicleInterestId &&
+      vehicleInterestId !== conversation.lead?.vehiculo_interes_id
+    ) {
+      const nextVehicle = findVehicleInterestById(vehicleInterestId, vehicleCandidates);
+      if (nextVehicle) {
+        const historyResult = await recordLeadVehicleInterestChange(auth.supabase, {
+          leadId: conversation.lead_id,
+          previousVehicleId: conversation.lead?.vehiculo_interes_id,
+          nextVehicle,
+          actorId: auth.user.id,
+          source: "Resumen IA de WhatsApp",
+        });
+
+        if (historyResult.error) {
+          console.warn("[WhatsApp AI] no pudimos registrar el cambio de interés", {
+            leadId: conversation.lead_id,
+            error: historyResult.error.message,
+          });
+        }
       }
     }
 

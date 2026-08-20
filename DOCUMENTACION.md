@@ -3897,6 +3897,24 @@ Decisiones técnicas: se reutilizan el modo demo, la configuración pública de 
 
 Validación: `npm run build` finalizado correctamente.
 
+### Ajuste del scroll de WhatsApp
+
+La bandeja principal de WhatsApp ahora ocupa únicamente el alto disponible dentro del dashboard, sin generar scroll en la sección completa. El desplazamiento queda contenido en la lista de conversaciones/contactos y en el historial de mensajes, manteniendo fijos los encabezados y acciones de cada panel.
+
+Paths modificados: `app/(dashboard)/whatsapp/page.tsx` y `components/whatsapp/whatsapp-inbox.tsx`.
+
+No se modificaron datos, acciones, permisos ni dependencias. Pendiente de validación visual manual en desktop y mobile. Validación técnica: `npm run build`.
+
+### Historial de vehículos de interés en WhatsApp
+
+La detección de vehículos mencionados en WhatsApp ahora actualiza el vehículo de interés vigente tanto en la conversación como en el lead cuando aparece una unidad diferente. Cada alta o cambio queda registrado en el historial existente de `lead_interacciones`, mostrando el vehículo anterior, el nuevo vehículo, el origen de la detección y la fecha.
+
+El mismo comportamiento se aplica cuando el resumen IA identifica un vehículo distinto al asociado previamente. El historial se presenta en la ficha del lead con la etiqueta humana `Cambio de interés`.
+
+Paths modificados: `lib/whatsapp/vehicle-interest.ts`, `app/api/evolution/webhook/route.ts`, `app/(dashboard)/whatsapp/actions.ts` y `components/crm/lead-interactions-timeline.tsx`.
+
+Tablas involucradas: `leads`, `conversaciones`, `vehiculos` y `lead_interacciones`. No se creó SQL ni se agregó una tabla nueva; se reutilizó el historial CRM existente. Validación: `npm run build` finalizado correctamente.
+
 ### Jerarquía operativa del detalle de peritaje
 
 Se ajustó la pantalla de detalle para que la inspección se lea en el orden correcto: identificación y estado general de la unidad, checklist de revisión, carrocería por panel, reparaciones y valores de referencia. Las secciones del checklist ahora pueden plegarse para reducir ruido y la primera sección queda abierta como punto de inicio.

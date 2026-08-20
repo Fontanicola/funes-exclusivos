@@ -230,7 +230,7 @@ export default async function WhatsappPage({ searchParams }: { searchParams?: { 
   );
 
   return (
-    <section className="flex h-[calc(100dvh-5rem)] min-h-0 flex-col gap-3 overflow-hidden">
+    <section className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
       {isDemoMode ? (
         <div className="shrink-0 rounded-md border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#6B7280]">
           Modo demo: la bandeja usa datos simulados y no consultará el servicio real.

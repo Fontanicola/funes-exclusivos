@@ -26,6 +26,16 @@ function formatDateTime(value: string | null) {
   }).format(date);
 }
 
+function interactionLabel(type: string | null) {
+  if (type === "interes_vehiculo") return "Cambio de interés";
+  if (type === "seguimiento") return "Seguimiento";
+  if (type === "mensaje") return "Mensaje";
+  if (type === "llamada") return "Llamada";
+  if (type === "visita") return "Visita";
+  if (type === "nota") return "Nota";
+  return type ?? "Interacción";
+}
+
 export function LeadInteractionsTimeline({ interactions }: { interactions: Interaction[] }) {
   if (!interactions.length) {
     return (
@@ -52,7 +62,7 @@ export function LeadInteractionsTimeline({ interactions }: { interactions: Inter
             <div className="space-y-1 rounded-md border border-[#E5E7EB] bg-[#FAFAFB] p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-medium text-[#111827]">
-                  {interaction.tipo ?? "Interacción"}
+                  {interactionLabel(interaction.tipo)}
                 </p>
                 <span className="text-xs text-[#6B7280]">{formatDateTime(interaction.fecha ?? interaction.created_at)}</span>
                 {interaction.created_by?.nombre ? (

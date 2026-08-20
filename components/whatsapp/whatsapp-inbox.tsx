@@ -182,8 +182,8 @@ export function WhatsappInbox({
   const selectedMessages = selected ? mensajes[selected.id] ?? [] : [];
 
   return (
-    <section className="flex min-h-0 flex-1 overflow-hidden rounded-md border border-[#E5E7EB] bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
-      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)]">
+    <section className="flex h-full min-h-0 flex-1 overflow-hidden rounded-md border border-[#E5E7EB] bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
+      <div className="grid h-full min-h-0 flex-1 grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)]">
         <aside className="flex min-h-[280px] min-w-0 flex-col border-b border-[#E5E7EB] bg-[#FCFCFC] lg:min-h-0 lg:border-b-0 lg:border-r">
           <div className="shrink-0 border-b border-[#E5E7EB] p-4">
             <div className="flex items-center justify-between gap-3">

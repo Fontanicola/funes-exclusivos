@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 export type VehicleInterestCandidate = {
   id: string;
   marca: string | null;
@@ -7,6 +9,54 @@ export type VehicleInterestCandidate = {
   dominio?: string | null;
   estado?: string | null;
 };
+
+function vehicleLabel(vehicle: VehicleInterestCandidate | null | undefined) {
+  if (!vehicle) return "Sin vehículo asociado";
+  return [vehicle.marca, vehicle.modelo, vehicle.version, vehicle.anio]
+    .filter(Boolean)
+    .join(" ") || "Vehículo sin descripción";
+}
+
+/** Records an interest change using the existing CRM interaction history. */
+export async function recordLeadVehicleInterestChange(
+  supabase: SupabaseClient,
+  input: {
+    leadId: string;
+    previousVehicleId: string | null | undefined;
+    nextVehicle: VehicleInterestCandidate;
+    actorId: string | null | undefined;
+    source: string;
+  }
+) {
+  if (!input.nextVehicle.id || input.previousVehicleId === input.nextVehicle.id) {
+    return { skipped: true, error: null };
+  }
+
+  let previousVehicle: VehicleInterestCandidate | null = null;
+  if (input.previousVehicleId) {
+    const { data } = await supabase
+      .from("vehiculos")
+      .select("id,marca,modelo,version,anio,dominio,estado")
+      .eq("id", input.previousVehicleId)
+      .maybeSingle<VehicleInterestCandidate>();
+    previousVehicle = data ?? null;
+  }
+
+  const previousLabel = vehicleLabel(previousVehicle);
+  const nextLabel = vehicleLabel(input.nextVehicle);
+  const title = input.previousVehicleId ? "Cambio de vehículo de interés" : "Vehículo de interés detectado";
+  const content = `${previousLabel} → ${nextLabel}. Origen: ${input.source}.`;
+
+  const { error } = await supabase.from("lead_interacciones").insert({
+    lead_id: input.leadId,
+    tipo: "interes_vehiculo",
+    titulo: title,
+    contenido: content,
+    created_by: input.actorId ?? null,
+  });
+
+  return { skipped: false, error };
+}
 
 function normalizeText(value: string | null | undefined) {
   return (value ?? "")
