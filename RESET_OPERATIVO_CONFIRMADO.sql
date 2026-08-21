@@ -60,30 +60,30 @@ and not exists (
 
 commit;
 
--- Verificación: estas tablas deberían devolver 0.
-select 'caja_movimientos' as tabla, count(*) as registros from public.caja_movimientos
-union all select 'ventas_pagos', count(*) from public.ventas_pagos
-union all select 'ventas_entregas', count(*) from public.ventas_entregas
-union all select 'ventas', count(*) from public.ventas
-union all select 'compras_vehiculos', count(*) from public.compras_vehiculos
-union all select 'vehiculo_gastos', count(*) from public.vehiculo_gastos
-union all select 'vehiculo_documentos', count(*) from public.vehiculo_documentos
-union all select 'proveedores', count(*) from public.proveedores
-union all select 'recordatorios', count(*) from public.recordatorios
-union all select 'gestoria_tramites', count(*) from public.gestoria_tramites
-union all select 'gestoria_presupuestos', count(*) from public.gestoria_presupuestos
-union all select 'comisiones', count(*) from public.comisiones
-union all select 'comision_liquidaciones', count(*) from public.comision_liquidaciones
-union all select 'peritajes', count(*) from public.peritajes
-union all select 'vehiculos_sin_interes', count(*)
-  from public.vehiculos as v
-  where not exists (select 1 from public.leads as l where l.vehiculo_interes_id = v.id)
-    and not exists (select 1 from public.conversaciones as c where c.vehiculo_interes_id = v.id);
+-- Verificación: cada consulta debería devolver 0.
+select count(*) as caja_movimientos_vigentes from public.caja_movimientos;
+select count(*) as ventas_pagos_vigentes from public.ventas_pagos;
+select count(*) as ventas_entregas_vigentes from public.ventas_entregas;
+select count(*) as ventas_vigentes from public.ventas;
+select count(*) as compras_vehiculos_vigentes from public.compras_vehiculos;
+select count(*) as vehiculo_gastos_vigentes from public.vehiculo_gastos;
+select count(*) as vehiculo_documentos_vigentes from public.vehiculo_documentos;
+select count(*) as proveedores_vigentes from public.proveedores;
+select count(*) as recordatorios_vigentes from public.recordatorios;
+select count(*) as gestoria_tramites_vigentes from public.gestoria_tramites;
+select count(*) as gestoria_presupuestos_vigentes from public.gestoria_presupuestos;
+select count(*) as comisiones_vigentes from public.comisiones;
+select count(*) as comision_liquidaciones_vigentes from public.comision_liquidaciones;
+select count(*) as peritajes_vigentes from public.peritajes;
+select count(*) as vehiculos_sin_interes
+from public.vehiculos as v
+where not exists (select 1 from public.leads as l where l.vehiculo_interes_id = v.id)
+  and not exists (select 1 from public.conversaciones as c where c.vehiculo_interes_id = v.id);
 
 -- Verificación de datos que se conservan.
-select 'leads' as tabla, count(*) as registros from public.leads
-union all select 'conversaciones', count(*) from public.conversaciones
-union all select 'conversacion_mensajes', count(*) from public.conversacion_mensajes
-union all select 'whatsapp_instancias', count(*) from public.whatsapp_instancias
-union all select 'vehiculos', count(*) from public.vehiculos
-union all select 'empleados', count(*) from public.empleados;
+select count(*) as leads_conservados from public.leads;
+select count(*) as conversaciones_conservadas from public.conversaciones;
+select count(*) as mensajes_conservados from public.conversacion_mensajes;
+select count(*) as whatsapp_instancias_conservadas from public.whatsapp_instancias;
+select count(*) as vehiculos_conservados from public.vehiculos;
+select count(*) as empleados_conservados from public.empleados;
