@@ -3935,11 +3935,9 @@ Tablas Supabase involucradas: `peritajes`, `peritaje_items`, `peritaje_paneles`,
 
 ### Rediseño del dashboard ejecutivo
 
-El dashboard ahora funciona como una pantalla de control para los dueños: abre con contexto de fecha y período, prioriza alertas y pendientes, concentra cuatro indicadores de decisión y ordena la lectura en bloques de resultado, comercial, inventario y operación. Se incorporaron accesos directos para revisar pendientes o inventario y una grilla responsive que aprovecha mejor el espacio en desktop sin perder legibilidad en pantallas angostas.
+El dashboard se simplificó para funcionar como una pantalla de decisión rápida para los dueños: prioriza alertas y pendientes, concentra cuatro indicadores principales y deja visibles únicamente resultado, actividad comercial e inventario. Se retiraron la introducción ornamental y los bloques operativos redundantes del primer nivel; gestoría, entregas, comisiones y proveedores siguen disponibles desde sus módulos específicos.
 
-El resumen financiero reemplazó el gráfico de barras por una tendencia de líneas SVG para ingresos, egresos y resultado de los últimos doce meses, con separación por moneda, etiquetas mensuales y tooltips nativos. No se agregó una dependencia gráfica nueva y se conservaron el modo demo, los filtros por período y los permisos financieros existentes.
-
-Paths creados: `components/dashboard/dashboard-intro.tsx`.
+El resumen financiero mantiene una tendencia de líneas SVG para ingresos, egresos y resultado de los últimos doce meses, con separación por moneda, etiquetas mensuales y tooltips nativos, pero con menos texto y menos tarjetas secundarias. No se agregó una dependencia gráfica nueva y se conservaron el modo demo, los filtros por período y los permisos financieros existentes.
 
 Paths modificados: `app/(dashboard)/dashboard/page.tsx`, `components/dashboard/pnl-summary.tsx` y `components/dashboard/monthly-pnl-chart.tsx`.
 

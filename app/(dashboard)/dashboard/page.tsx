@@ -27,10 +27,7 @@ import { KpiCard } from "@/components/dashboard/kpi-card";
 import { PnlSummary } from "@/components/dashboard/pnl-summary";
 import { InventorySummary } from "@/components/dashboard/inventory-summary";
 import { CommercialSummary } from "@/components/dashboard/commercial-summary";
-import { OperationsSummary } from "@/components/dashboard/operations-summary";
 import { DashboardAlerts } from "@/components/dashboard/dashboard-alerts";
-import { VendorActivitySummary } from "@/components/dashboard/vendor-activity-summary";
-import { DashboardIntro } from "@/components/dashboard/dashboard-intro";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const dynamic = "force-dynamic";
@@ -321,9 +318,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: {
   const canViewFinancials = canViewCosts(currentRole);
 
   return (
-    <section className="space-y-6">
-      <DashboardIntro hasAlerts={metrics.alerts.length > 0} />
-
+    <section className="space-y-5">
       <DashboardAlerts alerts={metrics.alerts} />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -366,7 +361,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: {
         canViewFinancials={canViewFinancials}
       />
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-5 xl:grid-cols-2">
         <CommercialSummary
           salesCount={metrics.commercial.salesCount}
           activeLeads={metrics.commercial.activeLeads}
@@ -393,22 +388,6 @@ export default async function DashboardPage({ searchParams }: { searchParams?: {
           preparationReady={metrics.inventory.preparationReady}
           canViewCosts={canViewFinancials}
         />
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <OperationsSummary
-          pendingTramites={metrics.operations.pendingTramites}
-          overdueTramites={metrics.operations.overdueTramites}
-          pendingBudgets={metrics.operations.pendingBudgets}
-          pendingLiquidations={metrics.operations.pendingLiquidations}
-          commissionsPending={metrics.operations.commissionsPending}
-          whatsappConnected={metrics.operations.whatsappConnected}
-          whatsappDisconnected={metrics.operations.whatsappDisconnected}
-          deliveryPending={metrics.operations.deliveryPending}
-          deliveryDelivered={metrics.operations.deliveryDelivered}
-          deliveryObserved={metrics.operations.deliveryObserved}
-        />
-        {canViewFinancials ? <VendorActivitySummary vendors={metrics.vendorActivity} /> : null}
       </div>
 
     </section>
