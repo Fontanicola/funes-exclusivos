@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Eye, LayoutGrid, List, PencilLine, Search, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, LayoutGrid, List, PencilLine, Search, X } from "lucide-react";
 import { canManageInventory, canViewCosts } from "@/lib/auth/permissions";
 import { VehiculoStatusBadge } from "./vehiculo-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
@@ -126,11 +126,12 @@ function VehicleCard({
   showCosts: boolean;
   showPreparation: boolean;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const photoUrl = getPhotoUrl(vehiculo.fotos);
   const initials = getInitials(vehiculo.marca, vehiculo.modelo);
 
   return (
-    <article className="overflow-hidden rounded-md border border-[#E5E7EB] bg-white transition hover:border-[#D8A1B2]">
+    <article className="relative rounded-md border border-[#E5E7EB] bg-white transition hover:border-[#D8A1B2]">
       <div className="relative aspect-[16/9] overflow-hidden bg-[#F9FAFB]">
         {photoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -144,23 +145,31 @@ function VehicleCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="truncate text-sm font-semibold text-[#111827]">{vehiculo.marca ?? "-"} {vehiculo.modelo ?? ""}</h3>
-            <p className="mt-1 truncate text-[11px] text-[#6B7280]">{[vehiculo.version, vehiculo.anio, vehiculo.dominio].filter(Boolean).join(" · ") || "Sin detalle cargado"}</p>
+            <p className="mt-1 text-[11px] text-[#6B7280]">{formatKm(vehiculo.km)} km</p>
           </div>
           <p className="shrink-0 text-right text-xs font-semibold text-[#111827]">{formatCompactCurrency(getCommercialPrice(vehiculo), vehiculo.precio_moneda)}</p>
         </div>
-        <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-          <div className="rounded-md bg-[#F9FAFB] px-2 py-1.5"><p className="text-[#9CA3AF]">Ubicación</p><p className="mt-0.5 truncate font-medium text-[#374151]">{vehiculo.ubicacion ?? "Sin ubicación"}</p></div>
-          <div className="rounded-md bg-[#F9FAFB] px-2 py-1.5"><p className="text-[#9CA3AF]">Kilómetros</p><p className="mt-0.5 font-medium text-[#374151]">{formatKm(vehiculo.km)}</p></div>
-        </div>
-        {showPreparation ? <p className="text-xs text-[#6B7280]">Preparación: <span className="font-medium text-[#374151]">{vehiculo.estado_preparacion ?? "Sin estado"}</span></p> : null}
-        {showCosts ? <p className="truncate text-xs text-[#6B7280]">Proveedor: {getProviderLabel(vehiculo, proveedores)}</p> : null}
-        <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-2">
-          <p className="text-[11px] text-[#6B7280]">Ingreso {formatDate(vehiculo.fecha_ingreso)}</p>
+        <button type="button" onClick={() => setExpanded((value) => !value)} className="flex w-full items-center justify-between border-t border-[#E5E7EB] pt-2 text-[11px] font-medium text-[#6B7280] hover:text-[#8A1538]">
+          <span>{expanded ? "Ocultar detalles" : "Ver más"}</span>
+          {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+        </button>
+        <div className="flex justify-end">
           <ActionMenu>
             <Link href={`/inventario/${vehiculo.id}`} className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm font-medium text-[#111827] hover:bg-[#F9FAFB]"><Eye className="h-4 w-4 text-[#6B7280]" />Ver</Link>
             {canEdit ? <Link href={`/inventario/${vehiculo.id}/editar`} className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm font-medium text-[#111827] hover:bg-[#F9FAFB]"><PencilLine className="h-4 w-4 text-[#6B7280]" />Editar</Link> : null}
           </ActionMenu>
         </div>
+        {expanded ? (
+          <div className="space-y-2 border-t border-[#E5E7EB] pt-3 text-[11px] text-[#6B7280]">
+            <p className="truncate">{[vehiculo.version, vehiculo.anio, vehiculo.dominio].filter(Boolean).join(" · ") || "Sin detalle cargado"}</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              <div className="rounded-md bg-[#F9FAFB] px-2 py-1.5"><p className="text-[#9CA3AF]">Ubicación</p><p className="mt-0.5 truncate font-medium text-[#374151]">{vehiculo.ubicacion ?? "Sin ubicación"}</p></div>
+              <div className="rounded-md bg-[#F9FAFB] px-2 py-1.5"><p className="text-[#9CA3AF]">Ingreso</p><p className="mt-0.5 font-medium text-[#374151]">{formatDate(vehiculo.fecha_ingreso)}</p></div>
+            </div>
+            {showPreparation ? <p>Preparación: <span className="font-medium text-[#374151]">{vehiculo.estado_preparacion ?? "Sin estado"}</span></p> : null}
+            {showCosts ? <p className="truncate">Proveedor: <span className="font-medium text-[#374151]">{getProviderLabel(vehiculo, proveedores)}</span></p> : null}
+          </div>
+        ) : null}
       </div>
     </article>
   );
