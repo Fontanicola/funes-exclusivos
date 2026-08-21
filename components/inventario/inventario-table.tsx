@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Eye, PencilLine, Search, X } from "lucide-react";
+import { Eye, LayoutGrid, List, PencilLine, Search, X } from "lucide-react";
 import { canManageInventory, canViewCosts } from "@/lib/auth/permissions";
 import { VehiculoStatusBadge } from "./vehiculo-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
@@ -113,6 +113,59 @@ function getCommercialPrice(vehiculo: Vehiculo) {
   return vehiculo.precio_contado ?? vehiculo.precio_venta;
 }
 
+function VehicleCard({
+  vehiculo,
+  proveedores,
+  canEdit,
+  showCosts,
+  showPreparation,
+}: {
+  vehiculo: Vehiculo;
+  proveedores: Proveedor[];
+  canEdit: boolean;
+  showCosts: boolean;
+  showPreparation: boolean;
+}) {
+  const photoUrl = getPhotoUrl(vehiculo.fotos);
+  const initials = getInitials(vehiculo.marca, vehiculo.modelo);
+
+  return (
+    <article className="overflow-hidden rounded-md border border-[#E5E7EB] bg-white transition hover:border-[#D8A1B2]">
+      <div className="relative aspect-[16/9] overflow-hidden bg-[#F9FAFB]">
+        {photoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photoUrl} alt={`${vehiculo.marca ?? "Vehículo"} ${vehiculo.modelo ?? ""}`} className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center"><span className="text-sm font-semibold tracking-[0.12em] text-[#9CA3AF]">{initials}</span></div>
+        )}
+        <div className="absolute left-3 top-3"><VehiculoStatusBadge status={vehiculo.estado} /></div>
+      </div>
+      <div className="space-y-4 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="truncate text-base font-semibold text-[#111827]">{vehiculo.marca ?? "-"} {vehiculo.modelo ?? ""}</h3>
+            <p className="mt-1 truncate text-xs text-[#6B7280]">{[vehiculo.version, vehiculo.anio, vehiculo.dominio].filter(Boolean).join(" · ") || "Sin detalle cargado"}</p>
+          </div>
+          <p className="shrink-0 text-right text-sm font-semibold text-[#111827]">{formatCompactCurrency(getCommercialPrice(vehiculo), vehiculo.precio_moneda)}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="rounded-md bg-[#F9FAFB] px-3 py-2"><p className="text-[#9CA3AF]">Ubicación</p><p className="mt-1 font-medium text-[#374151]">{vehiculo.ubicacion ?? "Sin ubicación"}</p></div>
+          <div className="rounded-md bg-[#F9FAFB] px-3 py-2"><p className="text-[#9CA3AF]">Kilómetros</p><p className="mt-1 font-medium text-[#374151]">{formatKm(vehiculo.km)}</p></div>
+        </div>
+        {showPreparation ? <p className="text-xs text-[#6B7280]">Preparación: <span className="font-medium text-[#374151]">{vehiculo.estado_preparacion ?? "Sin estado"}</span></p> : null}
+        {showCosts ? <p className="truncate text-xs text-[#6B7280]">Proveedor: {getProviderLabel(vehiculo, proveedores)}</p> : null}
+        <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-3">
+          <p className="text-xs text-[#6B7280]">Ingreso {formatDate(vehiculo.fecha_ingreso)}</p>
+          <ActionMenu>
+            <Link href={`/inventario/${vehiculo.id}`} className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm font-medium text-[#111827] hover:bg-[#F9FAFB]"><Eye className="h-4 w-4 text-[#6B7280]" />Ver</Link>
+            {canEdit ? <Link href={`/inventario/${vehiculo.id}/editar`} className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm font-medium text-[#111827] hover:bg-[#F9FAFB]"><PencilLine className="h-4 w-4 text-[#6B7280]" />Editar</Link> : null}
+          </ActionMenu>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export function InventarioTable({
   vehiculos,
   proveedores = [],
@@ -133,6 +186,7 @@ export function InventarioTable({
   const [yearTo, setYearTo] = useState("");
   const [priceFrom, setPriceFrom] = useState("");
   const [priceTo, setPriceTo] = useState("");
+  const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
   const showCosts = canViewCosts(role);
@@ -282,11 +336,22 @@ export function InventarioTable({
           </AdvancedFilters>
         </div>
 
-        <p className="text-xs text-[#6B7280]">
-          {filteredVehiculos.length} de {vehiculos.length} unidades
-        </p>
+        <div className="flex items-center gap-3">
+          <div className="inline-flex rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-0.5" aria-label="Vista de inventario">
+            <button type="button" onClick={() => setViewMode("cards")} className={`inline-flex h-8 items-center gap-1.5 rounded px-2.5 text-xs font-medium ${viewMode === "cards" ? "bg-white text-[#8A1538] shadow-sm" : "text-[#6B7280]"}`} aria-pressed={viewMode === "cards"}><LayoutGrid className="h-3.5 w-3.5" />Cards</button>
+            <button type="button" onClick={() => setViewMode("list")} className={`inline-flex h-8 items-center gap-1.5 rounded px-2.5 text-xs font-medium ${viewMode === "list" ? "bg-white text-[#8A1538] shadow-sm" : "text-[#6B7280]"}`} aria-pressed={viewMode === "list"}><List className="h-3.5 w-3.5" />Lista</button>
+          </div>
+          <p className="hidden text-xs text-[#6B7280] sm:block">{filteredVehiculos.length} de {vehiculos.length} unidades</p>
+        </div>
       </div>
 
+      {viewMode === "cards" ? (
+        <div className="grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-3">
+          {visibleVehiculos.length ? visibleVehiculos.map((vehiculo) => <VehicleCard key={vehiculo.id} vehiculo={vehiculo} proveedores={proveedores} canEdit={canEdit} showCosts={showCosts} showPreparation={showPreparation} />) : (
+            <div className="rounded-md border border-dashed border-[#E5E7EB] px-4 py-14 text-center text-sm text-[#6B7280] md:col-span-2 xl:col-span-3">No hay resultados para mostrar</div>
+          )}
+        </div>
+      ) : (
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-[#E5E7EB]">
           <thead className="bg-[#FAFAFA]">
@@ -466,6 +531,7 @@ export function InventarioTable({
           </tbody>
         </table>
       </div>
+      )}
 
       <PaginationControls page={currentPage} totalItems={filteredVehiculos.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </section>
