@@ -138,24 +138,24 @@ function VehicleCard({
         ) : (
           <div className="flex h-full w-full items-center justify-center"><span className="text-sm font-semibold tracking-[0.12em] text-[#9CA3AF]">{initials}</span></div>
         )}
-        <div className="absolute left-3 top-3"><VehiculoStatusBadge status={vehiculo.estado} /></div>
+        <div className="absolute left-2 top-2"><VehiculoStatusBadge status={vehiculo.estado} /></div>
       </div>
-      <div className="space-y-4 p-4">
+      <div className="space-y-3 p-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="truncate text-base font-semibold text-[#111827]">{vehiculo.marca ?? "-"} {vehiculo.modelo ?? ""}</h3>
-            <p className="mt-1 truncate text-xs text-[#6B7280]">{[vehiculo.version, vehiculo.anio, vehiculo.dominio].filter(Boolean).join(" · ") || "Sin detalle cargado"}</p>
+            <h3 className="truncate text-sm font-semibold text-[#111827]">{vehiculo.marca ?? "-"} {vehiculo.modelo ?? ""}</h3>
+            <p className="mt-1 truncate text-[11px] text-[#6B7280]">{[vehiculo.version, vehiculo.anio, vehiculo.dominio].filter(Boolean).join(" · ") || "Sin detalle cargado"}</p>
           </div>
-          <p className="shrink-0 text-right text-sm font-semibold text-[#111827]">{formatCompactCurrency(getCommercialPrice(vehiculo), vehiculo.precio_moneda)}</p>
+          <p className="shrink-0 text-right text-xs font-semibold text-[#111827]">{formatCompactCurrency(getCommercialPrice(vehiculo), vehiculo.precio_moneda)}</p>
         </div>
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded-md bg-[#F9FAFB] px-3 py-2"><p className="text-[#9CA3AF]">Ubicación</p><p className="mt-1 font-medium text-[#374151]">{vehiculo.ubicacion ?? "Sin ubicación"}</p></div>
-          <div className="rounded-md bg-[#F9FAFB] px-3 py-2"><p className="text-[#9CA3AF]">Kilómetros</p><p className="mt-1 font-medium text-[#374151]">{formatKm(vehiculo.km)}</p></div>
+        <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+          <div className="rounded-md bg-[#F9FAFB] px-2 py-1.5"><p className="text-[#9CA3AF]">Ubicación</p><p className="mt-0.5 truncate font-medium text-[#374151]">{vehiculo.ubicacion ?? "Sin ubicación"}</p></div>
+          <div className="rounded-md bg-[#F9FAFB] px-2 py-1.5"><p className="text-[#9CA3AF]">Kilómetros</p><p className="mt-0.5 font-medium text-[#374151]">{formatKm(vehiculo.km)}</p></div>
         </div>
         {showPreparation ? <p className="text-xs text-[#6B7280]">Preparación: <span className="font-medium text-[#374151]">{vehiculo.estado_preparacion ?? "Sin estado"}</span></p> : null}
         {showCosts ? <p className="truncate text-xs text-[#6B7280]">Proveedor: {getProviderLabel(vehiculo, proveedores)}</p> : null}
-        <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-3">
-          <p className="text-xs text-[#6B7280]">Ingreso {formatDate(vehiculo.fecha_ingreso)}</p>
+        <div className="flex items-center justify-between border-t border-[#E5E7EB] pt-2">
+          <p className="text-[11px] text-[#6B7280]">Ingreso {formatDate(vehiculo.fecha_ingreso)}</p>
           <ActionMenu>
             <Link href={`/inventario/${vehiculo.id}`} className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm font-medium text-[#111827] hover:bg-[#F9FAFB]"><Eye className="h-4 w-4 text-[#6B7280]" />Ver</Link>
             {canEdit ? <Link href={`/inventario/${vehiculo.id}/editar`} className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm font-medium text-[#111827] hover:bg-[#F9FAFB]"><PencilLine className="h-4 w-4 text-[#6B7280]" />Editar</Link> : null}
@@ -346,7 +346,7 @@ export function InventarioTable({
       </div>
 
       {viewMode === "cards" ? (
-        <div className="grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 p-3 md:grid-cols-3 xl:grid-cols-5">
           {visibleVehiculos.length ? visibleVehiculos.map((vehiculo) => <VehicleCard key={vehiculo.id} vehiculo={vehiculo} proveedores={proveedores} canEdit={canEdit} showCosts={showCosts} showPreparation={showPreparation} />) : (
             <div className="rounded-md border border-dashed border-[#E5E7EB] px-4 py-14 text-center text-sm text-[#6B7280] md:col-span-2 xl:col-span-3">No hay resultados para mostrar</div>
           )}

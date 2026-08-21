@@ -3945,7 +3945,7 @@ No se modificaron tablas, acciones, permisos ni dependencias. Validación técni
 
 ### Vistas de vehículos en Inventario
 
-La sección de Inventario ahora abre por defecto en una grilla de cards con foto, identificación, precio, estado, ubicación y acciones principales. Se agregó un selector visible para alternar a Lista cuando se necesita revisar muchas columnas o comparar datos en formato denso. Los filtros, permisos, paginación y acciones existentes se comparten entre ambas vistas.
+La sección de Inventario ahora abre por defecto en una grilla compacta de hasta cinco cards por fila en desktop, con foto, identificación, precio, estado, ubicación y acciones principales. Se agregó un selector visible para alternar a Lista cuando se necesita revisar muchas columnas o comparar datos en formato denso. Los filtros, permisos, paginación y acciones existentes se comparten entre ambas vistas.
 
 Path modificado: `components/inventario/inventario-table.tsx`.
 
