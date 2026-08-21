@@ -124,7 +124,16 @@ export function PnlSummary({
               </div>
             </div>
 
-            <MonthlyPnlChart seriesByCurrency={monthlySeriesByCurrency} compact />
+            <div className="border-t border-[#E5E7EB] pt-5">
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-[#111827]">Tendencia de los últimos 12 meses</p>
+                  <p className="mt-1 text-xs text-[#6B7280]">La línea ayuda a ver dirección y ritmo, no solo volumen.</p>
+                </div>
+                <span className="rounded-full border border-[#E5E7EB] bg-[#FAFAFA] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Ingresos · egresos · resultado</span>
+              </div>
+              <MonthlyPnlChart seriesByCurrency={monthlySeriesByCurrency} compact />
+            </div>
           </>
         ) : (
           <div className="rounded-md border border-dashed border-[#E5E7EB] bg-[#FAFAFA] px-5 py-8 text-sm text-[#6B7280]">

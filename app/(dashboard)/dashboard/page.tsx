@@ -30,6 +30,7 @@ import { CommercialSummary } from "@/components/dashboard/commercial-summary";
 import { OperationsSummary } from "@/components/dashboard/operations-summary";
 import { DashboardAlerts } from "@/components/dashboard/dashboard-alerts";
 import { VendorActivitySummary } from "@/components/dashboard/vendor-activity-summary";
+import { DashboardIntro } from "@/components/dashboard/dashboard-intro";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 
 export const dynamic = "force-dynamic";
@@ -320,7 +321,9 @@ export default async function DashboardPage({ searchParams }: { searchParams?: {
   const canViewFinancials = canViewCosts(currentRole);
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6">
+      <DashboardIntro hasAlerts={metrics.alerts.length > 0} />
+
       <DashboardAlerts alerts={metrics.alerts} />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -363,7 +366,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: {
         canViewFinancials={canViewFinancials}
       />
 
-      <div className="space-y-6">
+      <div className="grid gap-6 xl:grid-cols-2">
         <CommercialSummary
           salesCount={metrics.commercial.salesCount}
           activeLeads={metrics.commercial.activeLeads}
@@ -392,7 +395,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: {
         />
       </div>
 
-      <div className="space-y-6">
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <OperationsSummary
           pendingTramites={metrics.operations.pendingTramites}
           overdueTramites={metrics.operations.overdueTramites}

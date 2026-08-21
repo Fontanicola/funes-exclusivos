@@ -3915,6 +3915,14 @@ Paths modificados: `lib/whatsapp/vehicle-interest.ts`, `app/api/evolution/webhoo
 
 Tablas involucradas: `leads`, `conversaciones`, `vehiculos` y `lead_interacciones`. No se creó SQL ni se agregó una tabla nueva; se reutilizó el historial CRM existente. Validación: `npm run build` finalizado correctamente.
 
+### Reinicio operativo de datos — 2026-08-21
+
+Se realizó un reinicio de los módulos operativos para comenzar una nueva carga manual. Se conservaron las cuentas y perfiles de acceso (`auth.users` y `public.empleados`), el CRM (`leads`, `lead_interacciones` y `crm_pipeline_estados`), WhatsApp (`whatsapp_instancias`, `conversaciones` y `conversacion_mensajes`), vehículos, configuración general y catálogo público.
+
+Se eliminaron los registros de `caja_movimientos`, `ventas_pagos`, `ventas_entregas`, `ventas`, `compras_vehiculos`, `vehiculo_gastos`, `vehiculo_documentos`, `proveedores`, `recordatorios`, `gestoria_presupuesto_items`, `gestoria_presupuestos`, `gestoria_tramites`, `comision_liquidacion_items`, `comision_ajustes`, `comision_liquidaciones`, `comisiones`, `peritaje_items`, `peritaje_paneles`, `peritaje_reparaciones` y `peritajes`.
+
+Antes de eliminar ventas se limpiaron únicamente los vínculos `leads.venta_id`, conservando los leads y sus datos CRM. La verificación posterior confirmó que las tablas operativas quedaron vacías y que CRM, WhatsApp, vehículos, empleados y configuración conservaron sus registros.
+
 ### Jerarquía operativa del detalle de peritaje
 
 Se ajustó la pantalla de detalle para que la inspección se lea en el orden correcto: identificación y estado general de la unidad, checklist de revisión, carrocería por panel, reparaciones y valores de referencia. Las secciones del checklist ahora pueden plegarse para reducir ruido y la primera sección queda abierta como punto de inicio.
@@ -3924,3 +3932,15 @@ El área de carrocería ganó ancho en desktop, con un mapa 2D más legible y un
 Paths modificados: `components/peritajes/peritaje-workspace.tsx` y `components/peritajes/peritaje-panel-diagram.tsx`.
 
 Tablas Supabase involucradas: `peritajes`, `peritaje_items`, `peritaje_paneles`, `peritaje_reparaciones`, `peritaje_plantillas`, `peritaje_plantilla_secciones`, `peritaje_plantilla_items` y `vehiculos`. No se modificó el schema ni se agregó SQL. Validación: `npm run build` finalizado correctamente.
+
+### Rediseño del dashboard ejecutivo
+
+El dashboard ahora funciona como una pantalla de control para los dueños: abre con contexto de fecha y período, prioriza alertas y pendientes, concentra cuatro indicadores de decisión y ordena la lectura en bloques de resultado, comercial, inventario y operación. Se incorporaron accesos directos para revisar pendientes o inventario y una grilla responsive que aprovecha mejor el espacio en desktop sin perder legibilidad en pantallas angostas.
+
+El resumen financiero reemplazó el gráfico de barras por una tendencia de líneas SVG para ingresos, egresos y resultado de los últimos doce meses, con separación por moneda, etiquetas mensuales y tooltips nativos. No se agregó una dependencia gráfica nueva y se conservaron el modo demo, los filtros por período y los permisos financieros existentes.
+
+Paths creados: `components/dashboard/dashboard-intro.tsx`.
+
+Paths modificados: `app/(dashboard)/dashboard/page.tsx`, `components/dashboard/pnl-summary.tsx` y `components/dashboard/monthly-pnl-chart.tsx`.
+
+No se modificaron tablas, acciones, permisos ni dependencias. Validación técnica: `git diff --check` y `npm run build` finalizados correctamente.
