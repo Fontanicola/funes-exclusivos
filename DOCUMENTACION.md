@@ -3950,3 +3950,13 @@ La sección de Inventario ahora abre por defecto en una grilla compacta de hasta
 Path modificado: `components/inventario/inventario-table.tsx`.
 
 No se modificaron tablas ni dependencias. Validación: `npm run build` y `git diff --check`.
+
+### Eliminación segura de vehículos
+
+Inventario ahora ofrece la acción `Eliminar` dentro del menú de tres puntos, tanto en cards como en Lista. La acción pide confirmación, está restringida a administradores y bloquea el borrado cuando existen leads, conversaciones o ventas vinculadas, evitando perder historial comercial o romper relaciones operativas.
+
+Paths creados: `components/inventario/vehiculo-delete-button.tsx`.
+
+Paths modificados: `app/(dashboard)/inventario/actions.ts` y `components/inventario/inventario-table.tsx`.
+
+No se modificó el schema. Validación pendiente: probar eliminación con un vehículo sin relaciones y verificar el mensaje de bloqueo con un vehículo vinculado.

@@ -476,6 +476,50 @@ export async function updateVehiculoAction(
   redirect("/inventario");
 }
 
+export async function deleteVehiculoAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState & { success?: boolean }> {
+  if (isDemoMode) return { error: "Modo demo activo: conectá el entorno real para eliminar vehículos." };
+
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
+
+  const { data: employee } = await supabase
+    .from("empleados")
+    .select("rol,activo")
+    .eq("id", user.id)
+    .maybeSingle<{ rol: string | null; activo: boolean | null }>();
+
+  if (!employee?.activo || employee.rol !== "admin") {
+    return { error: "Solo un administrador puede eliminar vehículos." };
+  }
+
+  const id = toOptionalString(formData.get("id"));
+  if (!id) return { error: "No pudimos identificar el vehículo." };
+
+  const [{ count: leadCount }, { count: conversationCount }, { count: saleCount }] = await Promise.all([
+    supabase.from("leads").select("id", { count: "exact", head: true }).eq("vehiculo_interes_id", id),
+    supabase.from("conversaciones").select("id", { count: "exact", head: true }).eq("vehiculo_interes_id", id),
+    supabase.from("ventas").select("id", { count: "exact", head: true }).eq("vehiculo_id", id),
+  ]);
+
+  if ((leadCount ?? 0) > 0 || (conversationCount ?? 0) > 0 || (saleCount ?? 0) > 0) {
+    return { error: "No se puede eliminar: el vehículo tiene leads, conversaciones o ventas vinculadas." };
+  }
+
+  const { error } = await supabase.from("vehiculos").delete().eq("id", id);
+  if (error) {
+    console.error("[Inventario] delete vehicle failed", { vehicleId: id, code: error.code, message: error.message });
+    return { error: "No pudimos eliminar el vehículo. Puede tener información operativa vinculada." };
+  }
+
+  revalidatePath("/inventario");
+  revalidatePath("/dashboard/catalogo");
+  return { success: true };
+}
+
 export async function getVehiculoById(id: string) {
   if (isDemoMode) {
     return null;

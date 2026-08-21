@@ -9,6 +9,7 @@ import { VehiculoStatusBadge } from "./vehiculo-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { ActionMenu } from "@/components/common/action-menu";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
+import { VehiculoDeleteButton } from "@/components/inventario/vehiculo-delete-button";
 
 type Vehiculo = {
   id: string;
@@ -119,12 +120,14 @@ function VehicleCard({
   canEdit,
   showCosts,
   showPreparation,
+  canDelete,
 }: {
   vehiculo: Vehiculo;
   proveedores: Proveedor[];
   canEdit: boolean;
   showCosts: boolean;
   showPreparation: boolean;
+  canDelete: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const photoUrl = getPhotoUrl(vehiculo.fotos);
@@ -157,6 +160,7 @@ function VehicleCard({
           <ActionMenu>
             <Link href={`/inventario/${vehiculo.id}`} className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm font-medium text-[#111827] hover:bg-[#F9FAFB]"><Eye className="h-4 w-4 text-[#6B7280]" />Ver</Link>
             {canEdit ? <Link href={`/inventario/${vehiculo.id}/editar`} className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm font-medium text-[#111827] hover:bg-[#F9FAFB]"><PencilLine className="h-4 w-4 text-[#6B7280]" />Editar</Link> : null}
+            {canDelete ? <VehiculoDeleteButton vehicleId={vehiculo.id} vehicleName={`${vehiculo.marca ?? "Vehículo"} ${vehiculo.modelo ?? ""}`.trim()} /> : null}
           </ActionMenu>
         </div>
         {expanded ? (
@@ -200,6 +204,7 @@ export function InventarioTable({
   const [page, setPage] = useState(1);
   const showCosts = canViewCosts(role);
   const showPreparation = canManageInventory(role);
+  const canDelete = (role ?? "").toLowerCase() === "admin";
 
   const preparationOptions = useMemo(
     () => Array.from(new Set(vehiculos.map((vehiculo) => vehiculo.estado_preparacion).filter(Boolean))).sort(),
@@ -356,7 +361,7 @@ export function InventarioTable({
 
       {viewMode === "cards" ? (
         <div className="grid gap-3 p-3 md:grid-cols-3 xl:grid-cols-5">
-          {visibleVehiculos.length ? visibleVehiculos.map((vehiculo) => <VehicleCard key={vehiculo.id} vehiculo={vehiculo} proveedores={proveedores} canEdit={canEdit} showCosts={showCosts} showPreparation={showPreparation} />) : (
+          {visibleVehiculos.length ? visibleVehiculos.map((vehiculo) => <VehicleCard key={vehiculo.id} vehiculo={vehiculo} proveedores={proveedores} canEdit={canEdit} showCosts={showCosts} showPreparation={showPreparation} canDelete={canDelete} />) : (
             <div className="rounded-md border border-dashed border-[#E5E7EB] px-4 py-14 text-center text-sm text-[#6B7280] md:col-span-2 xl:col-span-3">No hay resultados para mostrar</div>
           )}
         </div>
@@ -512,6 +517,12 @@ export function InventarioTable({
                             <PencilLine className="h-4 w-4 text-[#6B7280]" />
                             Editar
                           </Link>
+                        ) : null}
+                        {canDelete ? (
+                          <VehiculoDeleteButton
+                            vehicleId={vehiculo.id}
+                            vehicleName={`${vehiculo.marca ?? "Vehículo"} ${vehiculo.modelo ?? ""}`.trim()}
+                          />
                         ) : null}
                       </ActionMenu>
                     </td>
