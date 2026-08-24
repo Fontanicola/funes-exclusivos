@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   InputHTMLAttributes,
   ReactNode,
@@ -152,6 +152,7 @@ export function CajaMovimientoForm({
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useFormState(createCajaMovimientoAction, initialState);
+  const [medio, setMedio] = useState("efectivo");
   const activeProviders = useMemo(() => proveedores.filter((proveedor) => proveedor.nombre), [proveedores]);
   const activeAssets = useMemo(() => activos.filter((activo) => activo.nombre), [activos]);
   const canCreate = canManageCaja(role);
@@ -212,7 +213,7 @@ export function CajaMovimientoForm({
             </div>
             <div className="space-y-2">
               <FieldLabel htmlFor="medio">Medio *</FieldLabel>
-              <Select id="medio" name="medio" defaultValue="efectivo" required>
+              <Select id="medio" name="medio" value={medio} onChange={(event) => setMedio(event.target.value)} required>
                 {MEDIOS.map((medio) => (
                   <option key={medio} value={medio}>
                     {formatMedium(medio)}
@@ -220,6 +221,12 @@ export function CajaMovimientoForm({
                 ))}
               </Select>
             </div>
+            {medio === "otro" ? (
+              <div className="space-y-2 md:col-span-2">
+                <FieldLabel htmlFor="medio_personalizado">Nombre del medio *</FieldLabel>
+                <Input id="medio_personalizado" name="medio_personalizado" placeholder="Ej. Cuenta Galicia, USDT, cheque propio..." required />
+              </div>
+            ) : null}
             <div className="space-y-2">
               <FieldLabel htmlFor="importe">Importe *</FieldLabel>
               <Input id="importe" name="importe" type="number" min="0" step="0.01" placeholder="0" required />

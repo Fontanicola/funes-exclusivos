@@ -16,6 +16,7 @@ import { CajaSummary } from "@/components/caja/caja-summary";
 import { filterByDateRange, parseDateRange } from "@/lib/date-range";
 import { CollapsibleSummary } from "@/components/common/collapsible-summary";
 import { SectionSubheaderActions } from "@/components/dashboard/section-subheader-actions";
+import { ProveedorQuickCreate } from "@/components/proveedores/proveedor-quick-create";
 
 export const metadata: Metadata = {
   title: "Caja | Funes Exclusivos",
@@ -358,13 +359,14 @@ export default async function CajaPage({ searchParams }: { searchParams?: { from
 
       <SectionSubheaderActions>
         {canManageCaja(currentRole) ? (
-          <DataEntryModal
-            triggerLabel="Cargar movimiento"
-            title="Nuevo movimiento de caja"
-            description="Registrá un ingreso o egreso manual."
-          >
-            <CajaMovimientoForm proveedores={proveedores} activos={activos} role={currentRole} />
-          </DataEntryModal>
+          <>
+            <DataEntryModal triggerLabel="Nuevo proveedor" title="Crear proveedor" description="Agregá un proveedor para usarlo en Caja, Compras e Inventario.">
+              <ProveedorQuickCreate />
+            </DataEntryModal>
+            <DataEntryModal triggerLabel="Cargar movimiento" title="Nuevo movimiento de caja" description="Registrá un ingreso o egreso manual.">
+              <CajaMovimientoForm proveedores={proveedores} activos={activos} role={currentRole} />
+            </DataEntryModal>
+          </>
         ) : null}
       </SectionSubheaderActions>
 

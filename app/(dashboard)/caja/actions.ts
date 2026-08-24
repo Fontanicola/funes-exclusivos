@@ -114,7 +114,9 @@ export async function createCajaMovimientoAction(
   const fechaInput = toOptionalString(formData.get("fecha"));
   const fecha = fechaInput || new Date().toISOString().slice(0, 10);
   const origenInput = toLowerTrimmed(formData.get("origen"));
-  const medio = toLowerTrimmed(formData.get("medio"));
+  const medioSeleccionado = toLowerTrimmed(formData.get("medio"));
+  const medioPersonalizado = toLowerTrimmed(formData.get("medio_personalizado"));
+  const medio = medioSeleccionado === "otro" ? medioPersonalizado : medioSeleccionado;
   const concepto = toOptionalString(formData.get("concepto"));
   const detalle1 = toOptionalString(formData.get("detalle_1"));
   const detalle2 = toOptionalString(formData.get("detalle_2"));

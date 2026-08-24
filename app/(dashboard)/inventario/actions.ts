@@ -411,6 +411,15 @@ export async function updateVehiculoAction(
   }
 
   const finalFotos = [...existingFotos, ...uploadResult.publicUrls];
+  const primaryFotoKey = toOptionalString(formData.get("primary_foto_key"));
+  const primaryUrl = primaryFotoKey.startsWith("existing:")
+    ? primaryFotoKey.slice("existing:".length)
+    : primaryFotoKey.startsWith("new:")
+      ? uploadResult.publicUrls[Number(primaryFotoKey.slice("new:".length))]
+      : null;
+  const orderedFotos = primaryUrl && finalFotos.includes(primaryUrl)
+    ? [primaryUrl, ...finalFotos.filter((foto) => foto !== primaryUrl)]
+    : finalFotos;
 
   const { error: updateError } = await supabase
     .from("vehiculos")
@@ -443,7 +452,7 @@ export async function updateVehiculoAction(
       preparacion_comentarios: data.preparacionComentarios || null,
       publicado_mercadolibre: data.publicadoMercadolibre,
       publicado_rodados_google: data.publicadoRodadosGoogle,
-      fotos: finalFotos,
+      fotos: orderedFotos,
       fecha_ingreso: data.fechaIngreso,
       descripcion: data.descripcion || null,
       observaciones: data.observaciones || null,
@@ -505,8 +514,18 @@ export async function deleteVehiculoAction(
     supabase.from("ventas").select("id", { count: "exact", head: true }).eq("vehiculo_id", id),
   ]);
 
-  if ((leadCount ?? 0) > 0 || (conversationCount ?? 0) > 0 || (saleCount ?? 0) > 0) {
-    return { error: "No se puede eliminar: el vehículo tiene leads, conversaciones o ventas vinculadas." };
+  if ((saleCount ?? 0) > 0) {
+    return { error: "No se puede eliminar: el vehículo tiene una venta vinculada." };
+  }
+
+  // El CRM y WhatsApp se conservan: solo se quita el vínculo al vehículo eliminado.
+  if ((leadCount ?? 0) > 0) {
+    const { error: leadsError } = await supabase.from("leads").update({ vehiculo_interes_id: null }).eq("vehiculo_interes_id", id);
+    if (leadsError) return { error: "No pudimos desvincular el vehículo de sus leads." };
+  }
+  if ((conversationCount ?? 0) > 0) {
+    const { error: conversationsError } = await supabase.from("conversaciones").update({ vehiculo_interes_id: null }).eq("vehiculo_interes_id", id);
+    if (conversationsError) return { error: "No pudimos desvincular el vehículo de sus conversaciones." };
   }
 
   const { error } = await supabase.from("vehiculos").delete().eq("id", id);

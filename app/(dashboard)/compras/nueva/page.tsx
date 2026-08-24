@@ -6,6 +6,7 @@ import { mockProveedores } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompraForm } from "@/components/compras/compra-form";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
+import { ProveedorQuickCreate } from "@/components/proveedores/proveedor-quick-create";
 
 export const metadata: Metadata = {
   title: "Nueva compra | Funes Exclusivos",
@@ -58,13 +59,14 @@ export default async function NuevaCompraPage() {
         ) : null}
       </header>
 
-      <DataEntryModal
-        triggerLabel="Cargar compra"
-        title="Nueva compra"
-        description="Registrá la compra y el ingreso de la unidad al inventario."
-      >
-        <CompraForm proveedores={proveedores} />
-      </DataEntryModal>
+      <div className="flex flex-wrap gap-2">
+        <DataEntryModal triggerLabel="Nuevo proveedor" title="Crear proveedor" description="Agregá un proveedor para usarlo en Compras, Caja e Inventario.">
+          <ProveedorQuickCreate />
+        </DataEntryModal>
+        <DataEntryModal triggerLabel="Cargar compra" title="Nueva compra" description="Registrá la compra y el ingreso de la unidad al inventario.">
+          <CompraForm proveedores={proveedores} />
+        </DataEntryModal>
+      </div>
     </section>
   );
 }

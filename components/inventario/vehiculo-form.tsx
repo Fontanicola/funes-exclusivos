@@ -201,6 +201,11 @@ export function VehiculoForm({
   const [keptFotos, setKeptFotos] = useState<string[]>(
     () => parseFotosValue(vehiculo?.fotos)
   );
+  const [newPhotoPreviews, setNewPhotoPreviews] = useState<Array<{ key: string; url: string; index: number }>>([]);
+  const [primaryPhotoKey, setPrimaryPhotoKey] = useState(() => {
+    const photos = parseFotosValue(vehiculo?.fotos);
+    return photos[0] ? `existing:${photos[0]}` : "";
+  });
   const action = mode === "edit" ? updateVehiculoAction : createVehiculoAction;
   const [state, formAction] = useFormState(action, initialState);
   const showInternalSection = canViewCosts(role);
@@ -544,7 +549,7 @@ export function VehiculoForm({
                   const checked = effectiveKeptFotos.includes(url);
 
                   return (
-                    <label
+                    <div
                       key={`${url}-${index}`}
                       className={[
                         "group flex cursor-pointer flex-col gap-2 rounded-md border p-3 transition",
@@ -562,7 +567,17 @@ export function VehiculoForm({
                         />
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <label className="flex items-center gap-2 text-sm text-[#111827]">
+                          <input
+                            type="radio"
+                            name="foto_principal_selector"
+                            checked={primaryPhotoKey === `existing:${url}`}
+                            onChange={() => setPrimaryPhotoKey(`existing:${url}`)}
+                            className="h-4 w-4 border-[#D1D5DB] text-[#8A1538] focus:ring-[#E9B8C6]"
+                          />
+                          Principal
+                        </label>
                         <input
                           type="checkbox"
                           checked={checked}
@@ -575,11 +590,11 @@ export function VehiculoForm({
                           }}
                           className="h-4 w-4 rounded border-[#D1D5DB] text-[#18181B] focus:ring-[#F3F4F6]"
                         />
-                        <span className="text-sm text-[#111827]">
+                        <span className="text-xs text-[#6B7280]">
                           Conservar foto
                         </span>
                       </div>
-                    </label>
+                    </div>
                   );
                 })}
               </div>
@@ -598,8 +613,28 @@ export function VehiculoForm({
               type="file"
               accept="image/jpeg,image/png,image/webp"
               multiple
+              onChange={(event) => {
+                const files = Array.from(event.target.files ?? []);
+                setNewPhotoPreviews(files.map((file, index) => ({ key: `new:${index}:${file.name}`, url: URL.createObjectURL(file), index })));
+                if (!primaryPhotoKey && files.length) setPrimaryPhotoKey("new:0");
+              }}
             />
           </div>
+          {newPhotoPreviews.length ? (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-[#111827]">Fotos nuevas</p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {newPhotoPreviews.map((photo) => (
+                  <label key={photo.key} className="flex cursor-pointer items-center gap-2 rounded-md border border-[#E5E7EB] p-2 text-xs text-[#111827]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photo.url} alt={`Foto nueva ${photo.index + 1}`} className="h-16 w-20 rounded object-cover" />
+                    <span className="flex items-center gap-1.5"><input type="radio" name="foto_principal_selector" checked={primaryPhotoKey === `new:${photo.index}`} onChange={() => setPrimaryPhotoKey(`new:${photo.index}`)} className="h-4 w-4 text-[#8A1538]" />Principal</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          <input type="hidden" name="primary_foto_key" value={primaryPhotoKey} />
           <p className="text-sm text-[#6B7280]">
             JPG, PNG o WEBP. Máximo 8 imágenes.
           </p>

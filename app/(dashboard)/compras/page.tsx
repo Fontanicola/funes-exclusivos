@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
-import { mockComprasVehiculos } from "@/lib/mock-data";
+import { mockComprasVehiculos, mockVehiculoGastos } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchAllSupabaseRows } from "@/lib/supabase/paginated";
 import { CompraKpis } from "@/components/compras/compra-kpis";
@@ -52,7 +52,11 @@ type Compra = {
     categoria: string | null;
     telefono: string | null;
   } | null;
+  gastos_total?: number;
+  costo_total?: number;
 };
+
+type Gasto = { vehiculo_id: string | null; tipo: string | null; monto: number | null; moneda: string | null };
 
 type RawCompra = Omit<Compra, "vehiculo" | "proveedor"> & {
   vehiculo: Compra["vehiculo"] | Compra["vehiculo"][] | null;
@@ -67,6 +71,7 @@ function normalizeSingleRelation<T>(value: T | T[] | null | undefined) {
 export default async function ComprasPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
   const dateRange = parseDateRange(searchParams);
   let compras: Compra[] = mockComprasVehiculos as unknown as Compra[];
+  let gastos: Gasto[] = mockVehiculoGastos as Gasto[];
 
   if (!isDemoMode) {
     const supabase = createSupabaseServerClient();
@@ -86,8 +91,20 @@ export default async function ComprasPage({ searchParams }: { searchParams?: { f
       vehiculo: normalizeSingleRelation(compra.vehiculo),
       proveedor: normalizeSingleRelation(compra.proveedor),
     }));
+    const vehicleIds = compras.map((compra) => compra.vehiculo_id).filter((id): id is string => Boolean(id));
+    if (vehicleIds.length) {
+      const { data: gastosData } = await supabase.from("vehiculo_gastos").select("vehiculo_id,tipo,monto,moneda").in("vehiculo_id", vehicleIds);
+      gastos = (gastosData ?? []) as Gasto[];
+    }
   }
 
+  compras = compras.map((compra) => {
+    const gastosTotal = gastos
+      .filter((gasto) => gasto.vehiculo_id === compra.vehiculo_id && (gasto.tipo ?? "").toLowerCase() !== "compra")
+      .filter((gasto) => !gasto.moneda || !compra.moneda || gasto.moneda.toUpperCase() === compra.moneda.toUpperCase())
+      .reduce((total, gasto) => total + (gasto.monto ?? 0), 0);
+    return { ...compra, gastos_total: gastosTotal, costo_total: (compra.precio_compra ?? 0) + gastosTotal };
+  });
   compras = filterByDateRange(compras, dateRange, (compra) => compra.fecha);
   const comprasPorEstado = [
     { label: "En stock", value: compras.filter((compra) => compra.vehiculo?.estado === "en_stock").length, tone: "emerald" as const },

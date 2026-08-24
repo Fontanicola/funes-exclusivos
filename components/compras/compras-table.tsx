@@ -41,6 +41,8 @@ type Compra = {
     categoria: string | null;
     telefono: string | null;
   } | null;
+  gastos_total?: number;
+  costo_total?: number;
 };
 
 const currencyFilters = ["", "ARS", "USD"] as const;
@@ -190,7 +192,9 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
               <th className="px-4 py-3">Operación</th>
               <th className="px-4 py-3">Vehículo</th>
               <th className="px-4 py-3">Proveedor</th>
-              <th className="px-4 py-3">Precio compra</th>
+            <th className="px-4 py-3">Precio compra</th>
+              <th className="px-4 py-3">Gastos</th>
+              <th className="px-4 py-3">Costo total</th>
               <th className="px-4 py-3">Precio boleto</th>
               <th className="px-4 py-3">Diferencia B</th>
               <th className="px-4 py-3">Deuda</th>
@@ -229,6 +233,12 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
                       {formatMoney(compra.precio_compra, compra.moneda)}
                     </td>
                     <td className="px-4 py-3 align-top text-sm text-[#111827]">
+                      {formatMoney(compra.gastos_total ?? 0, compra.moneda)}
+                    </td>
+                    <td className="px-4 py-3 align-top text-sm font-semibold text-[#111827]">
+                      {formatMoney(compra.costo_total ?? compra.precio_compra, compra.moneda)}
+                    </td>
+                    <td className="px-4 py-3 align-top text-sm text-[#111827]">
                       {formatMoney(compra.precio_boleto, compra.moneda)}
                     </td>
                     <td className="px-4 py-3 align-top text-sm text-[#111827]">
@@ -251,7 +261,7 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
               })
             ) : (
               <tr>
-                <td colSpan={9} className="px-4 py-14 text-center">
+                <td colSpan={11} className="px-4 py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
                     <p className="text-sm font-medium text-[#111827]">
                       {compras.length ? "No encontramos compras con esos filtros" : "Todavía no hay compras cargadas"}

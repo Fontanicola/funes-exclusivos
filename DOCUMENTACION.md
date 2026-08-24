@@ -3960,3 +3960,19 @@ Paths creados: `components/inventario/vehiculo-delete-button.tsx`.
 Paths modificados: `app/(dashboard)/inventario/actions.ts` y `components/inventario/inventario-table.tsx`.
 
 No se modificó el schema. Validación pendiente: probar eliminación con un vehículo sin relaciones y verificar el mensaje de bloqueo con un vehículo vinculado.
+
+### Ajustes solicitados por el cliente — proveedores, caja, fotos y compras
+
+Se agregó un alta rápida de proveedores desde Caja y Nueva compra, reutilizando las columnas existentes de `proveedores` y actualizando los selectores al crear uno nuevo.
+
+El flujo de venta con permuta ahora queda documentado y visible en la pantalla: el vehículo recibido se carga en Inventario como `En stock` y el usado no genera un movimiento monetario en Caja. Se conserva la lógica existente que solo lleva a Caja los pagos monetarios.
+
+En la edición de vehículos se puede elegir manualmente la foto principal entre las fotos actuales y las nuevas que se están subiendo. La selección se guarda ordenando la foto principal al comienzo del array `fotos`, sin agregar columnas nuevas.
+
+La eliminación de vehículos desvincula leads y conversaciones antes de borrar, preservando CRM y WhatsApp; continúa bloqueando únicamente vehículos con ventas vinculadas. En Compras se incorporaron las columnas `Gastos` y `Costo total`, calculado como precio de compra más gastos adicionales del vehículo, excluyendo el registro técnico de tipo `compra` que duplica el precio base.
+
+Paths creados: `app/(dashboard)/proveedores/actions.ts` y `components/proveedores/proveedor-quick-create.tsx`.
+
+Paths modificados: `app/(dashboard)/caja/page.tsx`, `app/(dashboard)/compras/nueva/page.tsx`, `app/(dashboard)/compras/page.tsx`, `app/(dashboard)/inventario/actions.ts`, `components/compras/compras-table.tsx` y `components/inventario/vehiculo-form.tsx`.
+
+Tablas involucradas: `proveedores`, `vehiculos`, `leads`, `conversaciones`, `ventas`, `vehiculo_gastos` y `caja_movimientos`. Validación técnica: `npm run build` y `git diff --check` finalizados correctamente.
