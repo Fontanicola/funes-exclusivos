@@ -111,7 +111,18 @@ function getProviderLabel(vehiculo: Vehiculo, proveedores: Proveedor[]) {
 }
 
 function getCommercialPrice(vehiculo: Vehiculo) {
-  return vehiculo.precio_contado ?? vehiculo.precio_venta;
+  return vehiculo.precio_permuta ?? vehiculo.precio_venta;
+}
+
+function getDaysInStock(vehiculo: Vehiculo) {
+  const source = vehiculo.fecha_compra ?? vehiculo.fecha_ingreso ?? vehiculo.created_at;
+  if (!source) return null;
+  const start = new Date(source);
+  if (Number.isNaN(start.getTime())) return null;
+  const today = new Date();
+  start.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.floor((today.getTime() - start.getTime()) / 86400000));
 }
 
 function VehicleCard({
@@ -148,7 +159,7 @@ function VehicleCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="truncate text-sm font-semibold text-[#111827]">{vehiculo.marca ?? "-"} {vehiculo.modelo ?? ""}</h3>
-            <p className="mt-1 text-[11px] text-[#6B7280]">{formatKm(vehiculo.km)} km</p>
+            <p className="mt-1 text-[11px] text-[#6B7280]">{formatKm(vehiculo.km)} km · {getDaysInStock(vehiculo) ?? "—"} días en stock</p>
           </div>
           <p className="shrink-0 text-right text-xs font-semibold text-[#111827]">{formatCompactCurrency(getCommercialPrice(vehiculo), vehiculo.precio_moneda)}</p>
         </div>
@@ -458,10 +469,10 @@ export function InventarioTable({
                     <td className="px-4 py-3 align-middle">
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-[#111827]">
-                          Contado {formatCompactCurrency(vehiculo.precio_contado, vehiculo.precio_moneda)}
+                          Permuta {formatCompactCurrency(vehiculo.precio_permuta, vehiculo.precio_moneda)}
                         </p>
                         <p className="text-sm text-[#6B7280]">
-                          Permuta {formatCompactCurrency(vehiculo.precio_permuta, vehiculo.precio_moneda)}
+                          Contado {formatCompactCurrency(vehiculo.precio_contado, vehiculo.precio_moneda)}
                         </p>
                         <p className="text-xs text-[#6B7280]">
                           Venta {formatCompactCurrency(vehiculo.precio_venta, vehiculo.precio_moneda)}

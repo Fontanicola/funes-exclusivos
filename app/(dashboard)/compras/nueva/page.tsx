@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { isDemoMode } from "@/lib/demo-mode";
 import { mockProveedores } from "@/lib/mock-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getNextCompraOperationNumber } from "@/app/(dashboard)/compras/actions";
 import { CompraForm } from "@/components/compras/compra-form";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 import { ProveedorQuickCreate } from "@/components/proveedores/proveedor-quick-create";
@@ -34,6 +35,7 @@ export default async function NuevaCompraPage() {
 
         return (data ?? []) as Proveedor[];
       })();
+  const nextOperationNumber = await getNextCompraOperationNumber();
 
   return (
     <section className="space-y-6">
@@ -64,7 +66,7 @@ export default async function NuevaCompraPage() {
           <ProveedorQuickCreate />
         </DataEntryModal>
         <DataEntryModal triggerLabel="Cargar compra" title="Nueva compra" description="Registrá la compra y el ingreso de la unidad al inventario.">
-          <CompraForm proveedores={proveedores} />
+          <CompraForm proveedores={proveedores} defaultOperationNumber={nextOperationNumber} />
         </DataEntryModal>
       </div>
     </section>

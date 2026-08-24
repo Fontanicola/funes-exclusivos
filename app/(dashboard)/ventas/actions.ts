@@ -63,6 +63,8 @@ export async function createVentaAction(
   const costoHistorico = toOptionalNumber(formData.get("costo_historico"));
   const importeGestoria = toOptionalNumber(formData.get("importe_gestoria"));
   const importeEscribania = toOptionalNumber(formData.get("importe_escribania"));
+  const saldoPreventa = toOptionalNumber(formData.get("saldo_preventa"));
+  const saldoEfectivo = toOptionalNumber(formData.get("saldo_efectivo"));
   const sellerId = toOptionalString(formData.get("vendedor_id")) || user.id;
 
   if (!vehiculoId) return { error: "Debés seleccionar un vehículo." };
@@ -109,7 +111,12 @@ export async function createVentaAction(
   });
 
   if (rpcResult.error) {
-    return { error: "No pudimos registrar la venta. Revisá los datos e intentá de nuevo." };
+    console.error("[ventas] Error al registrar venta:", rpcResult.error);
+    const message = rpcResult.error.message?.toLowerCase() ?? "";
+    if (message.includes("stock") || message.includes("vendido")) {
+      return { error: "No pudimos registrar la venta porque el vehículo ya no está disponible." };
+    }
+    return { error: "No pudimos registrar la venta. Revisá vehículo, cliente, precio y forma de pago." };
   }
 
   const ventaId =
@@ -133,6 +140,8 @@ export async function createVentaAction(
       .from("ventas")
       .update({
         vendedor_id: sellerId,
+        saldo_preventa: saldoPreventa,
+        saldo_efectivo: saldoEfectivo,
       })
       .eq("id", ventaId);
 

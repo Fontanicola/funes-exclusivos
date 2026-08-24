@@ -10,6 +10,42 @@ type ActionState = {
   error?: string;
 };
 
+export async function createVehiculoGastoAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  if (isDemoMode) return { error: "Modo demo activo: conectá el entorno real para guardar cambios." };
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
+  const { data: employee } = await supabase.from("empleados").select("rol,activo").eq("id", user.id).maybeSingle();
+  if (!employee?.activo || !canManageInventory(employee.rol)) return { error: "No tenés permisos para cargar gastos." };
+
+  const vehiculoId = toOptionalString(formData.get("vehiculo_id"));
+  const monto = toOptionalNumber(formData.get("monto"));
+  const fecha = toOptionalString(formData.get("fecha")) || new Date().toISOString().slice(0, 10);
+  const moneda = toUpperTrimmed(formData.get("moneda"));
+  const tipo = toOptionalString(formData.get("tipo")) || "otro";
+  const detalle = toOptionalString(formData.get("detalle")) || null;
+  if (!vehiculoId || monto == null || monto <= 0) return { error: "Indicá un monto válido para el gasto." };
+  if (!["ARS", "USD"].includes(moneda)) return { error: "La moneda debe ser ARS o USD." };
+
+  const { error } = await supabase.from("vehiculo_gastos").insert({
+    vehiculo_id: vehiculoId,
+    tipo,
+    monto,
+    moneda,
+    fecha,
+    detalle,
+    created_by: user.id,
+    updated_by: user.id,
+  });
+  if (error) return { error: "No pudimos cargar el gasto. Revisá los datos e intentá de nuevo." };
+  revalidatePath(`/inventario/${vehiculoId}`);
+  revalidatePath("/inventario");
+  return {};
+}
+
 const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
   "image/png",

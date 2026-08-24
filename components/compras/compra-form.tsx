@@ -58,7 +58,7 @@ function SubmitButton() {
   );
 }
 
-export function CompraForm({ proveedores }: { proveedores: Proveedor[] }) {
+export function CompraForm({ proveedores, defaultOperationNumber }: { proveedores: Proveedor[]; defaultOperationNumber: string }) {
   const [state, formAction] = useFormState(createCompraVehiculoAction, initialState);
   const providerOptions = useMemo(() => proveedores, [proveedores]);
   const [precioCompra, setPrecioCompra] = useState("");
@@ -92,7 +92,7 @@ export function CompraForm({ proveedores }: { proveedores: Proveedor[] }) {
           </div>
           <div className="space-y-2">
             <FieldLabel htmlFor="nro_operacion">Nro operación</FieldLabel>
-            <Input id="nro_operacion" name="nro_operacion" placeholder="OP-2026-001" />
+            <Input id="nro_operacion" name="nro_operacion" defaultValue={defaultOperationNumber} placeholder="OP-2026-001" />
           </div>
           <div className="space-y-2 md:col-span-2">
             <FieldLabel htmlFor="proveedor_id">Proveedor</FieldLabel>

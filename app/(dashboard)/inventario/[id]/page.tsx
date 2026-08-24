@@ -9,6 +9,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VehiculoDetail } from "@/components/inventario/vehiculo-detail";
 import { VehiculoDocumentoForm } from "@/components/inventario/vehiculo-documento-form";
 import { VehiculoDocumentosTable } from "@/components/inventario/vehiculo-documentos-table";
+import { VehiculoGastoForm } from "@/components/inventario/vehiculo-gasto-form";
 import { DataEntryModal } from "@/components/common/data-entry-modal";
 
 export const dynamic = "force-dynamic";
@@ -115,6 +116,8 @@ type VehiculoDocumento = {
   } | null;
 };
 
+type VehiculoGasto = { id: string; tipo: string | null; monto: number | null; moneda: string | null; fecha: string | null; detalle: string | null };
+
 function sortDocuments(documentos: VehiculoDocumento[]) {
   return [...documentos].sort((left, right) => {
     const leftStatus = (left.estado ?? "").toLowerCase();
@@ -161,6 +164,7 @@ async function loadData(id: string) {
         proveedor: null,
       } as unknown as Vehiculo,
       documentos: sortDocuments(getDemoDocuments(id) as VehiculoDocumento[]),
+      gastos: [] as VehiculoGasto[],
       role: mockEmpleado.rol,
       canManageDocuments: mockEmpleado.rol === "admin" || mockEmpleado.rol === "gestor",
       canDeleteDocuments: mockEmpleado.rol === "admin",
@@ -173,6 +177,7 @@ async function loadData(id: string) {
     vehicleResult,
     providerResult,
     documentsResult,
+    gastosResult,
     {
       data: { user },
     },
@@ -194,6 +199,11 @@ async function loadData(id: string) {
         "id,vehiculo_id,tramite_id,venta_id,compra_id,tipo,estado,titulo,descripcion,archivo_path,archivo_nombre,archivo_mime_type,archivo_size_bytes,fecha_emision,fecha_vencimiento,observaciones,created_at,updated_at,tramite:gestoria_tramites!vehiculo_documentos_tramite_id_fkey(id,titulo,tipo,estado,fecha_vencimiento),venta:ventas!vehiculo_documentos_venta_id_fkey(id,cliente_nombre,fecha_venta),compra:compras_vehiculos!vehiculo_documentos_compra_id_fkey(id,nro_operacion,fecha,proveedor:proveedores!compras_vehiculos_proveedor_id_fkey(id,nombre)),vehiculo:vehiculos!vehiculo_documentos_vehiculo_id_fkey(id,marca,modelo,dominio)"
       )
       .eq("vehiculo_id", id),
+    supabase
+      .from("vehiculo_gastos")
+      .select("id,tipo,monto,moneda,fecha,detalle")
+      .eq("vehiculo_id", id)
+      .order("fecha", { ascending: false }),
     supabase.auth.getUser(),
   ]);
 
@@ -223,6 +233,7 @@ async function loadData(id: string) {
       proveedor: provider,
     },
     documentos,
+    gastos: (gastosResult.data ?? []) as VehiculoGasto[],
     role: employee.rol,
     canManageDocuments: (employee.rol ?? "").toLowerCase() === "admin" || (employee.rol ?? "").toLowerCase() === "gestor",
     canDeleteDocuments: (employee.rol ?? "").toLowerCase() === "admin",
@@ -276,6 +287,14 @@ export default async function VehiculoDetailPage({ params }: PageProps) {
       </header>
 
       <VehiculoDetail vehiculo={data.vehiculo} canEdit={data.canEditVehicle} role={data.role} />
+
+      <section className="rounded-md border border-[#E5E7EB] bg-white p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div><h2 className="text-base font-semibold text-[#111827]">Gastos del vehículo</h2><p className="mt-1 text-sm text-[#6B7280]">Cargá reparaciones, gestoría y preparación desde la ficha. Estos gastos se suman al costo total.</p></div>
+          <DataEntryModal triggerLabel="Cargar gasto" title="Nuevo gasto del vehículo" description="Registrá un gasto asociado a esta unidad."><VehiculoGastoForm vehiculoId={data.vehiculo.id} /></DataEntryModal>
+        </div>
+        {data.gastos.length ? <div className="mt-4 divide-y divide-[#E5E7EB] rounded-md border border-[#E5E7EB]">{data.gastos.map((gasto) => <div key={gasto.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"><div><p className="font-medium text-[#111827]">{gasto.detalle ?? gasto.tipo ?? "Gasto"}</p><p className="text-xs text-[#6B7280]">{gasto.fecha ?? "Sin fecha"} · {gasto.tipo ?? "Otro"}</p></div><p className="font-semibold text-[#111827]">{gasto.moneda === "USD" ? "US$" : "$"} {new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(gasto.monto ?? 0)}</p></div>)}</div> : <p className="mt-4 rounded-md bg-[#FAFAFA] px-4 py-3 text-sm text-[#6B7280]">Todavía no hay gastos adicionales cargados. La compra inicial ya queda registrada como costo de adquisición.</p>}
+      </section>
 
       <div className="space-y-6">
         {data.canManageDocuments ? (

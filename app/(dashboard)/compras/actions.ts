@@ -30,6 +30,26 @@ function toUpperTrimmed(value: FormDataEntryValue | null) {
   return toOptionalString(value).toUpperCase();
 }
 
+export async function getNextCompraOperationNumber() {
+  const year = new Date().getFullYear();
+  const fallback = `OP-${year}-001`;
+  if (isDemoMode) return fallback;
+
+  const supabase = createSupabaseServerClient();
+  const { data } = await supabase
+    .from("compras_vehiculos")
+    .select("nro_operacion")
+    .like("nro_operacion", `OP-${year}-%`)
+    .not("nro_operacion", "is", null);
+
+  const max = (data ?? []).reduce((highest, row) => {
+    const match = String(row.nro_operacion ?? "").match(new RegExp(`^OP-${year}-(\\d+)$`));
+    return Math.max(highest, match ? Number(match[1]) : 0);
+  }, 0);
+
+  return `OP-${year}-${String(max + 1).padStart(3, "0")}`;
+}
+
 async function getCurrentEmployee(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>) {
   const {
     data: { user },
@@ -70,7 +90,7 @@ export async function createCompraVehiculoAction(
 
   const fechaInput = toOptionalString(formData.get("fecha"));
   const fecha = fechaInput || new Date().toISOString().slice(0, 10);
-  const nroOperacion = toOptionalString(formData.get("nro_operacion")) || null;
+  const nroOperacion = toOptionalString(formData.get("nro_operacion")) || await getNextCompraOperationNumber();
   const proveedorId = toOptionalString(formData.get("proveedor_id")) || null;
   const moneda = toUpperTrimmed(formData.get("moneda"));
   const precioCompra = toOptionalNumber(formData.get("precio_compra"));

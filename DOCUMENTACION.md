@@ -3976,3 +3976,15 @@ Paths creados: `app/(dashboard)/proveedores/actions.ts` y `components/proveedore
 Paths modificados: `app/(dashboard)/caja/page.tsx`, `app/(dashboard)/compras/nueva/page.tsx`, `app/(dashboard)/compras/page.tsx`, `app/(dashboard)/inventario/actions.ts`, `components/compras/compras-table.tsx` y `components/inventario/vehiculo-form.tsx`.
 
 Tablas involucradas: `proveedores`, `vehiculos`, `leads`, `conversaciones`, `ventas`, `vehiculo_gastos` y `caja_movimientos`. Validación técnica: `npm run build` y `git diff --check` finalizados correctamente.
+
+### Ajustes operativos de Compras, Inventario y Ventas — 2026-08-24
+
+Las nuevas compras muestran y generan automáticamente el número de operación con formato `OP-AAAA-###`. Inventario muestra por defecto el precio de permuta y los días en stock. La ficha de cada vehículo incorpora una sección de gastos para registrar preparación, gestoría, reparaciones u otros costos asociados a la unidad.
+
+Ventas reemplazó el selector largo de vehículos por un buscador filtrable por patente, marca y modelo. También permite seleccionar vendedor, persiste saldos de preventa y efectivo, y devuelve mensajes más claros cuando el registro falla. La consulta de vendedores usa empleados activos con rol vendedor.
+
+Paths creados: `components/inventario/vehiculo-gasto-form.tsx`.
+
+Paths modificados: `app/(dashboard)/compras/actions.ts`, `app/(dashboard)/compras/nueva/page.tsx`, `components/compras/compra-form.tsx`, `app/(dashboard)/inventario/[id]/page.tsx`, `app/(dashboard)/inventario/actions.ts`, `components/inventario/inventario-table.tsx`, `app/(dashboard)/ventas/nueva/page.tsx`, `components/ventas/venta-form.tsx` y `app/(dashboard)/ventas/actions.ts`.
+
+Tablas involucradas: `compras_vehiculos`, `vehiculos`, `vehiculo_gastos`, `empleados` y `ventas`. Validación técnica: TypeScript y `git diff --check` finalizados correctamente; el build de Next no reportó errores antes de finalizar el proceso.

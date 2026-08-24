@@ -6,6 +6,7 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTML
 import { useFormState, useFormStatus } from "react-dom";
 import { createVentaAction } from "@/app/(dashboard)/ventas/actions";
 import { PermutaFields } from "./permuta-fields";
+import { Search, X } from "lucide-react";
 
 type VehiculoDisponible = {
   id: string;
@@ -26,6 +27,8 @@ type VehiculoDisponible = {
 type ActionState = {
   error?: string;
 };
+
+type Vendedor = { id: string; nombre: string | null; email: string | null; rol: string | null };
 
 const initialState: ActionState = {};
 
@@ -123,13 +126,15 @@ function todayValue() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function VentaForm({ vehiculos }: { vehiculos: VehiculoDisponible[] }) {
+export function VentaForm({ vehiculos, vendedores = [] }: { vehiculos: VehiculoDisponible[]; vendedores?: Vendedor[] }) {
   const [state, formAction] = useFormState(createVentaAction, initialState);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState<VehiculoDisponible | null>(null);
   const [metodoPago, setMetodoPago] = useState("transferencia");
   const [precioVenta, setPrecioVenta] = useState("");
   const [moneda, setMoneda] = useState("ARS");
+  const [vehicleQuery, setVehicleQuery] = useState("");
+  const [vehicleSearchOpen, setVehicleSearchOpen] = useState(false);
 
   const selectedVehicleOptions = useMemo(
     () =>
@@ -139,6 +144,17 @@ export function VentaForm({ vehiculos }: { vehiculos: VehiculoDisponible[] }) {
       })),
     [vehiculos]
   );
+  const filteredVehicles = useMemo(() => {
+    const query = vehicleQuery.trim().toLowerCase();
+    if (!query) return selectedVehicleOptions.slice(0, 12);
+    return selectedVehicleOptions.filter((vehicle) =>
+      [vehicle.marca, vehicle.modelo, vehicle.version, vehicle.anio, vehicle.dominio]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(query)
+    ).slice(0, 12);
+  }, [selectedVehicleOptions, vehicleQuery]);
 
   useEffect(() => {
     const found = selectedVehicleOptions.find((vehicle) => vehicle.id === selectedVehicleId) ?? null;
@@ -160,23 +176,40 @@ export function VentaForm({ vehiculos }: { vehiculos: VehiculoDisponible[] }) {
         <div className="space-y-4 px-5 py-5">
           <div className="space-y-2">
             <FieldLabel htmlFor="vehiculo_id">Vehículo *</FieldLabel>
-            <Select
-              id="vehiculo_id"
-              name="vehiculo_id"
-              value={selectedVehicleId}
-              onChange={(event) => setSelectedVehicleId(event.target.value)}
-              required
-            >
-              <option value="">Seleccionar vehículo</option>
-              {selectedVehicleOptions.map((vehiculo) => (
-                <option key={vehiculo.id} value={vehiculo.id}>
-                  {vehiculo.marca ?? "-"} {vehiculo.modelo ?? ""}{" "}
-                  {vehiculo.version ? `· ${vehiculo.version}` : ""}{" "}
-                  {vehiculo.anio ? `· ${vehiculo.anio}` : ""}{" "}
-                  {vehiculo.dominio ? `· ${vehiculo.dominio}` : ""}
-                </option>
-              ))}
-            </Select>
+            <input type="hidden" name="vehiculo_id" value={selectedVehicleId} />
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-[#9CA3AF]" />
+              <Input
+                id="vehiculo_busqueda"
+                value={selectedVehicle ? `${selectedVehicle.marca ?? ""} ${selectedVehicle.modelo ?? ""} · ${selectedVehicle.dominio ?? "Sin patente"}` : vehicleQuery}
+                onChange={(event) => {
+                  setVehicleQuery(event.target.value);
+                  setSelectedVehicleId("");
+                  setVehicleSearchOpen(true);
+                }}
+                onFocus={() => setVehicleSearchOpen(true)}
+                placeholder="Buscar por patente, marca o modelo"
+                autoComplete="off"
+                required={!selectedVehicleId}
+                className="pl-10 pr-10"
+              />
+              {selectedVehicle ? (
+                <button type="button" onClick={() => { setSelectedVehicleId(""); setVehicleQuery(""); setVehicleSearchOpen(true); }} className="absolute right-3 top-3 text-[#6B7280] hover:text-[#111827]" aria-label="Limpiar vehículo">
+                  <X className="h-4 w-4" />
+                </button>
+              ) : null}
+              {vehicleSearchOpen && !selectedVehicleId ? (
+                <div className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border border-[#E5E7EB] bg-white p-1 shadow-lg">
+                  {filteredVehicles.length ? filteredVehicles.map((vehiculo) => (
+                    <button key={vehiculo.id} type="button" onClick={() => { setSelectedVehicleId(vehiculo.id); setVehicleQuery(""); setVehicleSearchOpen(false); }} className="w-full rounded px-3 py-2 text-left text-sm hover:bg-[#F9FAFB]">
+                      <span className="font-medium text-[#111827]">{vehiculo.marca ?? "-"} {vehiculo.modelo ?? ""}</span>
+                      <span className="ml-2 text-[#6B7280]">{vehiculo.dominio ?? "Sin patente"}{vehiculo.anio ? ` · ${vehiculo.anio}` : ""}</span>
+                    </button>
+                  )) : <p className="px-3 py-3 text-sm text-[#6B7280]">No encontramos vehículos.</p>}
+                </div>
+              ) : null}
+            </div>
+            <p className="text-xs text-[#6B7280]">Escribí la patente para encontrar el vehículo rápidamente.</p>
           </div>
 
           {selectedVehicle ? (
@@ -231,6 +264,13 @@ export function VentaForm({ vehiculos }: { vehiculos: VehiculoDisponible[] }) {
           <div className="space-y-2">
             <FieldLabel htmlFor="fecha_venta">Fecha de venta *</FieldLabel>
             <Input id="fecha_venta" name="fecha_venta" type="date" defaultValue={todayValue()} />
+          </div>
+          <div className="space-y-2">
+            <FieldLabel htmlFor="vendedor_id">Vendedor</FieldLabel>
+            <Select id="vendedor_id" name="vendedor_id" defaultValue="">
+              <option value="">Vendedor actual</option>
+              {vendedores.map((vendedor) => <option key={vendedor.id} value={vendedor.id}>{vendedor.nombre ?? vendedor.email ?? "Vendedor"}</option>)}
+            </Select>
           </div>
           <div className="space-y-2">
             <FieldLabel htmlFor="precio_venta">Precio venta *</FieldLabel>

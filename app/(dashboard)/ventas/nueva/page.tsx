@@ -29,6 +29,8 @@ type VehiculoDisponible = {
   fotos: string[] | string | null;
 };
 
+type Vendedor = { id: string; nombre: string | null; email: string | null; rol: string | null };
+
 export default async function NuevaVentaPage() {
   const vehiculos = isDemoMode
     ? (mockVehiculos.filter((vehiculo) => vehiculo.estado === "en_stock") as VehiculoDisponible[])
@@ -42,6 +44,18 @@ export default async function NuevaVentaPage() {
           .order("modelo", { ascending: true });
 
         return (data ?? []) as VehiculoDisponible[];
+      })();
+  const vendedores = isDemoMode
+    ? []
+    : await (async () => {
+        const supabase = createSupabaseServerClient();
+        const { data } = await supabase
+          .from("empleados")
+          .select("id,nombre,email,rol")
+          .eq("activo", true)
+          .eq("rol", "vendedor")
+          .order("nombre");
+        return (data ?? []) as Vendedor[];
       })();
 
   return (
@@ -75,7 +89,7 @@ export default async function NuevaVentaPage() {
         title="Nueva venta"
         description="Cargá la operación y sus pagos iniciales."
       >
-        <VentaForm vehiculos={vehiculos} />
+        <VentaForm vehiculos={vehiculos} vendedores={vendedores} />
       </DataEntryModal>
     </section>
   );
