@@ -132,7 +132,9 @@ function collectVehicleData(formData: FormData) {
   const fechaCompraInput = toOptionalString(formData.get("fecha_compra"));
   const fechaCompra = fechaCompraInput || null;
   const costoAdquisicion = toOptionalNumber(formData.get("costo_adquisicion"));
-  const costoMoneda = toUpperTrimmed(formData.get("costo_moneda"));
+  // Las consignaciones pueden ingresar sin costo de adquisición. En ese caso
+  // usamos la moneda comercial como referencia para no bloquear el alta.
+  const costoMoneda = toUpperTrimmed(formData.get("costo_moneda")) || "ARS";
   const precioVenta = toOptionalNumber(formData.get("precio_venta"));
   const precioMoneda = toUpperTrimmed(formData.get("precio_moneda"));
   const precioInfoautoCompra = toOptionalNumber(formData.get("precio_infoauto_compra"));

@@ -3988,3 +3988,7 @@ Paths creados: `components/inventario/vehiculo-gasto-form.tsx`.
 Paths modificados: `app/(dashboard)/compras/actions.ts`, `app/(dashboard)/compras/nueva/page.tsx`, `components/compras/compra-form.tsx`, `app/(dashboard)/inventario/[id]/page.tsx`, `app/(dashboard)/inventario/actions.ts`, `components/inventario/inventario-table.tsx`, `app/(dashboard)/ventas/nueva/page.tsx`, `components/ventas/venta-form.tsx` y `app/(dashboard)/ventas/actions.ts`.
 
 Tablas involucradas: `compras_vehiculos`, `vehiculos`, `vehiculo_gastos`, `empleados` y `ventas`. Validación técnica: TypeScript y `git diff --check` finalizados correctamente; el build de Next no reportó errores antes de finalizar el proceso.
+
+### Alta de vehículos en consignación
+
+El alta manual desde Inventario acepta consignaciones sin costo de adquisición ni moneda de costo. Si esos datos no se cargan, se utiliza ARS como referencia interna sin bloquear el guardado; la moneda comercial continúa siendo obligatoria para los precios publicados.

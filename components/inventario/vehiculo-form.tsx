@@ -410,12 +410,11 @@ export function VehiculoForm({
               />
             </div>
             <div className="space-y-2">
-              <FieldLabel htmlFor="costo_moneda">Moneda costo *</FieldLabel>
+              <FieldLabel htmlFor="costo_moneda">Moneda costo</FieldLabel>
               <Select
                 id="costo_moneda"
                 name="costo_moneda"
                 defaultValue={vehiculo?.costo_moneda ?? "ARS"}
-                required
               >
                 <option value="ARS">ARS</option>
                 <option value="USD">USD</option>
