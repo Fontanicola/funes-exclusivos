@@ -25,6 +25,7 @@ type VehiculoDisponible = {
   precio_contado?: number | null;
   precio_permuta?: number | null;
   precio_infoauto_actual?: number | null;
+  costo_adquisicion?: number | null;
   costo_reposicion?: number | null;
   fotos: string[] | string | null;
 };
@@ -38,7 +39,7 @@ export default async function NuevaVentaPage() {
         const supabase = createSupabaseServerClient();
         const { data } = await supabase
           .from("vehiculos")
-          .select("id,marca,modelo,version,anio,dominio,precio_venta,precio_moneda,precio_contado,precio_permuta,precio_infoauto_actual,costo_reposicion,fotos")
+          .select("id,marca,modelo,version,anio,dominio,precio_venta,precio_moneda,precio_contado,precio_permuta,precio_infoauto_actual,costo_adquisicion,costo_reposicion,fotos")
           .eq("estado", "en_stock")
           .order("marca", { ascending: true })
           .order("modelo", { ascending: true });

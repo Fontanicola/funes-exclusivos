@@ -20,6 +20,7 @@ type VehiculoDisponible = {
   precio_contado?: number | null;
   precio_permuta?: number | null;
   precio_infoauto_actual?: number | null;
+  costo_adquisicion?: number | null;
   costo_reposicion?: number | null;
   fotos: string[] | string | null;
 };
@@ -133,6 +134,9 @@ export function VentaForm({ vehiculos, vendedores = [] }: { vehiculos: VehiculoD
   const [metodoPago, setMetodoPago] = useState("transferencia");
   const [precioVenta, setPrecioVenta] = useState("");
   const [moneda, setMoneda] = useState("ARS");
+  const [precioInfoauto, setPrecioInfoauto] = useState("");
+  const [costoReposicion, setCostoReposicion] = useState("");
+  const [costoHistorico, setCostoHistorico] = useState("");
   const [vehicleQuery, setVehicleQuery] = useState("");
   const [vehicleSearchOpen, setVehicleSearchOpen] = useState(false);
 
@@ -165,6 +169,9 @@ export function VentaForm({ vehiculos, vendedores = [] }: { vehiculos: VehiculoD
     if (found?.precio_moneda) {
       setMoneda(found.precio_moneda);
     }
+    setPrecioInfoauto(found?.precio_infoauto_actual != null ? String(found.precio_infoauto_actual) : "");
+    setCostoReposicion(found?.costo_reposicion != null ? String(found.costo_reposicion) : "");
+    setCostoHistorico(found?.costo_adquisicion != null ? String(found.costo_adquisicion) : "");
   }, [selectedVehicleId, selectedVehicleOptions]);
 
   return (
@@ -288,15 +295,15 @@ export function VentaForm({ vehiculos, vendedores = [] }: { vehiculos: VehiculoD
           </div>
           <div className="space-y-2">
             <FieldLabel htmlFor="precio_infoauto">Precio Infoauto</FieldLabel>
-            <Input id="precio_infoauto" name="precio_infoauto" type="number" min="0" step="0.01" placeholder="0" />
+            <Input id="precio_infoauto" name="precio_infoauto" type="number" min="0" step="0.01" placeholder="0" value={precioInfoauto} onChange={(event) => setPrecioInfoauto(event.target.value)} />
           </div>
           <div className="space-y-2">
             <FieldLabel htmlFor="costo_reposicion">Costo reposición</FieldLabel>
-            <Input id="costo_reposicion" name="costo_reposicion" type="number" min="0" step="0.01" placeholder="0" />
+            <Input id="costo_reposicion" name="costo_reposicion" type="number" min="0" step="0.01" placeholder="0" value={costoReposicion} onChange={(event) => setCostoReposicion(event.target.value)} />
           </div>
           <div className="space-y-2">
             <FieldLabel htmlFor="costo_historico">Costo histórico</FieldLabel>
-            <Input id="costo_historico" name="costo_historico" type="number" min="0" step="0.01" placeholder="0" />
+            <Input id="costo_historico" name="costo_historico" type="number" min="0" step="0.01" placeholder="0" value={costoHistorico} onChange={(event) => setCostoHistorico(event.target.value)} />
           </div>
           <div className="space-y-2">
             <FieldLabel htmlFor="importe_gestoria">Importe gestoría</FieldLabel>

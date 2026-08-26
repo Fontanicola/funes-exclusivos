@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { canViewMargins } from "@/lib/auth/permissions";
-import { PaymentMethodBadge } from "./payment-method-badge";
 import { VentaStatusBadge } from "./venta-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
@@ -61,7 +60,6 @@ type Venta = {
   } | null;
 };
 
-const paymentMethods = ["", "transferencia", "efectivo", "dolares", "pesos", "permuta"] as const;
 const statuses = ["", "registrada", "anulada"] as const;
 
 function formatDate(value: string | null) {
@@ -149,7 +147,6 @@ export function VentasTable({
   toolbarAction?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
-  const [methodFilter, setMethodFilter] = useState<(typeof paymentMethods)[number]>("");
   const [statusFilter, setStatusFilter] = useState<(typeof statuses)[number]>("");
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
@@ -159,7 +156,6 @@ export function VentasTable({
     const normalizedQuery = query.trim().toLowerCase();
 
     return ventas.filter((venta) => {
-      if (methodFilter && venta.metodo_pago !== methodFilter) return false;
       if (statusFilter && venta.estado !== statusFilter) return false;
 
       if (!normalizedQuery) return true;
@@ -184,7 +180,7 @@ export function VentasTable({
 
       return searchable.includes(normalizedQuery);
     });
-  }, [methodFilter, query, statusFilter, ventas]);
+  }, [query, statusFilter, ventas]);
 
   const totalPages = Math.max(1, Math.ceil(filteredVentas.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -217,21 +213,6 @@ export function VentasTable({
           </div>
 
           <AdvancedFilters>
-          <div className="relative min-w-[180px] flex-1 sm:flex-none">
-            <select
-              value={methodFilter}
-              onChange={(event) => setMethodFilter(event.target.value as (typeof paymentMethods)[number])}
-              className="h-10 w-full appearance-none rounded-md border border-[#E5E7EB] bg-white px-3 pr-9 text-sm text-[#111827] outline-none transition focus:border-[#8A1538] focus:ring-2 focus:ring-[#E9B8C6]"
-            >
-              <option value="">Todos los métodos</option>
-              <option value="transferencia">Transferencia</option>
-              <option value="efectivo">Efectivo</option>
-              <option value="dolares">Dólares</option>
-              <option value="pesos">Pesos</option>
-              <option value="permuta">Permuta</option>
-            </select>
-          </div>
-
           <div className="relative min-w-[170px] flex-1 sm:flex-none">
             <select
               value={statusFilter}
@@ -259,7 +240,7 @@ export function VentasTable({
               <th className="px-4 py-3">Cliente</th>
               <th className="px-4 py-3">Vendedor</th>
               <th className="px-4 py-3">Fecha</th>
-              <th className="px-4 py-3">Método</th>
+              <th className="px-4 py-3">Financiación</th>
               <th className="px-4 py-3">Precio</th>
               <th className="px-4 py-3">Entrega</th>
               <th className="px-4 py-3">Permuta</th>
@@ -307,8 +288,8 @@ export function VentasTable({
                     <td className="px-4 py-3 align-middle text-sm text-[#111827]">
                       {formatDate(venta.fecha_venta)}
                     </td>
-                    <td className="px-4 py-3 align-middle">
-                      <PaymentMethodBadge method={venta.metodo_pago} />
+                    <td className="px-4 py-3 align-middle text-sm text-[#111827]">
+                      {venta.saldo_preventa != null && venta.saldo_preventa > 0 ? `Sí · ${formatMoney(venta.saldo_preventa, venta.moneda)}` : "No"}
                     </td>
                     <td className="px-4 py-3 align-middle text-sm text-[#111827]">
                       <div className="space-y-1">

@@ -471,16 +471,20 @@ export function VehiculoForm({
               defaultValue={formatDateValue(vehiculo?.fecha_ingreso ?? null)}
             />
           </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="estado_preparacion">Estado preparación</FieldLabel>
-            <Select
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <FieldLabel htmlFor="estado_preparacion">Estado preparación</FieldLabel>
+                {vehiculo?.id ? <Link href={`/inventario/${vehiculo.id}/peritaje`} className="text-xs font-medium text-[#8A1538] hover:underline">Gestionar en peritaje</Link> : null}
+              </div>
+              <Select
               id="estado_preparacion"
               name="estado_preparacion"
               defaultValue={vehiculo?.estado_preparacion ?? "sin_preparar"}
-            >
-              <option value="sin_preparar">Sin preparar</option>
-            </Select>
-          </div>
+              >
+                <option value="sin_preparar">Sin preparar</option>
+              </Select>
+              <p className="text-xs text-[#6B7280]">El avance detallado se actualiza desde el peritaje del vehículo.</p>
+            </div>
           <div className="space-y-2">
             <FieldLabel htmlFor="chapero">Chapero</FieldLabel>
             <Input id="chapero" name="chapero" placeholder="Nombre o taller" defaultValue={vehiculo?.chapero ?? ""} />

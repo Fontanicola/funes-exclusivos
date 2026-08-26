@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { VehiculoStatusBadge } from "@/components/inventario/vehiculo-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
@@ -92,6 +92,7 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
   const [query, setQuery] = useState("");
   const [currencyFilter, setCurrencyFilter] = useState<(typeof currencyFilters)[number]>("");
   const [withDebt, setWithDebt] = useState(false);
+  const [showBoletoColumns, setShowBoletoColumns] = useState(false);
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
 
@@ -121,9 +122,13 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
     });
   }, [compras, currencyFilter, query, withDebt]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredCompras.length / PAGE_SIZE));
+  const sortedCompras = useMemo(
+    () => [...filteredCompras].sort((a, b) => new Date(b.fecha ?? b.created_at ?? 0).getTime() - new Date(a.fecha ?? a.created_at ?? 0).getTime()),
+    [filteredCompras]
+  );
+  const totalPages = Math.max(1, Math.ceil(sortedCompras.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const visibleCompras = filteredCompras.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const visibleCompras = sortedCompras.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <section className="rounded-md border border-[#E5E7EB] bg-white">
@@ -176,10 +181,11 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
           >
             Con deuda
             </button>
+            <button type="button" onClick={() => setShowBoletoColumns((value) => !value)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] hover:bg-[#F9FAFB]"><SlidersHorizontal className="h-4 w-4" />{showBoletoColumns ? "Ocultar boleto" : "Ver boleto"}</button>
             </AdvancedFilters>
           </div>
           <p className="text-xs text-[#6B7280]">
-            Mostrando {visibleCompras.length} de {filteredCompras.length}
+            Mostrando {visibleCompras.length} de {sortedCompras.length}
           </p>
         </div>
       </div>
@@ -195,8 +201,8 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
             <th className="px-4 py-3">Precio compra</th>
               <th className="px-4 py-3">Gastos</th>
               <th className="px-4 py-3">Costo total</th>
-              <th className="px-4 py-3">Precio boleto</th>
-              <th className="px-4 py-3">Diferencia B</th>
+              {showBoletoColumns ? <th className="px-4 py-3">Precio boleto</th> : null}
+              {showBoletoColumns ? <th className="px-4 py-3">Diferencia B</th> : null}
               <th className="px-4 py-3">Deuda</th>
               <th className="px-4 py-3">Estado stock</th>
             </tr>
@@ -238,12 +244,12 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
                     <td className="px-4 py-3 align-top text-sm font-semibold text-[#111827]">
                       {formatMoney(compra.costo_total ?? compra.precio_compra, compra.moneda)}
                     </td>
-                    <td className="px-4 py-3 align-top text-sm text-[#111827]">
+                    {showBoletoColumns ? <td className="px-4 py-3 align-top text-sm text-[#111827]">
                       {formatMoney(compra.precio_boleto, compra.moneda)}
-                    </td>
-                    <td className="px-4 py-3 align-top text-sm text-[#111827]">
+                    </td> : null}
+                    {showBoletoColumns ? <td className="px-4 py-3 align-top text-sm text-[#111827]">
                       {formatMoney(compra.diferencia_b, compra.moneda)}
-                    </td>
+                    </td> : null}
                     <td className="px-4 py-3 align-top">
                       {hasDebt ? (
                         <span className="inline-flex items-center rounded-full border border-[#FEF3C7] bg-[#FFFBEB] px-2.5 py-1 text-xs font-medium text-[#92400E]">
@@ -261,7 +267,7 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
               })
             ) : (
               <tr>
-                <td colSpan={11} className="px-4 py-14 text-center">
+                <td colSpan={showBoletoColumns ? 11 : 9} className="px-4 py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
                     <p className="text-sm font-medium text-[#111827]">
                       {compras.length ? "No encontramos compras con esos filtros" : "Todavía no hay compras cargadas"}
@@ -279,7 +285,7 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
         </table>
       </div>
 
-      <PaginationControls page={currentPage} totalItems={filteredCompras.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
+      <PaginationControls page={currentPage} totalItems={sortedCompras.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </section>
   );
 }

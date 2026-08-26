@@ -3992,3 +3992,9 @@ Tablas involucradas: `compras_vehiculos`, `vehiculos`, `vehiculo_gastos`, `emple
 ### Alta de vehículos en consignación
 
 El alta manual desde Inventario acepta consignaciones sin costo de adquisición ni moneda de costo. Si esos datos no se cargan, se utiliza ARS como referencia interna sin bloquear el guardado; la moneda comercial continúa siendo obligatoria para los precios publicados.
+
+### Ajustes operativos adicionales — 2026-08-26
+
+Las cards de Inventario muestran versión junto al modelo y año junto a kilómetros. La edición de vehículos incorpora un acceso directo al peritaje; el estado detallado de preparación se gestiona allí para respetar el valor permitido por el esquema actual. Compras se ordena de más nuevas a más antiguas y permite mostrar u ocultar Precio boleto y Diferencia B. Ventas reemplaza la columna Método por una columna resumida de Financiación.
+
+En Nueva venta, Infoauto, costo de reposición y costo histórico se completan automáticamente desde la unidad seleccionada y siguen siendo editables.

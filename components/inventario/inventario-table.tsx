@@ -158,8 +158,8 @@ function VehicleCard({
       <div className="space-y-3 p-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="truncate text-sm font-semibold text-[#111827]">{vehiculo.marca ?? "-"} {vehiculo.modelo ?? ""}</h3>
-            <p className="mt-1 text-[11px] text-[#6B7280]">{formatKm(vehiculo.km)} km · {getDaysInStock(vehiculo) ?? "—"} días en stock</p>
+            <h3 className="truncate text-sm font-semibold text-[#111827]">{vehiculo.marca ?? "-"} {vehiculo.modelo ?? ""}{vehiculo.version ? <span className="font-normal text-[#6B7280]"> · {vehiculo.version}</span> : null}</h3>
+            <p className="mt-1 text-[11px] text-[#6B7280]">{formatKm(vehiculo.km)} km · {vehiculo.anio ?? "—"} · {getDaysInStock(vehiculo) ?? "—"} días en stock</p>
           </div>
           <p className="shrink-0 text-right text-xs font-semibold text-[#111827]">{formatCompactCurrency(getCommercialPrice(vehiculo), vehiculo.precio_moneda)}</p>
         </div>
