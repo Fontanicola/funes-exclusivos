@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { PencilLine, Search, X } from "lucide-react";
 import { canViewMargins } from "@/lib/auth/permissions";
 import { VentaStatusBadge } from "./venta-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
@@ -245,6 +246,7 @@ export function VentasTable({
               <th className="px-4 py-3">Entrega</th>
               <th className="px-4 py-3">Permuta</th>
               <th className="px-4 py-3">Estado</th>
+              <th className="px-4 py-3">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
@@ -340,12 +342,13 @@ export function VentasTable({
                     <td className="px-4 py-3 align-middle">
                       <VentaStatusBadge status={venta.estado} />
                     </td>
+                    <td className="px-4 py-3 align-middle"><Link href={`/ventas/${venta.id}/editar`} className="inline-flex items-center gap-1.5 rounded-md border border-[#E5E7EB] px-2.5 py-2 text-xs font-medium text-[#111827] hover:bg-[#F9FAFB]"><PencilLine className="h-3.5 w-3.5 text-[#8A1538]" />Editar</Link></td>
                   </tr>
                 );
               })
             ) : (
               <tr>
-                <td colSpan={9} className="px-4 py-14 text-center">
+                <td colSpan={10} className="px-4 py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
                     <p className="text-sm font-medium text-[#111827]">
                       No hay resultados para mostrar

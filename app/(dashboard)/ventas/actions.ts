@@ -180,3 +180,28 @@ export async function createVentaAction(
   revalidatePath("/inventario");
   redirect("/ventas");
 }
+
+export async function updateVentaAction(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  if (isDemoMode) return { error: "Modo demo activo: conectá el entorno real para guardar cambios." };
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Tu sesión expiró. Volvé a iniciar sesión." };
+  const { data: actor } = await supabase.from("empleados").select("id,rol,activo").eq("id", user.id).maybeSingle<{ id: string; rol: string | null; activo: boolean | null }>();
+  if (!actor || actor.activo !== true || !canManageSales(actor.rol)) return { error: "No tenés permisos para editar ventas." };
+  const id = toOptionalString(formData.get("id"));
+  const clienteNombre = toOptionalString(formData.get("cliente_nombre"));
+  const precioVenta = toOptionalNumber(formData.get("precio_venta"));
+  const moneda = toUpperTrimmed(formData.get("moneda"));
+  const metodoPago = toLowerTrimmed(formData.get("metodo_pago"));
+  const fechaVenta = toOptionalString(formData.get("fecha_venta")) || new Date().toISOString().slice(0, 10);
+  const vendedorId = toOptionalString(formData.get("vendedor_id")) || null;
+  if (!id || !clienteNombre || precioVenta == null) return { error: "Completá cliente y precio de venta." };
+  if (!["ARS", "USD"].includes(moneda)) return { error: "La moneda debe ser ARS o USD." };
+  if (!["transferencia", "efectivo", "dolares", "pesos", "permuta"].includes(metodoPago)) return { error: "El método de pago no es válido." };
+  if (actor.rol === "vendedor" && vendedorId && vendedorId !== user.id) return { error: "No podés asignar la venta a otro vendedor." };
+
+  const { error } = await supabase.from("ventas").update({ cliente_nombre: clienteNombre, cliente_telefono: toOptionalString(formData.get("cliente_telefono")) || null, cliente_email: toOptionalString(formData.get("cliente_email")) || null, cliente_documento: toOptionalString(formData.get("cliente_documento")) || null, fecha_venta: fechaVenta, precio_venta: precioVenta, moneda, metodo_pago: metodoPago, vendedor_id: vendedorId || user.id, saldo_preventa: toOptionalNumber(formData.get("saldo_preventa")), saldo_efectivo: toOptionalNumber(formData.get("saldo_efectivo")), observaciones: toOptionalString(formData.get("observaciones")) || null }).eq("id", id);
+  if (error) return { error: "No pudimos actualizar la venta." };
+  revalidatePath("/ventas");
+  redirect("/ventas");
+}

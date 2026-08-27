@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { PencilLine, Search, SlidersHorizontal, X } from "lucide-react";
 import { VehiculoStatusBadge } from "@/components/inventario/vehiculo-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
@@ -205,6 +206,7 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
               {showBoletoColumns ? <th className="px-4 py-3">Diferencia B</th> : null}
               <th className="px-4 py-3">Deuda</th>
               <th className="px-4 py-3">Estado stock</th>
+              <th className="px-4 py-3">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] bg-white">
@@ -262,12 +264,13 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
                     <td className="px-4 py-3 align-top">
                       <VehiculoStatusBadge status={compra.vehiculo?.estado ?? "en_stock"} />
                     </td>
+                    <td className="px-4 py-3 align-top"><Link href={`/compras/${compra.id}/editar`} className="inline-flex items-center gap-1.5 rounded-md border border-[#E5E7EB] px-2.5 py-2 text-xs font-medium text-[#111827] hover:bg-[#F9FAFB]"><PencilLine className="h-3.5 w-3.5 text-[#8A1538]" />Editar</Link></td>
                   </tr>
                 );
               })
             ) : (
               <tr>
-                <td colSpan={showBoletoColumns ? 11 : 9} className="px-4 py-14 text-center">
+                <td colSpan={showBoletoColumns ? 12 : 10} className="px-4 py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
                     <p className="text-sm font-medium text-[#111827]">
                       {compras.length ? "No encontramos compras con esos filtros" : "Todavía no hay compras cargadas"}

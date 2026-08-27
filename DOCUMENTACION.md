@@ -3998,3 +3998,11 @@ El alta manual desde Inventario acepta consignaciones sin costo de adquisición 
 Las cards de Inventario muestran versión junto al modelo y año junto a kilómetros. La edición de vehículos incorpora un acceso directo al peritaje; el estado detallado de preparación se gestiona allí para respetar el valor permitido por el esquema actual. Compras se ordena de más nuevas a más antiguas y permite mostrar u ocultar Precio boleto y Diferencia B. Ventas reemplaza la columna Método por una columna resumida de Financiación.
 
 En Nueva venta, Infoauto, costo de reposición y costo histórico se completan automáticamente desde la unidad seleccionada y siguen siendo editables.
+
+### Edición de Compras y Ventas — 2026-08-27
+
+Compras y Ventas ahora tienen rutas y formularios de edición propios, accesibles desde la columna Acciones de cada tabla. La edición de una compra sincroniza fecha, operación, proveedor, moneda, valores y deuda con el vehículo y el gasto inicial asociado. La edición de una venta permite corregir cliente, vendedor, fecha, precio, moneda, forma de pago, saldos y observaciones sin alterar el vehículo vendido.
+
+Paths creados: `app/(dashboard)/compras/[id]/editar/page.tsx`, `app/(dashboard)/ventas/[id]/editar/page.tsx`, `components/compras/compra-edit-form.tsx` y `components/ventas/venta-edit-form.tsx`.
+
+Paths modificados: `app/(dashboard)/compras/actions.ts`, `app/(dashboard)/ventas/actions.ts`, `components/compras/compras-table.tsx` y `components/ventas/ventas-table.tsx`.

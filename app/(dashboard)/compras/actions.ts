@@ -263,3 +263,40 @@ export async function createCompraVehiculoAction(
   revalidatePath("/dashboard");
   redirect("/compras");
 }
+
+export async function updateCompraVehiculoAction(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  if (isDemoMode) return { error: "Modo demo activo: conectá el entorno real para guardar cambios." };
+  const supabase = createSupabaseServerClient();
+  const authResult = await getCurrentEmployee(supabase);
+  if ("error" in authResult) return { error: authResult.error };
+  const id = toOptionalString(formData.get("id"));
+  if (!id) return { error: "No encontramos la compra a editar." };
+
+  const fecha = toOptionalString(formData.get("fecha")) || new Date().toISOString().slice(0, 10);
+  const nroOperacion = toOptionalString(formData.get("nro_operacion")) || null;
+  const proveedorId = toOptionalString(formData.get("proveedor_id")) || null;
+  const moneda = toUpperTrimmed(formData.get("moneda"));
+  const precioCompra = toOptionalNumber(formData.get("precio_compra"));
+  const precioBoleto = toOptionalNumber(formData.get("precio_boleto"));
+  const diferenciaB = toOptionalNumber(formData.get("diferencia_b"));
+  const deudaPendiente = toOptionalNumber(formData.get("deuda_pendiente"));
+  const observaciones = toOptionalString(formData.get("observaciones")) || null;
+  if (precioCompra == null || precioCompra < 0) return { error: "El precio de compra es obligatorio." };
+  if (!["ARS", "USD"].includes(moneda)) return { error: "La moneda debe ser ARS o USD." };
+
+  const { data: compra } = await supabase.from("compras_vehiculos").select("vehiculo_id").eq("id", id).maybeSingle<{ vehiculo_id: string | null }>();
+  if (!compra) return { error: "No encontramos la compra a editar." };
+  const { error } = await supabase.from("compras_vehiculos").update({ fecha, nro_operacion: nroOperacion, proveedor_id: proveedorId, precio_compra: precioCompra, precio_boleto: precioBoleto, moneda, diferencia_b: diferenciaB, deuda_pendiente: deudaPendiente, observaciones, updated_by: authResult.user.id }).eq("id", id);
+  if (error) return { error: "No pudimos actualizar la compra." };
+  if (compra.vehiculo_id) {
+    await supabase.from("vehiculos").update({ proveedor_id: proveedorId, fecha_compra: fecha, nro_operacion: nroOperacion, costo_adquisicion: precioCompra, costo_moneda: moneda, updated_by: authResult.user.id }).eq("id", compra.vehiculo_id);
+    await supabase.from("vehiculo_gastos").update({ proveedor_id: proveedorId, monto: precioCompra, moneda, fecha, updated_by: authResult.user.id }).eq("vehiculo_id", compra.vehiculo_id).eq("tipo", "compra");
+  }
+  revalidatePath("/compras");
+  revalidatePath(`/compras/${id}/editar`);
+  revalidatePath("/inventario");
+  redirect("/compras");
+}
