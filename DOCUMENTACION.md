@@ -4014,4 +4014,6 @@ En Compras se retiraron de la interfaz los campos/columnas Precio boleto y Difer
 
 Paths modificados: `components/dashboard/notification-center.tsx`, `components/dashboard/breadcrumb-header.tsx`, `components/dashboard/section-subheader.tsx`, `components/inventario/vehiculo-detail.tsx`, `components/inventario/vehiculo-gasto-form.tsx`, `app/(dashboard)/inventario/actions.ts`, `components/peritajes/peritaje-create-form.tsx`, `components/ventas/ventas-table.tsx`, `components/compras/compras-table.tsx`, `components/compras/compra-form.tsx` y `components/compras/compra-edit-form.tsx`.
 
+El centro de alertas también permite crear un recordatorio directamente desde la campanita mediante el formulario compacto `CreateAlertForm`, con tipo, prioridad, fecha, título y descripción. Reutiliza `createRecordatorioAction` para mantener permisos, validaciones y persistencia alineados con la sección Recordatorios.
+
 Tablas involucradas: `recordatorios`, `vehiculo_gastos` y `caja_movimientos`. Validación: `npx tsc --noEmit` finalizado correctamente; el build de Next quedó sin salida durante varios minutos y fue detenido para evitar dejar un proceso colgado.
