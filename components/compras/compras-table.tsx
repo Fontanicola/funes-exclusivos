@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { PencilLine, Search, SlidersHorizontal, X } from "lucide-react";
+import { PencilLine, Search, X } from "lucide-react";
 import { VehiculoStatusBadge } from "@/components/inventario/vehiculo-status-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { AdvancedFilters } from "@/components/common/advanced-filters";
@@ -93,7 +93,6 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
   const [query, setQuery] = useState("");
   const [currencyFilter, setCurrencyFilter] = useState<(typeof currencyFilters)[number]>("");
   const [withDebt, setWithDebt] = useState(false);
-  const [showBoletoColumns, setShowBoletoColumns] = useState(false);
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
 
@@ -182,7 +181,6 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
           >
             Con deuda
             </button>
-            <button type="button" onClick={() => setShowBoletoColumns((value) => !value)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-medium text-[#111827] hover:bg-[#F9FAFB]"><SlidersHorizontal className="h-4 w-4" />{showBoletoColumns ? "Ocultar boleto" : "Ver boleto"}</button>
             </AdvancedFilters>
           </div>
           <p className="text-xs text-[#6B7280]">
@@ -202,8 +200,6 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
             <th className="px-4 py-3">Precio compra</th>
               <th className="px-4 py-3">Gastos</th>
               <th className="px-4 py-3">Costo total</th>
-              {showBoletoColumns ? <th className="px-4 py-3">Precio boleto</th> : null}
-              {showBoletoColumns ? <th className="px-4 py-3">Diferencia B</th> : null}
               <th className="px-4 py-3">Deuda</th>
               <th className="px-4 py-3">Estado stock</th>
               <th className="px-4 py-3">Acciones</th>
@@ -246,12 +242,6 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
                     <td className="px-4 py-3 align-top text-sm font-semibold text-[#111827]">
                       {formatMoney(compra.costo_total ?? compra.precio_compra, compra.moneda)}
                     </td>
-                    {showBoletoColumns ? <td className="px-4 py-3 align-top text-sm text-[#111827]">
-                      {formatMoney(compra.precio_boleto, compra.moneda)}
-                    </td> : null}
-                    {showBoletoColumns ? <td className="px-4 py-3 align-top text-sm text-[#111827]">
-                      {formatMoney(compra.diferencia_b, compra.moneda)}
-                    </td> : null}
                     <td className="px-4 py-3 align-top">
                       {hasDebt ? (
                         <span className="inline-flex items-center rounded-full border border-[#FEF3C7] bg-[#FFFBEB] px-2.5 py-1 text-xs font-medium text-[#92400E]">
@@ -270,7 +260,7 @@ export function ComprasTable({ compras, toolbarAction }: { compras: Compra[]; to
               })
             ) : (
               <tr>
-                <td colSpan={showBoletoColumns ? 12 : 10} className="px-4 py-14 text-center">
+                <td colSpan={10} className="px-4 py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
                     <p className="text-sm font-medium text-[#111827]">
                       {compras.length ? "No encontramos compras con esos filtros" : "Todavía no hay compras cargadas"}

@@ -21,8 +21,6 @@ export function CompraEditForm({ compra, proveedores }: { compra: Compra; provee
       <Field label="Proveedor"><select className={input} name="proveedor_id" defaultValue={compra.proveedor_id ?? ""}><option value="">Sin proveedor</option>{proveedores.map((p) => <option key={p.id} value={p.id}>{p.nombre ?? "Proveedor"}{p.categoria ? ` · ${p.categoria}` : ""}</option>)}</select></Field>
       <Field label="Moneda"><select className={input} name="moneda" defaultValue={compra.moneda ?? "ARS"}><option>ARS</option><option>USD</option></select></Field>
       <Field label="Precio compra"><input className={input} type="number" min="0" step="0.01" name="precio_compra" defaultValue={compra.precio_compra ?? ""} required /></Field>
-      <Field label="Precio boleto"><input className={input} type="number" min="0" step="0.01" name="precio_boleto" defaultValue={compra.precio_boleto ?? ""} /></Field>
-      <Field label="Diferencia B"><input className={input} type="number" min="0" step="0.01" name="diferencia_b" defaultValue={compra.diferencia_b ?? ""} /></Field>
       <Field label="Deuda pendiente"><input className={input} type="number" min="0" step="0.01" name="deuda_pendiente" defaultValue={compra.deuda_pendiente ?? ""} /></Field>
     </div>
     <Field label="Observaciones"><textarea className="min-h-24 w-full rounded-md border border-[#E5E7EB] px-3 py-2 text-sm font-normal outline-none focus:border-[#8A1538]" name="observaciones" defaultValue={compra.observaciones ?? ""} /></Field>

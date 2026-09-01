@@ -31,11 +31,11 @@ export function PeritajeCreateForm({ vehiculoId }: { vehiculoId: string }) {
         <label className="space-y-1.5 text-sm font-medium text-slate-700">Fecha
           <span className="relative block"><CalendarDays className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" /><input required type="date" name="fecha_peritaje" defaultValue={new Date().toISOString().slice(0, 10)} className="h-10 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm" /></span>
         </label>
-        <label className="space-y-1.5 text-sm font-medium text-slate-700">Cliente
-          <input name="cliente_nombre" placeholder="Nombre del cliente" className="h-10 w-full rounded-md border border-slate-200 px-3 text-sm" />
+        <label className="space-y-1.5 text-sm font-medium text-slate-700">Responsable
+          <input name="cliente_nombre" placeholder="Nombre del responsable" className="h-10 w-full rounded-md border border-slate-200 px-3 text-sm" />
         </label>
-        <label className="space-y-1.5 text-sm font-medium text-slate-700">Teléfono
-          <input name="cliente_telefono" placeholder="Teléfono" className="h-10 w-full rounded-md border border-slate-200 px-3 text-sm" />
+        <label className="space-y-1.5 text-sm font-medium text-slate-700">Contacto del responsable
+          <input name="cliente_telefono" placeholder="Teléfono o contacto" className="h-10 w-full rounded-md border border-slate-200 px-3 text-sm" />
         </label>
       </div>
       {error ? <p className="mt-4 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}

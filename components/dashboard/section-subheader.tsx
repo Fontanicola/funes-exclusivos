@@ -28,6 +28,7 @@ const sections = [
       { label: "Compras", href: "/compras", icon: BadgeDollarSign },
       { label: "Ventas", href: "/ventas", icon: ShoppingCart },
       { label: "Caja", href: "/caja", icon: Banknote },
+      { label: "Cobros", href: "/caja?tipo=ingreso", icon: Banknote },
     ],
   },
   {

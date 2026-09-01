@@ -132,6 +132,11 @@ export function VehiculoDetail({
               </span>
             </div>
 
+            <Link href={`/inventario/${vehiculo.id}/peritaje`} className="flex items-center justify-between gap-3 rounded-md border border-[#D8A1B2] bg-[#FDF2F5] px-4 py-3 transition hover:bg-[#FBE8EE]">
+              <div className="flex items-center gap-3"><ClipboardCheck className="h-5 w-5 text-[#8A1538]" /><div><p className="text-sm font-semibold text-[#111827]">Peritaje del vehículo</p><p className="mt-0.5 text-xs text-[#6B7280]">Checklist, paneles, reparaciones y valoración</p></div></div>
+              <span className="text-xs font-semibold text-[#8A1538]">Abrir revisión →</span>
+            </Link>
+
             <div className="space-y-2">
               <p className="text-xs uppercase tracking-[0.18em] text-[#6B7280]">
                 {vehiculo.dominio ?? "Sin dominio"}

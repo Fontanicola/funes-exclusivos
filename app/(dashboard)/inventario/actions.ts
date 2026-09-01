@@ -27,6 +27,7 @@ export async function createVehiculoGastoAction(
   const moneda = toUpperTrimmed(formData.get("moneda"));
   const tipo = toOptionalString(formData.get("tipo")) || "otro";
   const detalle = toOptionalString(formData.get("detalle")) || null;
+  const impactaCaja = formData.get("impacta_caja") !== null;
   if (!vehiculoId || monto == null || monto <= 0) return { error: "Indicá un monto válido para el gasto." };
   if (!["ARS", "USD"].includes(moneda)) return { error: "La moneda debe ser ARS o USD." };
 
@@ -41,6 +42,13 @@ export async function createVehiculoGastoAction(
     updated_by: user.id,
   });
   if (error) return { error: "No pudimos cargar el gasto. Revisá los datos e intentá de nuevo." };
+  if (impactaCaja) {
+    const { error: cajaError } = await supabase.from("caja_movimientos").insert({
+      origen: "vehiculo_gasto", tipo: "egreso", monto, moneda, fecha, concepto: "Gasto de vehículo",
+      detalle_1: detalle ?? tipo, detalle_3: vehiculoId, created_by: user.id, updated_by: user.id,
+    });
+    if (cajaError) return { error: "El gasto se guardó, pero no pudimos registrarlo en Caja." };
+  }
   revalidatePath(`/inventario/${vehiculoId}`);
   revalidatePath("/inventario");
   return {};

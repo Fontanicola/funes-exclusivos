@@ -18,6 +18,7 @@ export function VehiculoGastoForm({ vehiculoId }: { vehiculoId: string }) {
       <label className="space-y-2 text-sm font-medium text-[#111827]">Monto<input name="monto" type="number" min="0" step="0.01" required className="h-10 w-full rounded-md border border-[#E5E7EB] px-3 text-sm font-normal" /></label>
       <label className="space-y-2 text-sm font-medium text-[#111827]">Moneda<select name="moneda" defaultValue="ARS" className="h-10 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-sm font-normal"><option>ARS</option><option>USD</option></select></label>
     </div>
+    <label className="flex items-start gap-3 rounded-md border border-[#E5E7EB] bg-[#FAFAFA] px-3 py-3 text-sm text-[#111827]"><input type="checkbox" name="impacta_caja" className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#8A1538]" /><span><span className="block font-medium">Impacta en Caja</span><span className="mt-0.5 block text-xs font-normal text-[#6B7280]">Genera un egreso automáticamente al guardar este gasto.</span></span></label>
     <label className="block space-y-2 text-sm font-medium text-[#111827]">Detalle<textarea name="detalle" className="min-h-20 w-full rounded-md border border-[#E5E7EB] px-3 py-2 text-sm font-normal" placeholder="Ej.: cambio de aceite y filtros" /></label>
     {state.error ? <p className="text-sm text-[#8A1538]">{state.error}</p> : null}
     <div className="flex justify-end"><SubmitButton /></div>

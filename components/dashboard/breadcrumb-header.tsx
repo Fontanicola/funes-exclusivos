@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { PeriodFilter } from "./period-filter";
+import { NotificationCenter } from "./notification-center";
 
 const routeLabels: Record<string, string> = {
   dashboard: "Dashboard",
@@ -75,7 +76,7 @@ export function BreadcrumbHeader({ pathname }: { pathname?: string | null }) {
             </div>
           ))}
         </nav>
-        <PeriodFilter />
+        <div className="flex items-center gap-2"><NotificationCenter /><PeriodFilter /></div>
       </div>
     </div>
   );

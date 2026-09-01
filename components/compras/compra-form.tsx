@@ -174,14 +174,6 @@ export function CompraForm({ proveedores, defaultOperationNumber }: { proveedore
               required
             />
           </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="precio_boleto">Precio boleto</FieldLabel>
-            <Input id="precio_boleto" name="precio_boleto" type="number" min="0" step="0.01" placeholder="0" />
-          </div>
-          <div className="space-y-2">
-            <FieldLabel htmlFor="diferencia_b">Diferencia B</FieldLabel>
-            <Input id="diferencia_b" name="diferencia_b" type="number" step="0.01" placeholder="0" />
-          </div>
           <div className="space-y-2 md:col-span-2">
             <FieldLabel htmlFor="deuda_pendiente">Deuda pendiente</FieldLabel>
             <Input

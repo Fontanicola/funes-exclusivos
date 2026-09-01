@@ -4006,3 +4006,12 @@ Compras y Ventas ahora tienen rutas y formularios de edición propios, accesible
 Paths creados: `app/(dashboard)/compras/[id]/editar/page.tsx`, `app/(dashboard)/ventas/[id]/editar/page.tsx`, `components/compras/compra-edit-form.tsx` y `components/ventas/venta-edit-form.tsx`.
 
 Paths modificados: `app/(dashboard)/compras/actions.ts`, `app/(dashboard)/ventas/actions.ts`, `components/compras/compras-table.tsx` y `components/ventas/ventas-table.tsx`.
+### Ajustes operativos de reunión con cliente — septiembre 2026
+
+Se incorporó un centro compacto de alertas en el header, alimentado por recordatorios pendientes, con badge, panel, prioridades, enlaces al contexto y ocultado local al estilo Arc Global. También se hizo visible el acceso al peritaje dentro de la ficha de cada vehículo, se agregaron gastos de vehículo con opción de impacto automático en Caja y las ventas ahora muestran cobrado, saldo pendiente, barra de avance y fecha de entrega cuando existe.
+
+En Compras se retiraron de la interfaz los campos/columnas Precio boleto y Diferencia B. El inicio de peritaje presenta los datos asociados como Responsable y contacto, conservando compatibilidad con las columnas actuales de la base.
+
+Paths modificados: `components/dashboard/notification-center.tsx`, `components/dashboard/breadcrumb-header.tsx`, `components/dashboard/section-subheader.tsx`, `components/inventario/vehiculo-detail.tsx`, `components/inventario/vehiculo-gasto-form.tsx`, `app/(dashboard)/inventario/actions.ts`, `components/peritajes/peritaje-create-form.tsx`, `components/ventas/ventas-table.tsx`, `components/compras/compras-table.tsx`, `components/compras/compra-form.tsx` y `components/compras/compra-edit-form.tsx`.
+
+Tablas involucradas: `recordatorios`, `vehiculo_gastos` y `caja_movimientos`. Validación: `npx tsc --noEmit` finalizado correctamente; el build de Next quedó sin salida durante varios minutos y fue detenido para evitar dejar un proceso colgado.

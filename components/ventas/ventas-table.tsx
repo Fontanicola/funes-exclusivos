@@ -121,6 +121,21 @@ function getPaymentsSummary(pagos: Array<Record<string, any>> | undefined) {
     .join(" · ");
 }
 
+function getCashPaid(pagos: Array<Record<string, any>> | undefined) {
+  return (pagos ?? []).reduce((total, pago) => {
+    const type = String(pago?.tipo ?? pago?.medio ?? "").toLowerCase();
+    if (["usado", "permuta", "credito", "financiado"].some((value) => type.includes(value))) return total;
+    return total + (Number(pago?.importe ?? pago?.monto ?? 0) || 0);
+  }, 0);
+}
+
+function getPendingBalance(venta: Venta) {
+  const explicit = (venta.saldo_preventa ?? 0) + (venta.saldo_efectivo ?? 0);
+  if (explicit > 0) return explicit;
+  const paid = (venta.pagos ?? []).reduce((total, pago) => total + (Number(pago?.importe ?? pago?.monto ?? 0) || 0), 0);
+  return Math.max(0, (venta.precio_venta ?? 0) - paid - (venta.monto_permuta ?? 0));
+}
+
 function getMarginSummary(venta: Venta) {
   const values = [
     venta.margen_reposicion != null ? `Reposición ${formatMoney(venta.margen_reposicion, venta.moneda)}` : null,
@@ -253,6 +268,10 @@ export function VentasTable({
             {visibleVentas.length ? (
               visibleVentas.map((venta) => {
                 const vehicle = getVehicleSummary(venta);
+                const cashPaid = getCashPaid(venta.pagos);
+                const pendingBalance = getPendingBalance(venta);
+                const salePrice = venta.precio_venta ?? 0;
+                const paidPercent = salePrice > 0 ? Math.min(100, Math.round(((salePrice - pendingBalance) / salePrice) * 100)) : 0;
 
                 return (
                   <tr key={venta.id} className="transition hover:bg-[#F9FAFB]">
@@ -301,6 +320,10 @@ export function VentasTable({
                         <p className="text-xs text-[#6B7280]">
                           {getPaymentsSummary(venta.pagos)}
                         </p>
+                        <div className="mt-2 max-w-[210px]">
+                          <div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#8A1538]" style={{ width: `${paidPercent}%` }} /></div>
+                          <div className="mt-1 flex justify-between gap-2 text-[11px] text-[#6B7280]"><span>Cobrado {formatMoney(cashPaid, venta.moneda)}</span><span>Saldo {formatMoney(pendingBalance, venta.moneda)}</span></div>
+                        </div>
                         {showMargins ? (
                           <>
                             <p className="text-xs text-[#6B7280]">
@@ -321,7 +344,7 @@ export function VentasTable({
                       </div>
                     </td>
                     <td className="px-4 py-3 align-middle">
-                      <span
+                      <div className="space-y-1"><span
                         className={[
                           "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium",
                           getDeliverySummary(venta.entrega?.estado) === "Entregada"
@@ -332,7 +355,7 @@ export function VentasTable({
                         ].join(" ")}
                       >
                         {getDeliverySummary(venta.entrega?.estado)}
-                      </span>
+                      </span>{venta.entrega?.fecha_entrega ? <p className="text-xs text-[#6B7280]">{formatDate(venta.entrega.fecha_entrega)}</p> : <Link href="/ventas/pendientes-entrega" className="text-xs font-medium text-[#8A1538] hover:underline">Cargar entrega</Link>}</div>
                     </td>
                     <td className="px-4 py-3 align-middle text-sm text-[#111827]">
                       {venta.monto_permuta != null
